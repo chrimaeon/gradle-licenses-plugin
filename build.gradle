@@ -1,0 +1,43 @@
+plugins {
+    id 'groovy'
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+    id 'com.github.ben-manes.versions' version '0.20.0'
+}
+
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+}
+
+repositories {
+    jcenter()
+    google()
+}
+
+group 'com.cmgapps'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+gradlePlugin {
+    plugins {
+        licensesPlugin {
+            id = 'com.cmgapps.licenses'
+            implementationClass = 'com.cmgapps.license.LicensesPlugin'
+        }
+    }
+}
+
+dependencyUpdates {
+    revision = 'release'
+}
+
+dependencies {
+    compileOnly "com.android.tools.build:gradle:3.1.4"
+
+    testCompile 'junit:junit:4.12'
+}
