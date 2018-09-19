@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018. <christian.grach@cmgapps.com>
+ */
+
 plugins {
     id 'groovy'
     id 'java-gradle-plugin'

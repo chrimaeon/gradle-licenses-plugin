@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018. <christian.grach@cmgapps.com>
+ */
+
 package com.cmgapps.license
 
 import com.android.build.gradle.api.BaseVariant
