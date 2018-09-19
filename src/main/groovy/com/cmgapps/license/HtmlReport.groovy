@@ -1,9 +1,9 @@
 package com.cmgapps.license
 
+import com.cmgapps.license.helper.LicensesHelper
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import groovy.xml.MarkupBuilder
-import org.apache.commons.io.output.StringBuilderWriter
 
 class HtmlReport {
 
@@ -26,10 +26,8 @@ class HtmlReport {
     }
 
     def generate() {
-        final def stringWriter = new StringBuilderWriter()
-        final def markup = new MarkupBuilder(stringWriter)
 
-        final Map<License, List<Library>> licenseListMap = new HashMap<>()
+        final Map<License, List<Library>> licenseListMap = [:]
 
         mLibraries.each { library ->
             def key = new License(name: NO_LICENSE, url: NO_URL)
@@ -45,7 +43,9 @@ class HtmlReport {
             licenseListMap.get(key).add(library)
         }
 
-        markup.html(lang: 'en') {
+        final def stringWriter = new StringWriter()
+        new MarkupBuilder(new IndentPrinter(stringWriter, '', false, false))
+                .html(lang: 'en') {
             head {
                 meta('charset': "UTF-8")
                 style(CSS_STYLE)
@@ -56,23 +56,32 @@ class HtmlReport {
                 h3(NOTICE_LIBRARIES)
                 licenseListMap.entrySet().each { entry ->
                     ul {
-
-
-                        final List<Library> sortedLibraries = entry.value.sort {
+                        entry.value.sort {
                             left, right -> left.name <=> right.name
-                        }
-
-                        sortedLibraries.each { library ->
-                            li("${library.name} $library.version")
+                        }.each { library ->
+                            li(library.name)
                         }
                     }
 
-                    pre(entry.key.name)
+                    if (LicensesHelper.LICENSE_MAP.containsKey(entry.key.url)) {
+                        pre(getLicenseText(LicensesHelper.LICENSE_MAP."${entry.key.url}"))
+                    } else if (LicensesHelper.LICENSE_MAP.containsKey(entry.key.name)) {
+                        pre(getLicenseText(LicensesHelper.LICENSE_MAP."${entry.key.name}"))
+                    } else {
+                        pre {
+                            mkp.yield("${entry.key.name}\n")
+                            a('href': entry.key.url, entry.key.url)
+                        }
+                    }
                 }
             }
         }
 
         return stringWriter.toString()
+    }
+
+    private String getLicenseText(def fileName) {
+        getClass().getResource("/licenses/$fileName").text
     }
 
 }
