@@ -14,9 +14,6 @@ class HtmlReport {
 
     private final static def OPEN_SOURCE_LIBRARIES = "Open source licenses"
 
-    private final static def NO_LICENSE = "No license found"
-    private final static def NO_URL = "N/A"
-
     private final static def NOTICE_LIBRARIES = "Notice for packages:"
 
     private List<Library> mLibraries
@@ -30,17 +27,16 @@ class HtmlReport {
         final Map<License, List<Library>> licenseListMap = [:]
 
         mLibraries.each { library ->
-            def key = new License(name: NO_LICENSE, url: NO_URL)
 
             if (library.licenses && library.licenses.size > 0) {
-                key = library.licenses[0]
-            }
+                def key = library.licenses[0]
 
-            if (!licenseListMap.containsKey(key)) {
-                licenseListMap.put(key, [])
-            }
+                if (!licenseListMap.containsKey(key)) {
+                    licenseListMap.put(key, [])
+                }
 
-            licenseListMap.get(key).add(library)
+                licenseListMap.get(key).add(library)
+            }
         }
 
         final def stringWriter = new StringWriter()
