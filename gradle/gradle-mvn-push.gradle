@@ -5,6 +5,14 @@
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
+def getUserName() {
+    return hasProperty('DEVEO_USERNAME') ? DEVEO_USERNAME : System.getenv('DEVEO_USERNAME')
+}
+
+def getPassword() {
+    return hasProperty('DEVEO_PASSWORD') ? DEVEO_PASSWORD : System.getenv('DEVEO_PASSWORD')
+}
+
 def pomConfig = {
     developers {
         developer {
@@ -44,12 +52,11 @@ publishing {
             name 'HelixTeamHub'
             url 'https://helixteamhub.cloud/cmgapps/projects/cmgapp-libs/repositories/maven/libraries'
             credentials {
-                username DEVEO_USERNAME
-                password DEVEO_PASSWORD
+                username getUserName()
+                password getPassword()
             }
         }
     }
-
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
