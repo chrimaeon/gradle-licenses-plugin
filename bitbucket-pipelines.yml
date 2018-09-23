@@ -1,0 +1,11 @@
+image: groovy
+
+pipelines:
+  branches:
+    master:
+    - step:
+        caches:
+        - gradle
+        name: Publish
+        script:
+        - bash ./gradlew publish
