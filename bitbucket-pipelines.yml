@@ -8,4 +8,4 @@ pipelines:
         - gradle
         name: Publish
         script:
-        - bash ./gradlew publish
+        - bash ./gradlew publish -PDEVEO_PASSWORD=$DEVEO_PASSWORD -PDEVEO_USERNAME=$DEVEO_USERNAME
