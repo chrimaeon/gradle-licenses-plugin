@@ -44,8 +44,9 @@ class HtmlReport {
         }
 
         final def stringWriter = new StringWriter()
-        new MarkupBuilder(new IndentPrinter(stringWriter, '', false, false))
-                .html(lang: 'en') {
+        def builder = new MarkupBuilder(new IndentPrinter(stringWriter, '', false, false))
+        builder.setDoubleQuotes(true)
+        builder.html(lang: 'en') {
             head {
                 meta('charset': "UTF-8")
                 style(CSS_STYLE)
