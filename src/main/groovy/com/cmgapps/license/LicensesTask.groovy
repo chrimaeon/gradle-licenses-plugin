@@ -147,7 +147,6 @@ class LicensesTask extends DefaultTask {
             return null
         }
 
-        // License information found
         if (pomText.licenses) {
             List<License> licenses = []
             pomText.licenses[0].license.each { license ->
