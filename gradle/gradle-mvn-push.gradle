@@ -1,0 +1,64 @@
+/*
+ * Copyright (c) 2018. <christian.grach@cmgapps.com>
+ */
+
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+def pomConfig = {
+    developers {
+        developer {
+            id 'cgrach'
+            name 'Christian Grach'
+        }
+    }
+
+    scm {
+        url 'https://bitbucket.org/chrimaeon/gradle-licenses-plugin/'
+    }
+}
+
+publishing {
+    publications {
+        gradlePlugin(MavenPublication) {
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocJar
+
+            groupId project.group
+            artifactId POM_ARTIFACT_ID
+            version project.version
+
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('name', POM_NAME)
+                root.appendNode('description', POM_DESCRIPTION)
+                root.children().last() + pomConfig
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name 'HelixTeamHub'
+            url 'https://helixteamhub.cloud/cmgapps/projects/cmgapp-libs/repositories/maven/libraries'
+            credentials {
+                username DEVEO_USERNAME
+                password DEVEO_PASSWORD
+            }
+        }
+    }
+
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
