@@ -8,6 +8,7 @@ import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.*
 
@@ -69,46 +70,45 @@ class LicensesTask extends DefaultTask {
 
             if (project.configurations.find {
                 it.name == "compile"
-            }) configurations << project.configurations."${buildType}Compile"
+            }) configurations << (Configuration) project.configurations."${buildType}Compile"
 
             if (project.configurations.find {
                 it.name == "api"
-            }) configurations << project.configurations."${buildType}Api"
+            }) configurations << (Configuration) project.configurations."${buildType}Api"
 
             if (project.configurations.find {
                 it.name == "implementation"
-            }) configurations << project.configurations."${buildType}Implementation"
+            }) configurations << (Configuration) project.configurations."${buildType}Implementation"
 
             productFlavors.each { flavor ->
                 // Works for productFlavors and productFlavors with dimensions
-                if (variant.capitalize().contains(flavor.name.capitalize())) {
+                if (variant.capitalize().contains((String) flavor.name.capitalize())) {
                     if (project.configurations.find {
                         it.name == "compile"
-                    }) configurations << project.configurations."${flavor.name}Compile"
+                    }) configurations << (Configuration) project.configurations."${flavor.name}Compile"
                     if (project.configurations.find {
                         it.name == "api"
-                    }) configurations << project.configurations."${flavor.name}Api"
+                    }) configurations << (Configuration) project.configurations."${flavor.name}Api"
                     if (project.configurations.find {
                         it.name == "implementation"
-                    }) configurations << project.configurations."${flavor.name}Implementation"
+                    }) configurations << (Configuration) project.configurations."${flavor.name}Implementation"
                 }
             }
         }
 
         configurations.each { configuration ->
-            configuration.canBeResolved &&
-                    configuration.resolvedConfiguration.lenientConfiguration.artifacts*.moduleVersion.id.collect { id ->
-                        "$id.group:$id.name:$id.version@pom"
-                    }.each { pom ->
-                        project.configurations."$POM_CONFIGURATION".dependencies.add(
-                                project.dependencies.add("$POM_CONFIGURATION", pom)
-                        )
-                    }
+            configuration.incoming.dependencies.withType(ExternalModuleDependency).collect { module ->
+                "$module.group:$module.name:$module.version@pom"
+            }.each { pom ->
+                project.configurations."$POM_CONFIGURATION".dependencies.add(
+                        project.dependencies.add("$POM_CONFIGURATION", pom)
+                )
+            }
         }
     }
 
     private def generatePomInfo() {
-        project.configurations."$POM_CONFIGURATION".resolvedConfiguration.lenientConfiguration.artifacts.each { pom ->
+        project.configurations."$POM_CONFIGURATION".incoming.artifacts.each { pom ->
             final File pomFile = pom.file
             final Node pomText = new XmlParser().parse(pomFile)
 
@@ -137,7 +137,7 @@ class LicensesTask extends DefaultTask {
             return null
         }
 
-        final def pomText = new XmlParser().parse(pomFile)
+        final Node pomText = new XmlParser().parse(pomFile)
 
         // If the POM is missing a name, do not record it
         final def name = getName(pomText)
@@ -147,11 +147,11 @@ class LicensesTask extends DefaultTask {
             return null
         }
 
-        if (pomText.licenses) {
+        if (pomText.get("licenses")) {
             List<License> licenses = []
-            pomText.licenses[0].license.each { license ->
-                def licenseName = license.name?.text()
-                def licenseUrl = license.url?.text()
+            pomText.get("licenses").license.each { license ->
+                String licenseName = license.name.text()
+                String licenseUrl = license.url.text()
                 try {
                     //noinspection GroovyResultOfObjectAllocationIgnored
                     new URL(licenseUrl)
@@ -166,9 +166,9 @@ class LicensesTask extends DefaultTask {
         }
         logger.log(LogLevel.INFO, "Project, ${name}, has no license in POM file.")
 
-        final def hasParent = pomText.parent != null
-        if (hasParent) {
-            final def parentPomFile = getParentPomFile(pomText)
+        final def parent = (pomText.get("parent") as NodeList)
+        if (parent.size() > 0) {
+            final def parentPomFile = getParentPomFile(parent)
             return findLicenses(parentPomFile)
         }
         return null
@@ -177,11 +177,11 @@ class LicensesTask extends DefaultTask {
     /**
      * Use Parent POM information when individual dependency license information is missing.
      */
-    private File getParentPomFile(def pomText) {
+    private File getParentPomFile(NodeList parent) {
         // Get parent POM information
-        def groupId = pomText?.parent?.groupId?.text()
-        def artifactId = pomText?.parent?.artifactId?.text()
-        def version = pomText?.parent?.version?.text()
+        def groupId = parent.groupId.text()
+        def artifactId = parent.artifactId.text()
+        def version = parent.version.text()
         def dependency = "$groupId:$artifactId:$version@pom"
 
         // Add dependency to temporary configuration
@@ -190,7 +190,8 @@ class LicensesTask extends DefaultTask {
                 project.dependencies.add(TEMP_POM_CONFIGURATION, dependency)
         )
 
-        def pomFile = (File) project.configurations."$TEMP_POM_CONFIGURATION".resolvedConfiguration.lenientConfiguration.artifacts?.file[0]
+        def pomFile = project.configurations.getByName("$TEMP_POM_CONFIGURATION").incoming
+                .artifacts.artifactFiles.singleFile
 
         // Reset dependencies in temporary configuration
         project.configurations.remove(project.configurations."$TEMP_POM_CONFIGURATION")
@@ -208,7 +209,7 @@ class LicensesTask extends DefaultTask {
             printStream.print(new HtmlReport(libraries).generate())
         }
 
-        logger.log(LogLevel.LIFECYCLE, "Wrote HTML report to ${getClickableFileUrl(htmlFile)}.")
+        logger.lifecycle("Wrote HTML report to ${getClickableFileUrl(htmlFile)}.")
     }
 
     private static def getClickableFileUrl(File path) {
