@@ -50,23 +50,22 @@ val POM_ARTIFACT_ID: String by project
 val POM_NAME: String by project
 val POM_DESCRIPTION: String by project
 
-task<Jar>("sourcesJar") {
+val sourcesJar by tasks.registering(Jar::class) {
     classifier = "sources"
-    from(project.sourceSets.main.get().allSource)
+    from(sourceSets.main.get().allSource)
 }
 
-task<Jar>("javadocJar") {
+val javadocJar by tasks.registering(Jar::class) {
     classifier = "javadoc"
     from(tasks.javadoc)
 }
 
 publishing {
     publications {
-        create<MavenPublication>("gradlePlugin") {
-            from(components["java"])
+        create<MavenPublication>("pluginMaven") {
 
-            artifact(tasks["sourcesJar"])
-            artifact(tasks["javadocJar"])
+            artifact(sourcesJar.get())
+            artifact(javadocJar.get())
 
             artifactId = POM_ARTIFACT_ID
 
