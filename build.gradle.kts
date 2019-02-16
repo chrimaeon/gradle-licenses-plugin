@@ -1,4 +1,3 @@
-import com.github.benmanes.gradle.versions.updates.DependencyUpdates
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 /*
@@ -18,11 +17,11 @@ repositories {
     google()
 }
 
-val GROUP: String by project
-val VERSION_NAME: String by project
+val group: String by project
+val versionName: String by project
 
-group = GROUP
-version = VERSION_NAME
+project.group = group
+version = versionName
 
 gradlePlugin {
     plugins {
@@ -33,12 +32,25 @@ gradlePlugin {
     }
 }
 
-tasks.getByName("dependencyUpdates", DependencyUpdatesTask::class) {
+tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
     revision = "release"
+
+    resolutionStrategy {
+        componentSelection {
+            all {
+                val rejected = listOf("alpha", "beta", "rc", "cr", "m", "preview")
+                        .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
+                        .any { it.matches(candidate.version) }
+                if (rejected) {
+                    reject("Release candidate")
+                }
+            }
+        }
+    }
 }
 
 dependencies {
-    compileOnly("com.android.tools.build:gradle:3.3.0-rc03")
+    compileOnly("com.android.tools.build:gradle:3.3.1")
 
     testCompile("junit:junit:4.12")
 }
@@ -46,9 +58,9 @@ dependencies {
 val DEVEO_USERNAME: String by project
 val DEVEO_PASSWORD: String by project
 
-val POM_ARTIFACT_ID: String by project
-val POM_NAME: String by project
-val POM_DESCRIPTION: String by project
+val pomArtifactId: String by project
+val pomName: String by project
+val pomDescription: String by project
 
 val sourcesJar by tasks.registering(Jar::class) {
     classifier = "sources"
@@ -67,11 +79,11 @@ publishing {
             artifact(sourcesJar.get())
             artifact(javadocJar.get())
 
-            artifactId = POM_ARTIFACT_ID
+            artifactId = pomArtifactId
 
             pom {
-                name.set(POM_NAME)
-                description.set(POM_DESCRIPTION)
+                name.set(pomName)
+                description.set(pomDescription)
                 developers {
                     developer {
                         id.set("cgrach")
