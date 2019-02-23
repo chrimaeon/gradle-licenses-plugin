@@ -1,4 +1,4 @@
-image: groovy
+image: java:8
 
 pipelines:
   branches:
