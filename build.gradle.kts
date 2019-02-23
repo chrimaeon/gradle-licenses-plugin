@@ -10,6 +10,7 @@ plugins {
     `maven-publish`
     signing
     id("com.github.ben-manes.versions") version "0.20.0"
+    kotlin("jvm") version "1.3.21"
 }
 
 repositories {
@@ -51,6 +52,9 @@ tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
 
 dependencies {
     compileOnly("com.android.tools.build:gradle:3.3.1")
+    implementation(kotlin("stdlib-jdk8", "1.3.21"))
+    implementation("org.apache.maven:maven-model:3.6.0")
+
 
     testCompile("junit:junit:4.12")
 }
