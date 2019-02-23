@@ -5,7 +5,6 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
  */
 
 plugins {
-    groovy
     `java-gradle-plugin`
     `maven-publish`
     signing
