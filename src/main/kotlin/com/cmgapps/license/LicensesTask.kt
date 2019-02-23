@@ -203,6 +203,6 @@ open class LicensesTask : DefaultTask() {
             print(HtmlReport(libraries).generate())
         }
 
-        logger.info("Wrote HTML report to ${getClickableFileUrl(htmlFile)}.")
+        logger.lifecycle("Wrote HTML report to ${getClickableFileUrl(htmlFile)}.")
     }
 }
