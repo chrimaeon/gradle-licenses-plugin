@@ -69,7 +69,7 @@ open class LicensesTask : DefaultTask() {
 
     private fun collectDependencies() {
         // Add POM information to our POM configuration
-        val configurations = LinkedHashSet<Configuration>()
+        val configurations = mutableSetOf<Configuration>()
 
         if (project.configurations.find { it.name == "compile" } != null) {
             configurations.add(project.configurations.getByName("compile"))
@@ -117,7 +117,6 @@ open class LicensesTask : DefaultTask() {
         configurations.forEach { configuration ->
             configuration.incoming.dependencies.withType(ExternalModuleDependency::class.java).map { module ->
                 "${module.group}:${module.name}:${module.version}@pom"
-
             }.forEach { pom ->
                 project.configurations.getByName(POM_CONFIGURATION).dependencies.add(
                         project.dependencies.add(POM_CONFIGURATION, pom)
@@ -204,6 +203,6 @@ open class LicensesTask : DefaultTask() {
             print(HtmlReport(libraries).generate())
         }
 
-        logger.lifecycle("Wrote HTML report to ${getClickableFileUrl(htmlFile)}.")
+        logger.info("Wrote HTML report to ${getClickableFileUrl(htmlFile)}.")
     }
 }

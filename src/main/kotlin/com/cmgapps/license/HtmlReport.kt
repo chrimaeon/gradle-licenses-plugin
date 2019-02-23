@@ -11,7 +11,7 @@ import com.cmgapps.license.model.License
 class HtmlReport(private val libraries: List<Library>) {
 
     companion object {
-        private const val BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
+        private const val BODY_CSS = "body{font-family:sans-serif;background-colo   r:#eee}"
         private const val PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
         private const val CSS_STYLE = "$BODY_CSS$PRE_CSS"
 
@@ -29,7 +29,7 @@ class HtmlReport(private val libraries: List<Library>) {
             if (!library.licenses.isNullOrEmpty()) {
                 val key = library.licenses[0]
 
-                if (!licenseListMap.containsKey(key)) {
+                if (!licenseListMap.contains(key)) {
                     licenseListMap.put(key, mutableListOf())
                 }
 
