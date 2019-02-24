@@ -1,12 +1,18 @@
 package com.cmgapps.license.reporter
 
 interface Element {
-    fun render(builder: StringBuilder, intent: String)
+    fun render(builder: StringBuilder, intent: String, format: Boolean)
 }
 
 class TextElement(private val text: String) : Element {
-    override fun render(builder: StringBuilder, intent: String) {
-        builder.append("$intent$text\n")
+    override fun render(builder: StringBuilder, intent: String, format: Boolean) {
+        if (format) {
+            builder.append(intent)
+        }
+        builder.append(text)
+        if (format) {
+            builder.append('\n')
+        }
     }
 }
 
@@ -24,20 +30,37 @@ abstract class Tag(private val name: String) : Element {
         return tag
     }
 
-    override fun render(builder: StringBuilder, intent: String) {
-        builder.append("$intent<$name").append(renderAttributes())
+    override fun render(builder: StringBuilder, intent: String, format: Boolean) {
+        if (format) {
+            builder.append(intent)
+        }
+        builder.append("<$name").append(renderAttributes())
 
         if (children.isEmpty()) {
-            builder.append("/>\n")
+            builder.append("/>")
+            if (format) {
+                builder.append('\n')
+            }
             return
         }
 
-        builder.append(">\n")
+        builder.append(">")
+
+        if (format) {
+            builder.append('\n')
+        }
 
         for (c in children) {
-            c.render(builder, "$intent  ")
+            c.render(builder, "$intent  ", format)
         }
-        builder.append("$intent</$name>\n")
+
+        if (format) {
+            builder.append(intent)
+        }
+        builder.append("</$name>")
+        if (format) {
+            builder.append('\n')
+        }
     }
 
     private fun renderAttributes(): String {
@@ -48,11 +71,11 @@ abstract class Tag(private val name: String) : Element {
         return builder.toString()
     }
 
-    override fun toString(): String {
-        return StringBuilder().apply {
-            render(this, "")
-        }.toString()
-    }
+    fun toString(format: Boolean = true): String = StringBuilder().apply {
+        render(this, "", format)
+    }.toString()
+
+    override fun toString(): String = toString(true)
 }
 
 abstract class TagWithText(name: String) : Tag(name) {

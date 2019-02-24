@@ -84,7 +84,7 @@ class HtmlReport(private val libraries: List<Library>) : Report {
 
                 }
             }
-        }.toString()
+        }.toString(false)
     }
 
     private fun getLicenseText(fileName: String?): String =
@@ -102,9 +102,12 @@ class HTML : TagWithText("html") {
 
     fun body(init: Body.() -> Unit) = initTag(Body(), init)
 
-    override fun render(builder: StringBuilder, intent: String) {
-        builder.append("<!DOCTYPE html>\n")
-        super.render(builder, intent)
+    override fun render(builder: StringBuilder, intent: String, format: Boolean) {
+        builder.append("<!DOCTYPE html>")
+        if (format) {
+            builder.append('\n')
+        }
+        super.render(builder, intent, format)
     }
 }
 
@@ -122,12 +125,19 @@ class Title : TagWithText("title")
 class Meta : Element {
     val attributes = hashMapOf<String, String>()
 
-    override fun render(builder: StringBuilder, intent: String) {
-        builder.append("$intent<meta")
+    override fun render(builder: StringBuilder, intent: String, format: Boolean) {
+        if (format) {
+            builder.append(intent)
+        }
+
+        builder.append("<meta")
         for ((attr, value) in attributes) {
             builder.append(" $attr=\"$value\"")
         }
-        builder.append(">\n")
+        builder.append(">")
+        if (format) {
+            builder.append('\n')
+        }
     }
 }
 

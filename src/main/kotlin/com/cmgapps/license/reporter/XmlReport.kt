@@ -42,9 +42,12 @@ class Libraries : Tag("libraries") {
 
     fun library(init: Library.() -> Unit) = initTag(Library(), init)
 
-    override fun render(builder: StringBuilder, intent: String) {
-        builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n")
-        super.render(builder, intent)
+    override fun render(builder: StringBuilder, intent: String, format: Boolean) {
+        builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>")
+        if (format) {
+            builder.append('\n')
+        }
+        super.render(builder, intent, format)
     }
 }
 
