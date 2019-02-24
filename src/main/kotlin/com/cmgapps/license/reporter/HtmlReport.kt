@@ -2,16 +2,16 @@
  * Copyright (c) 2018. <christian.grach@cmgapps.com>
  */
 
-package com.cmgapps.license
+package com.cmgapps.license.reporter
 
 import com.cmgapps.license.helper.LicensesHelper
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 
-class HtmlReport(private val libraries: List<Library>) {
+class HtmlReport(private val libraries: List<Library>) : Report {
 
     companion object {
-        private const val BODY_CSS = "body{font-family:sans-serif;background-colo   r:#eee}"
+        private const val BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
         private const val PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
         private const val CSS_STYLE = "$BODY_CSS$PRE_CSS"
 
@@ -20,7 +20,7 @@ class HtmlReport(private val libraries: List<Library>) {
         private const val NOTICE_LIBRARIES = "Notice for packages:"
     }
 
-    fun generate(): String {
+    override fun generate(): String {
 
         val licenseListMap = mutableMapOf<License, MutableList<Library>>()
 
@@ -30,10 +30,10 @@ class HtmlReport(private val libraries: List<Library>) {
                 val key = library.licenses[0]
 
                 if (!licenseListMap.contains(key)) {
-                    licenseListMap.put(key, mutableListOf())
+                    licenseListMap[key] = mutableListOf()
                 }
 
-                licenseListMap.get(key)?.add(library)
+                licenseListMap[key]?.add(library)
             }
         }
 
@@ -65,16 +65,14 @@ class HtmlReport(private val libraries: List<Library>) {
                         }
                     }
 
-                    if (LicensesHelper.LICENSE_MAP.containsKey(entry.key.url)) {
-                        pre {
-                            +getLicenseText(LicensesHelper.LICENSE_MAP.get(entry.key.url))
+                    when {
+                        LicensesHelper.LICENSE_MAP.containsKey(entry.key.url) -> pre {
+                            +getLicenseText(LicensesHelper.LICENSE_MAP[entry.key.url])
                         }
-                    } else if (LicensesHelper.LICENSE_MAP.containsKey(entry.key.name)) {
-                        pre {
-                            +getLicenseText(LicensesHelper.LICENSE_MAP.get(entry.key.url))
+                        LicensesHelper.LICENSE_MAP.containsKey(entry.key.name) -> pre {
+                            +getLicenseText(LicensesHelper.LICENSE_MAP[entry.key.url])
                         }
-                    } else {
-                        div("license") {
+                        else -> div("license") {
                             p {
                                 +"${entry.key.name}<br/>"
                             }
@@ -94,67 +92,6 @@ class HtmlReport(private val libraries: List<Library>) {
 }
 
 
-interface Element {
-    fun render(builder: StringBuilder)
-}
-
-class TextElement(val text: String) : Element {
-    override fun render(builder: StringBuilder) {
-        builder.append(text)
-    }
-}
-
-@DslMarker
-annotation class HtmlTagMarker
-
-@HtmlTagMarker
-abstract class Tag(val name: String) : Element {
-    val children = arrayListOf<Element>()
-    val attributes = hashMapOf<String, String>()
-
-    protected fun <T : Element> initTag(tag: T, init: T.() -> Unit): T {
-        tag.init()
-        children.add(tag)
-        return tag
-    }
-
-    override fun render(builder: StringBuilder) {
-        builder.append("<$name").append(renderAttributes())
-
-        if (children.isEmpty()) {
-            builder.append("/>")
-            return
-        }
-
-        builder.append('>')
-
-        for (c in children) {
-            c.render(builder)
-        }
-        builder.append("</$name>")
-    }
-
-    private fun renderAttributes(): String {
-        val builder = StringBuilder()
-        for ((attr, value) in attributes) {
-            builder.append(" $attr=\"$value\"")
-        }
-        return builder.toString()
-    }
-
-    override fun toString(): String {
-        return StringBuilder().apply {
-            render(this)
-        }.toString()
-    }
-}
-
-abstract class TagWithText(name: String) : Tag(name) {
-    operator fun String.unaryPlus() {
-        children.add(TextElement(this))
-    }
-}
-
 class HTML : TagWithText("html") {
 
     init {
@@ -165,9 +102,9 @@ class HTML : TagWithText("html") {
 
     fun body(init: Body.() -> Unit) = initTag(Body(), init)
 
-    override fun render(builder: StringBuilder) {
-        builder.append("<!DOCTYPE html>")
-        super.render(builder)
+    override fun render(builder: StringBuilder, intent: String) {
+        builder.append("<!DOCTYPE html>\n")
+        super.render(builder, intent)
     }
 }
 
@@ -185,12 +122,12 @@ class Title : TagWithText("title")
 class Meta : Element {
     val attributes = hashMapOf<String, String>()
 
-    override fun render(builder: StringBuilder) {
-        builder.append("<meta")
+    override fun render(builder: StringBuilder, intent: String) {
+        builder.append("$intent<meta")
         for ((attr, value) in attributes) {
             builder.append(" $attr=\"$value\"")
         }
-        builder.append('>')
+        builder.append(">\n")
     }
 }
 

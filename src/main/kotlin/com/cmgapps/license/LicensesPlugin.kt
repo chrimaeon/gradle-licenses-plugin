@@ -20,25 +20,27 @@ class LicensesPlugin : Plugin<Project> {
         private const val FEATURE_PLUGIN_ID = "com.android.feature"
         private val ANDROID_IDS = listOf(APP_PLUGIN_ID, LIBRARY_PLUGIN_ID, FEATURE_PLUGIN_ID)
 
-        private fun configureJavaProject(project: Project) {
+        private fun configureJavaProject(project: Project, extension: LicensesExtension) {
             val taskName = "licenseReport"
             val path = "${project.buildDir}/reports/licenses/$taskName/"
 
             val task = project.tasks.create(taskName, LicensesTask::class.java)
-            task.htmlFile = project.file(path + "licenses.html")
+            task.htmlFile = project.file(path + getFileName(extension.outputType))
+            task.outputType = extension.outputType
             task.description = TASK_DESC
             task.group = TASK_GROUP
             task.outputs.upToDateWhen { false }
         }
 
-        private fun configureAndroidProject(project: Project) {
+        private fun configureAndroidProject(project: Project, extension: LicensesExtension) {
             getAndroidVariants(project)?.all { variant ->
                 variant as BaseVariant
                 val taskName = "license${variant.name.capitalize()}Report"
                 val path = "${project.buildDir}/reports/licenses/$taskName/"
 
                 val task = project.tasks.create(taskName, LicensesTask::class.java)
-                task.htmlFile = project.file(path + "licenses.html")
+                task.htmlFile = project.file(path + getFileName(extension.outputType))
+                task.outputType = extension.outputType
                 task.description = TASK_DESC
                 task.group = TASK_GROUP
                 task.variant = variant.name
@@ -64,14 +66,24 @@ class LicensesPlugin : Plugin<Project> {
 
             return null
         }
+
+        private fun getFileName(type: OutputType): String {
+            val filename = "licenses."
+            return when (type) {
+                OutputType.HTML -> filename + "html"
+                OutputType.XML -> filename + "xml"
+            }
+        }
     }
 
     override fun apply(project: Project) {
 
-        project.plugins.withId("java") { configureJavaProject(project) }
+        val extension = project.extensions.create("licenses", LicensesExtension::class.java)
+
+        project.plugins.withId("java") { configureJavaProject(project, extension) }
 
         ANDROID_IDS.forEach { id ->
-            project.plugins.withId(id) { configureAndroidProject(project) }
+            project.plugins.withId(id) { configureAndroidProject(project, extension) }
         }
     }
 }

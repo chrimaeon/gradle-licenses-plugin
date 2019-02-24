@@ -7,6 +7,8 @@ package com.cmgapps.license
 import com.android.builder.model.ProductFlavor
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import com.cmgapps.license.reporter.HtmlReport
+import com.cmgapps.license.reporter.XmlReport
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
@@ -43,9 +45,13 @@ open class LicensesTask : DefaultTask() {
     @Input
     var buildType: String? = null
 
+    @Input
+    var outputType: OutputType = OutputType.HTML
+
     @Optional
     @Internal
     var productFlavors: List<ProductFlavor>? = null
+
 
     @Suppress("unused")
     @TaskAction
@@ -200,7 +206,11 @@ open class LicensesTask : DefaultTask() {
         htmlFile.parentFile.mkdirs()
         htmlFile.createNewFile()
         PrintStream(htmlFile.outputStream()).run {
-            print(HtmlReport(libraries).generate())
+            val report = when (outputType) {
+                OutputType.HTML -> HtmlReport(libraries)
+                OutputType.XML -> XmlReport(libraries)
+            }
+            print(report.generate())
         }
 
         logger.lifecycle("Wrote HTML report to ${getClickableFileUrl(htmlFile)}.")
