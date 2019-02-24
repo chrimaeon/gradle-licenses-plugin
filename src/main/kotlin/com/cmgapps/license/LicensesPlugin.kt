@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018. <christian.grach@cmgapps.com>
+ * Copyright (c)  2018. Christian Grach <christian.grach@cmgapps.com>
  */
 
 package com.cmgapps.license
@@ -72,6 +72,7 @@ class LicensesPlugin : Plugin<Project> {
             return when (type) {
                 OutputType.HTML -> filename + "html"
                 OutputType.XML -> filename + "xml"
+                OutputType.JSON -> filename + "json"
             }
         }
     }

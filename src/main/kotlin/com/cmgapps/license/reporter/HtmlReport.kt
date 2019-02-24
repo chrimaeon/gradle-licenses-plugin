@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018. <christian.grach@cmgapps.com>
+ * Copyright (c)  2018. Christian Grach <christian.grach@cmgapps.com>
  */
 
 package com.cmgapps.license.reporter
@@ -67,14 +67,14 @@ class HtmlReport(private val libraries: List<Library>) : Report {
 
                     when {
                         LicensesHelper.LICENSE_MAP.containsKey(entry.key.url) -> pre {
-                            +getLicenseText(LicensesHelper.LICENSE_MAP[entry.key.url])
+                            +(getLicenseText(LicensesHelper.LICENSE_MAP[entry.key.url]) ?: "")
                         }
                         LicensesHelper.LICENSE_MAP.containsKey(entry.key.name) -> pre {
-                            +getLicenseText(LicensesHelper.LICENSE_MAP[entry.key.url])
+                            +(getLicenseText(LicensesHelper.LICENSE_MAP[entry.key.name]) ?: "")
                         }
                         else -> div("license") {
                             p {
-                                +"${entry.key.name}<br/>"
+                                +entry.key.name
                             }
                             a(entry.key.url) {
                                 +entry.key.url
@@ -87,8 +87,8 @@ class HtmlReport(private val libraries: List<Library>) : Report {
         }.toString(false)
     }
 
-    private fun getLicenseText(fileName: String?): String =
-            javaClass.getResource("/licenses/$fileName").readText()
+    private fun getLicenseText(fileName: String?): String? =
+            javaClass.getResource("/licenses/$fileName")?.readText()
 }
 
 

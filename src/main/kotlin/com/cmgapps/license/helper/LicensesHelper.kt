@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018. <christian.grach@cmgapps.com>
+ * Copyright (c)  2018. Christian Grach <christian.grach@cmgapps.com>
  */
 
 package com.cmgapps.license.helper

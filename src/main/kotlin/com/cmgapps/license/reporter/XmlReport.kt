@@ -1,3 +1,7 @@
+/*
+ * Copyright (c)  2019. Christian Grach <christian.grach@cmgapps.com>
+ */
+
 package com.cmgapps.license.reporter
 
 class XmlReport(private val libraries: List<com.cmgapps.license.model.Library>) : Report {

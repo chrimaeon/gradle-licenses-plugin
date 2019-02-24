@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018. <christian.grach@cmgapps.com>
+ * Copyright (c)  2018. Christian Grach <christian.grach@cmgapps.com>
  */
 
 package com.cmgapps.license
@@ -8,6 +8,7 @@ import com.android.builder.model.ProductFlavor
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import com.cmgapps.license.reporter.HtmlReport
+import com.cmgapps.license.reporter.JsonReport
 import com.cmgapps.license.reporter.XmlReport
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
@@ -46,7 +47,7 @@ open class LicensesTask : DefaultTask() {
     var buildType: String? = null
 
     @Input
-    var outputType: OutputType = OutputType.HTML
+    lateinit var outputType: OutputType
 
     @Optional
     @Internal
@@ -201,18 +202,19 @@ open class LicensesTask : DefaultTask() {
     }
 
     private fun createHtmlReport() {
-        project.file(htmlFile).delete()
-
+        htmlFile.delete()
         htmlFile.parentFile.mkdirs()
         htmlFile.createNewFile()
+
         PrintStream(htmlFile.outputStream()).run {
             val report = when (outputType) {
                 OutputType.HTML -> HtmlReport(libraries)
                 OutputType.XML -> XmlReport(libraries)
+                OutputType.JSON -> JsonReport(libraries)
             }
             print(report.generate())
         }
 
-        logger.lifecycle("Wrote HTML report to ${getClickableFileUrl(htmlFile)}.")
+        logger.lifecycle("Wrote ${outputType.name} report to ${getClickableFileUrl(htmlFile)}.")
     }
 }

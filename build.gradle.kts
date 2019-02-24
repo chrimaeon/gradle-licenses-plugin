@@ -1,7 +1,7 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 /*
- * Copyright (c) 2018. <christian.grach@cmgapps.com>
+ * Copyright (c)  2018. Christian Grach <christian.grach@cmgapps.com>
  */
 
 plugins {
@@ -9,7 +9,7 @@ plugins {
     `maven-publish`
     signing
     id("com.github.ben-manes.versions") version "0.20.0"
-    kotlin("jvm") version "1.3.21"
+    kotlin("jvm") version Deps.kotlinVersion
 }
 
 repositories {
@@ -23,6 +23,20 @@ val versionName: String by project
 project.group = group
 version = versionName
 
+sourceSets {
+    create("functionalTest") {
+        java {
+            srcDir(file("src/functionalTest/kotlin"))
+        }
+        resources {
+            srcDir(file("src/functionalTest/resources"))
+        }
+
+        compileClasspath += sourceSets.main.get().output + configurations.testRuntime
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
 gradlePlugin {
     plugins {
         create("licensesPlugin") {
@@ -30,6 +44,8 @@ gradlePlugin {
             implementationClass = "com.cmgapps.license.LicensesPlugin"
         }
     }
+
+    testSourceSets(sourceSets["functionalTest"])
 }
 
 tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
@@ -38,24 +54,35 @@ tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
     resolutionStrategy {
         componentSelection {
             all {
-                val rejected = listOf("alpha", "beta", "rc", "cr", "m", "preview")
+                listOf("alpha", "beta", "rc", "cr", "m", "preview")
                         .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
-                        .any { it.matches(candidate.version) }
-                if (rejected) {
-                    reject("Release candidate")
-                }
+                        .any { it.matches(candidate.version) }.let {
+                            if (it) {
+                                reject("Release candidate")
+                            }
+                        }
+
             }
         }
     }
 }
 
 dependencies {
-    compileOnly("com.android.tools.build:gradle:3.3.1")
-    implementation(kotlin("stdlib-jdk8", "1.3.21"))
-    implementation("org.apache.maven:maven-model:3.6.0")
+    compileOnly(Deps.androidGradlePlugin)
+    implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
+    implementation(Deps.mavenModel)
+    implementation(Deps.moshi)
 
-
-    testCompile("junit:junit:4.12")
+    testImplementation(Deps.jUnit) {
+        exclude(group = "org.hamcrest")
+    }
+    testImplementation(Deps.hamcrest)
+    "functionalTestImplementation"(Deps.jUnit) {
+        exclude(group = "org.hamcrest")
+    }
+    "functionalTestImplementation"(Deps.hamcrest)
+    "functionalTestImplementation"(gradleTestKit())
+    "functionalTestImplementation"(kotlin("stdlib-jdk8", Deps.kotlinVersion))
 }
 
 val DEVEO_USERNAME: String by project
@@ -77,7 +104,7 @@ val javadocJar by tasks.registering(Jar::class) {
 
 publishing {
     publications {
-        create<MavenPublication>("pluginMaven") {
+        register<MavenPublication>("pluginMaven") {
 
             artifact(sourcesJar.get())
             artifact(javadocJar.get())
@@ -113,4 +140,14 @@ publishing {
         }
     }
 }
+
+val functionalTest by tasks.registering(Test::class) {
+    group = "verification"
+    testClassesDirs = sourceSets["functionalTest"].output.classesDirs
+    classpath = sourceSets["functionalTest"].runtimeClasspath
+}
+
+tasks.check { dependsOn(functionalTest) }
+
+
 
