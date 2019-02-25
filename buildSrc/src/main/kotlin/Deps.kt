@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018. Christian Grach <christian.grach@cmgapps.com>
+ * Copyright (c) 2019. Christian Grach <christian.grach@cmgapps.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-package com.cmgapps.license.model
+object Deps {
+    val kotlinVersion = "1.3.21"
 
-data class License(val name: String, val url: String)
-
+    val androidGradlePlugin = "com.android.tools.build:gradle:3.3.1"
+    val mavenModel = "org.apache.maven:maven-model:3.6.0"
+    val moshi = "com.squareup.moshi:moshi:1.8.0"
+    val jUnit = "junit:junit:4.12"
+    val hamcrest = "org.hamcrest:hamcrest:2.1"
+}

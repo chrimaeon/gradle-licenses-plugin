@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018. Christian Grach <christian.grach@cmgapps.com>
+ * Copyright (c) 2019. Christian Grach <christian.grach@cmgapps.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.cmgapps.license.model
-
-data class License(val name: String, val url: String)
-

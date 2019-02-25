@@ -1,5 +1,17 @@
 /*
- * Copyright (c) 2018. <christian.grach@cmgapps.com>
+ * Copyright (c) 2018. Christian Grach <christian.grach@cmgapps.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.cmgapps.license
@@ -7,6 +19,9 @@ package com.cmgapps.license
 import com.android.builder.model.ProductFlavor
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import com.cmgapps.license.reporter.HtmlReport
+import com.cmgapps.license.reporter.JsonReport
+import com.cmgapps.license.reporter.XmlReport
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
@@ -29,11 +44,11 @@ open class LicensesTask : DefaultTask() {
                 URI("file", "", path.toURI().path, null, null).toString()
     }
 
-    @Internal
-    val libraries = mutableListOf<Library>()
-
     @OutputFile
-    lateinit var htmlFile: File
+    lateinit var outputFile: File
+
+    @Input
+    lateinit var outputType: OutputType
 
     @Optional
     @Input
@@ -43,17 +58,26 @@ open class LicensesTask : DefaultTask() {
     @Input
     var buildType: String? = null
 
+    @Internal
+    val libraries = mutableListOf<Library>()
+
     @Optional
     @Internal
     var productFlavors: List<ProductFlavor>? = null
 
-    @Suppress("unused")
     @TaskAction
     fun licensesReport() {
+        if (!this::outputFile.isInitialized) {
+            throw IllegalStateException("outputFile must be set")
+        }
+
+        if (!this::outputType.isInitialized) {
+            throw IllegalStateException("outputType must be set")
+        }
         setupEnvironment()
         collectDependencies()
-        generatePomInfo()
-        createHtmlReport()
+        generateLibraries()
+        createReport()
     }
 
     private fun setupEnvironment() {
@@ -68,7 +92,6 @@ open class LicensesTask : DefaultTask() {
     }
 
     private fun collectDependencies() {
-        // Add POM information to our POM configuration
         val configurations = mutableSetOf<Configuration>()
 
         if (project.configurations.find { it.name == "compile" } != null) {
@@ -83,7 +106,7 @@ open class LicensesTask : DefaultTask() {
             configurations.add(project.configurations.getByName("implementation"))
         }
 
-        // If Android project, add extra configurations
+        //Android project -> add additional configurations
         if (variant != null) {
 
             if (project.configurations.find { it.name == "compile" } != null) {
@@ -125,7 +148,7 @@ open class LicensesTask : DefaultTask() {
         }
     }
 
-    private fun generatePomInfo() {
+    private fun generateLibraries() {
         project.configurations.getByName(POM_CONFIGURATION).incoming.artifacts.forEach { pom ->
 
             val model = getPomModel(pom.file)
@@ -162,9 +185,10 @@ open class LicensesTask : DefaultTask() {
             return licenses
         }
 
-        logger.info("Project, $name, has no license in POM file.")
+        logger.info("Project $name has no license in POM file.")
 
         if (pom.parent != null) {
+            logger.info("Checking parent POM file.")
             val parentPom = getParentPomFile(pom.parent)
             return findLicenses(parentPom)
         }
@@ -172,15 +196,10 @@ open class LicensesTask : DefaultTask() {
         return null
     }
 
-    /**
-     * Use Parent POM information when individual dependency license information is missing.
-     */
     private fun getParentPomFile(parent: Parent): Model {
-        // Get parent POM information
 
         val dependency = "${parent.groupId}:${parent.artifactId}:${parent.version}@pom"
 
-        // Add dependency to temporary configuration
         project.configurations.create(TEMP_POM_CONFIGURATION).dependencies.add(
                 project.dependencies.add(TEMP_POM_CONFIGURATION, dependency)
         )
@@ -188,21 +207,25 @@ open class LicensesTask : DefaultTask() {
         val pomFile = project.configurations.getByName(TEMP_POM_CONFIGURATION).incoming
                 .artifacts.artifactFiles.singleFile
 
-        // Reset dependencies in temporary configuration
         project.configurations.remove(project.configurations.getByName(TEMP_POM_CONFIGURATION))
 
         return getPomModel(pomFile)
     }
 
-    private fun createHtmlReport() {
-        project.file(htmlFile).delete()
+    private fun createReport() {
+        outputFile.delete()
+        outputFile.parentFile.mkdirs()
+        outputFile.createNewFile()
 
-        htmlFile.parentFile.mkdirs()
-        htmlFile.createNewFile()
-        PrintStream(htmlFile.outputStream()).run {
-            print(HtmlReport(libraries).generate())
+        PrintStream(outputFile.outputStream()).run {
+            val report = when (outputType) {
+                OutputType.HTML -> HtmlReport(libraries)
+                OutputType.XML -> XmlReport(libraries)
+                OutputType.JSON -> JsonReport(libraries)
+            }
+            print(report.generate())
         }
 
-        logger.lifecycle("Wrote HTML report to ${getClickableFileUrl(htmlFile)}.")
+        logger.lifecycle("Wrote ${outputType.name} report to ${getClickableFileUrl(outputFile)}.")
     }
 }
