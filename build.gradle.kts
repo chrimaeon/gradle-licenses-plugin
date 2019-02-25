@@ -25,6 +25,7 @@ plugins {
     id("com.github.ben-manes.versions") version "0.20.0"
     kotlin("jvm") version Deps.kotlinVersion
     id("com.jfrog.bintray") version "1.8.4"
+    id("com.gradle.plugin-publish") version "0.10.0"
 }
 
 repositories {
@@ -58,15 +59,29 @@ configurations {
 
 val group: String by project
 val versionName: String by project
+val projectUrl: String by project
+val pomArtifactId: String by project
+val pomName: String by project
+val pomDescription: String by project
+val scmUrl: String by project
+
 
 project.group = group
 version = versionName
+
+pluginBundle {
+    website = projectUrl
+    vcsUrl = scmUrl
+    tags = listOf("license-managment", "android", "java", "java-library", "licenses")
+}
 
 gradlePlugin {
     plugins {
         create("licensesPlugin") {
             id = "com.cmgapps.licenses"
             implementationClass = "com.cmgapps.license.LicensesPlugin"
+            displayName = pomName
+            description = pomDescription
         }
     }
 
@@ -105,10 +120,6 @@ dependencies {
     "functionalTestImplementation"(gradleTestKit())
 }
 
-val pomArtifactId: String by project
-val pomName: String by project
-val pomDescription: String by project
-
 val sourcesJar by tasks.registering(Jar::class) {
     classifier = "sources"
     from(sourceSets.main.get().allSource)
@@ -121,7 +132,6 @@ val javadocJar by tasks.registering(Jar::class) {
 
 val connectionUrl: String by project
 val developerConnectionUrl: String by project
-val projectUrl: String by project
 
 publishing {
     publications {
@@ -144,12 +154,14 @@ publishing {
                 scm {
                     connection.set(connectionUrl)
                     developerConnection.set(developerConnectionUrl)
-                    url.set(projectUrl)
+                    url.set(scmUrl)
                 }
             }
         }
     }
 }
+
+val issuesTrackerUrl: String by project
 
 bintray {
     val credentialProps = Properties()
@@ -164,6 +176,7 @@ bintray {
         userOrg = user
         setLicenses("Apache-2.0")
         vcsUrl = projectUrl
+        issueTrackerUrl = issuesTrackerUrl
         version(closureOf<BintrayExtension.VersionConfig> {
             name = versionName
             vcsTag = versionName
