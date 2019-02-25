@@ -36,7 +36,7 @@ open class LicensesTask : DefaultTask() {
     val libraries = mutableListOf<Library>()
 
     @OutputFile
-    lateinit var htmlFile: File
+    lateinit var outputFile: File
 
     @Optional
     @Input
@@ -57,6 +57,13 @@ open class LicensesTask : DefaultTask() {
     @Suppress("unused")
     @TaskAction
     fun licensesReport() {
+        if (!this::outputFile.isInitialized) {
+            throw IllegalStateException("outputFile must be set")
+        }
+
+        if (!this::outputType.isInitialized) {
+            throw IllegalStateException("outputType must be set")
+        }
         setupEnvironment()
         collectDependencies()
         generatePomInfo()
@@ -202,11 +209,11 @@ open class LicensesTask : DefaultTask() {
     }
 
     private fun createHtmlReport() {
-        htmlFile.delete()
-        htmlFile.parentFile.mkdirs()
-        htmlFile.createNewFile()
+        outputFile.delete()
+        outputFile.parentFile.mkdirs()
+        outputFile.createNewFile()
 
-        PrintStream(htmlFile.outputStream()).run {
+        PrintStream(outputFile.outputStream()).run {
             val report = when (outputType) {
                 OutputType.HTML -> HtmlReport(libraries)
                 OutputType.XML -> XmlReport(libraries)
@@ -215,6 +222,6 @@ open class LicensesTask : DefaultTask() {
             print(report.generate())
         }
 
-        logger.lifecycle("Wrote ${outputType.name} report to ${getClickableFileUrl(htmlFile)}.")
+        logger.lifecycle("Wrote ${outputType.name} report to ${getClickableFileUrl(outputFile)}.")
     }
 }

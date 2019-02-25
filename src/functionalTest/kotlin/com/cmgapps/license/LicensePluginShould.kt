@@ -10,7 +10,6 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.matchesPattern
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -36,7 +35,7 @@ class LicensePluginShould {
 
     @Test
     fun `apply Licenses plugin to various Gradle versions`() {
-        buildFile.appendText("""
+        buildFile.writeText("""
             |plugins {
             |   id("java")
             |   id("com.cmgapps.licenses")
@@ -58,7 +57,7 @@ class LicensePluginShould {
 
     @Test
     fun `generate report with no dependencies`() {
-        buildFile.appendText("""
+        buildFile.writeText("""
             |plugins {
             |   id("java-library")
             |   id("com.cmgapps.licenses")
@@ -77,7 +76,7 @@ class LicensePluginShould {
 
     @Test
     fun `generate report with no open source dependencies`() {
-        buildFile.appendText("""
+        buildFile.writeText("""
             |plugins {
             |   id("java-library")
             |   id("com.cmgapps.licenses")
@@ -115,7 +114,7 @@ class LicensePluginShould {
 
     @Test
     fun `java library with parent pom dependency`() {
-        buildFile.appendText("""
+        buildFile.writeText("""
             |plugins {
             |   id("java-library")
             |   id("com.cmgapps.licenses")
@@ -358,7 +357,7 @@ class LicensePluginShould {
 
     @Test
     fun `generate Report with custom license`() {
-        buildFile.appendText("""
+        buildFile.writeText("""
             |plugins {
             |   id("java-library")
             |   id("com.cmgapps.licenses")
@@ -399,42 +398,5 @@ class LicensePluginShould {
                 "</div>" +
                 "</body>" +
                 "</html>"))
-    }
-
-    @Ignore("Figure out how to use extension")
-    @Test
-    fun `generate JSON report`() {
-        buildFile.appendText("""
-            |import com.cmgapps.license.OutputType
-            |
-            |plugins {
-            |   id("java-library")
-            |   id("com.cmgapps.licenses")
-            |}
-            |
-            |licenses {
-            |   outputType OutputType.XML
-            |}
-            |
-            |repositories {
-            |  maven {
-            |    url '$mavenRepoUrl'
-            |  }
-            |}
-            |
-            |dependencies {
-            |  compile 'com.squareup.retrofit2:retrofit:2.3.0'
-            |}
-        """.trimMargin())
-
-        val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
-                .withArguments(":licenseReport")
-                .withPluginClasspath()
-                .build()
-
-        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
-        assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote JSON report to .*$reportFolder/licenses.json.*", Pattern.DOTALL)))
-        assertThat(File("$reportFolder/licenses.json").readText().trim(), `is`(""))
     }
 }

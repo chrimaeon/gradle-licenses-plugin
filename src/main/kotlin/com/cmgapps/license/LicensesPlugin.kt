@@ -25,7 +25,7 @@ class LicensesPlugin : Plugin<Project> {
             val path = "${project.buildDir}/reports/licenses/$taskName/"
 
             val task = project.tasks.create(taskName, LicensesTask::class.java)
-            task.htmlFile = project.file(path + getFileName(extension.outputType))
+            task.outputFile = project.file(path + getFileName(extension.outputType))
             task.outputType = extension.outputType
             task.description = TASK_DESC
             task.group = TASK_GROUP
@@ -39,7 +39,7 @@ class LicensesPlugin : Plugin<Project> {
                 val path = "${project.buildDir}/reports/licenses/$taskName/"
 
                 val task = project.tasks.create(taskName, LicensesTask::class.java)
-                task.htmlFile = project.file(path + getFileName(extension.outputType))
+                task.outputFile = project.file(path + getFileName(extension.outputType))
                 task.outputType = extension.outputType
                 task.description = TASK_DESC
                 task.group = TASK_GROUP

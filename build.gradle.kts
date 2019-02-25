@@ -17,12 +17,6 @@ repositories {
     google()
 }
 
-val group: String by project
-val versionName: String by project
-
-project.group = group
-version = versionName
-
 sourceSets {
     create("functionalTest") {
         java {
@@ -36,6 +30,22 @@ sourceSets {
         runtimeClasspath += output + compileClasspath
     }
 }
+
+configurations {
+    named("functionalTestImplementation") {
+        extendsFrom(testImplementation.get())
+    }
+
+    named("functionalTestRuntime") {
+        extendsFrom(testRuntime.get())
+    }
+}
+
+val group: String by project
+val versionName: String by project
+
+project.group = group
+version = versionName
 
 gradlePlugin {
     plugins {
@@ -77,12 +87,7 @@ dependencies {
         exclude(group = "org.hamcrest")
     }
     testImplementation(Deps.hamcrest)
-    "functionalTestImplementation"(Deps.jUnit) {
-        exclude(group = "org.hamcrest")
-    }
-    "functionalTestImplementation"(Deps.hamcrest)
     "functionalTestImplementation"(gradleTestKit())
-    "functionalTestImplementation"(kotlin("stdlib-jdk8", Deps.kotlinVersion))
 }
 
 val DEVEO_USERNAME: String by project
