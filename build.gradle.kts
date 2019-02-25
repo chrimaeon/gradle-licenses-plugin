@@ -65,7 +65,6 @@ val pomName: String by project
 val pomDescription: String by project
 val scmUrl: String by project
 
-
 project.group = group
 version = versionName
 
@@ -88,38 +87,6 @@ gradlePlugin {
     testSourceSets(sourceSets["functionalTest"])
 }
 
-tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
-    revision = "release"
-
-    resolutionStrategy {
-        componentSelection {
-            all {
-                listOf("alpha", "beta", "rc", "cr", "m", "preview")
-                        .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
-                        .any { it.matches(candidate.version) }.let {
-                            if (it) {
-                                reject("Release candidate")
-                            }
-                        }
-
-            }
-        }
-    }
-}
-
-dependencies {
-    compileOnly(Deps.androidGradlePlugin)
-    implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
-    implementation(Deps.mavenModel)
-    implementation(Deps.moshi)
-
-    testImplementation(Deps.jUnit) {
-        exclude(group = "org.hamcrest")
-    }
-    testImplementation(Deps.hamcrest)
-    "functionalTestImplementation"(gradleTestKit())
-}
-
 val sourcesJar by tasks.registering(Jar::class) {
     classifier = "sources"
     from(sourceSets.main.get().allSource)
@@ -129,9 +96,6 @@ val javadocJar by tasks.registering(Jar::class) {
     classifier = "javadoc"
     from(tasks.javadoc)
 }
-
-val connectionUrl: String by project
-val developerConnectionUrl: String by project
 
 publishing {
     publications {
@@ -152,7 +116,9 @@ publishing {
                     }
                 }
                 scm {
+                    val connectionUrl: String by project
                     connection.set(connectionUrl)
+                    val developerConnectionUrl: String by project
                     developerConnection.set(developerConnectionUrl)
                     url.set(scmUrl)
                 }
@@ -160,8 +126,6 @@ publishing {
         }
     }
 }
-
-val issuesTrackerUrl: String by project
 
 bintray {
     val credentialProps = Properties()
@@ -176,6 +140,7 @@ bintray {
         userOrg = user
         setLicenses("Apache-2.0")
         vcsUrl = projectUrl
+        val issuesTrackerUrl: String by project
         issueTrackerUrl = issuesTrackerUrl
         version(closureOf<BintrayExtension.VersionConfig> {
             name = versionName
@@ -185,13 +150,57 @@ bintray {
     })
 }
 
-val functionalTest by tasks.registering(Test::class) {
-    group = "verification"
-    testClassesDirs = sourceSets["functionalTest"].output.classesDirs
-    classpath = sourceSets["functionalTest"].runtimeClasspath
+tasks {
+    val functionalTest by registering(Test::class) {
+        group = "verification"
+        testClassesDirs = sourceSets["functionalTest"].output.classesDirs
+        classpath = sourceSets["functionalTest"].runtimeClasspath
+    }
+
+    check {
+        dependsOn(functionalTest)
+    }
+
+    jar {
+        manifest {
+            attributes(mapOf("Implementation-Title" to pomName,
+                    "Implementation-Version" to versionName,
+                    "Built-By" to System.getProperty("user.name"),
+                    "Built-Date" to Date(),
+                    "Built-JDK" to System.getProperty("java.version"),
+                    "Built-Gradle" to gradle.gradleVersion))
+        }
+    }
+
+    named<DependencyUpdatesTask>("dependencyUpdates") {
+        revision = "release"
+
+        resolutionStrategy {
+            componentSelection {
+                all {
+                    listOf("alpha", "beta", "rc", "cr", "m", "preview")
+                            .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
+                            .any { it.matches(candidate.version) }.let {
+                                if (it) {
+                                    reject("Release candidate")
+                                }
+                            }
+
+                }
+            }
+        }
+    }
 }
 
-tasks.check { dependsOn(functionalTest) }
+dependencies {
+    compileOnly(Deps.androidGradlePlugin)
+    implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
+    implementation(Deps.mavenModel)
+    implementation(Deps.moshi)
 
-
-
+    testImplementation(Deps.jUnit) {
+        exclude(group = "org.hamcrest")
+    }
+    testImplementation(Deps.hamcrest)
+    "functionalTestImplementation"(gradleTestKit())
+}
