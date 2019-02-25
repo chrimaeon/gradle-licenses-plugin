@@ -1,6 +1,7 @@
 # Gradle Licenses Plugin
 
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Bintray](https://img.shields.io/bintray/v/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin.svg)](https://bintray.com/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin)
 
 This Gradle plugin provides tasks to generate a Html/Xml/Json file with the licenses used from the libraries.
 
@@ -13,18 +14,18 @@ buildscript {
   }
 
   dependencies {
-    classpath("com.cmgapps:gradle-licenses-plugin:0.5")
+    classpath("com.cmgapps:gradle-licenses-plugin:<version>")
   }
 }
 
-apply(plugin: "com.android.application") // or "java-library" or "java"
+apply(plugin: "com.android.application")
 apply(plugin: "com.cmgapps.licenses")
 ```
 ### Tasks
 
-Applying the plugin will create tasks to generate to license report
+Applying the plugin will create tasks to generate the license report
 
-For `"java"` and and `"java-library`
+For `"java"` and `"java-library`
 *  `licenseReport`
 
 For `"com.android.application"`, `"com.android.library"` and `"com.android.feature"`
