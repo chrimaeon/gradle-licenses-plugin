@@ -10,37 +10,44 @@ import org.gradle.api.DomainObjectSet
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+@Suppress("unused")
 class LicensesPlugin : Plugin<Project> {
 
     companion object {
         private const val TASK_DESC = "Collect licenses from libraries"
         private const val TASK_GROUP = "Reporting"
+
         private const val APP_PLUGIN_ID = "com.android.application"
         private const val LIBRARY_PLUGIN_ID = "com.android.library"
         private const val FEATURE_PLUGIN_ID = "com.android.feature"
         private val ANDROID_IDS = listOf(APP_PLUGIN_ID, LIBRARY_PLUGIN_ID, FEATURE_PLUGIN_ID)
 
+        @JvmStatic
         private fun configureJavaProject(project: Project, extension: LicensesExtension) {
             val taskName = "licenseReport"
             val path = "${project.buildDir}/reports/licenses/$taskName/"
+            val outputType = extension.outputType ?: OutputType.HTML
 
             val task = project.tasks.create(taskName, LicensesTask::class.java)
-            task.outputFile = project.file(path + getFileName(extension.outputType))
-            task.outputType = extension.outputType
+            task.outputFile = project.file(path + getFileName(outputType))
+            task.outputType = outputType
             task.description = TASK_DESC
             task.group = TASK_GROUP
             task.outputs.upToDateWhen { false }
         }
 
+        @JvmStatic
         private fun configureAndroidProject(project: Project, extension: LicensesExtension) {
             getAndroidVariants(project)?.all { variant ->
-                variant as BaseVariant
                 val taskName = "license${variant.name.capitalize()}Report"
                 val path = "${project.buildDir}/reports/licenses/$taskName/"
+                val outputType = extension.outputType ?: OutputType.HTML
+
+                println(path)
 
                 val task = project.tasks.create(taskName, LicensesTask::class.java)
-                task.outputFile = project.file(path + getFileName(extension.outputType))
-                task.outputType = extension.outputType
+                task.outputFile = project.file(path + getFileName(outputType))
+                task.outputType = outputType
                 task.description = TASK_DESC
                 task.group = TASK_GROUP
                 task.variant = variant.name
@@ -51,7 +58,8 @@ class LicensesPlugin : Plugin<Project> {
             }
         }
 
-        private fun getAndroidVariants(project: Project): DomainObjectSet<*>? {
+        @JvmStatic
+        private fun getAndroidVariants(project: Project): DomainObjectSet<out BaseVariant>? {
             if (project.plugins.hasPlugin(AppPlugin::class.java)) {
                 return project.extensions.getByType(AppExtension::class.java).applicationVariants
             }
@@ -67,6 +75,7 @@ class LicensesPlugin : Plugin<Project> {
             return null
         }
 
+        @JvmStatic
         private fun getFileName(type: OutputType): String {
             val filename = "licenses."
             return when (type) {

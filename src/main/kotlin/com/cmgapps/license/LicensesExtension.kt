@@ -6,7 +6,7 @@ package com.cmgapps.license
 
 
 open class LicensesExtension {
-    var outputType: OutputType = OutputType.HTML
+    var outputType: OutputType? = null
 }
 
 enum class OutputType {

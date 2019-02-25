@@ -32,11 +32,11 @@ open class LicensesTask : DefaultTask() {
                 URI("file", "", path.toURI().path, null, null).toString()
     }
 
-    @Internal
-    val libraries = mutableListOf<Library>()
-
     @OutputFile
     lateinit var outputFile: File
+
+    @Input
+    lateinit var outputType: OutputType
 
     @Optional
     @Input
@@ -46,15 +46,13 @@ open class LicensesTask : DefaultTask() {
     @Input
     var buildType: String? = null
 
-    @Input
-    lateinit var outputType: OutputType
+    @Internal
+    val libraries = mutableListOf<Library>()
 
     @Optional
     @Internal
     var productFlavors: List<ProductFlavor>? = null
 
-
-    @Suppress("unused")
     @TaskAction
     fun licensesReport() {
         if (!this::outputFile.isInitialized) {
@@ -66,8 +64,8 @@ open class LicensesTask : DefaultTask() {
         }
         setupEnvironment()
         collectDependencies()
-        generatePomInfo()
-        createHtmlReport()
+        generateLibraries()
+        createReport()
     }
 
     private fun setupEnvironment() {
@@ -82,7 +80,6 @@ open class LicensesTask : DefaultTask() {
     }
 
     private fun collectDependencies() {
-        // Add POM information to our POM configuration
         val configurations = mutableSetOf<Configuration>()
 
         if (project.configurations.find { it.name == "compile" } != null) {
@@ -97,7 +94,7 @@ open class LicensesTask : DefaultTask() {
             configurations.add(project.configurations.getByName("implementation"))
         }
 
-        // If Android project, add extra configurations
+        //Android project -> add additional configurations
         if (variant != null) {
 
             if (project.configurations.find { it.name == "compile" } != null) {
@@ -139,7 +136,7 @@ open class LicensesTask : DefaultTask() {
         }
     }
 
-    private fun generatePomInfo() {
+    private fun generateLibraries() {
         project.configurations.getByName(POM_CONFIGURATION).incoming.artifacts.forEach { pom ->
 
             val model = getPomModel(pom.file)
@@ -176,9 +173,10 @@ open class LicensesTask : DefaultTask() {
             return licenses
         }
 
-        logger.info("Project, $name, has no license in POM file.")
+        logger.info("Project $name has no license in POM file.")
 
         if (pom.parent != null) {
+            logger.info("Checking parent POM file.")
             val parentPom = getParentPomFile(pom.parent)
             return findLicenses(parentPom)
         }
@@ -186,15 +184,10 @@ open class LicensesTask : DefaultTask() {
         return null
     }
 
-    /**
-     * Use Parent POM information when individual dependency license information is missing.
-     */
     private fun getParentPomFile(parent: Parent): Model {
-        // Get parent POM information
 
         val dependency = "${parent.groupId}:${parent.artifactId}:${parent.version}@pom"
 
-        // Add dependency to temporary configuration
         project.configurations.create(TEMP_POM_CONFIGURATION).dependencies.add(
                 project.dependencies.add(TEMP_POM_CONFIGURATION, dependency)
         )
@@ -202,13 +195,12 @@ open class LicensesTask : DefaultTask() {
         val pomFile = project.configurations.getByName(TEMP_POM_CONFIGURATION).incoming
                 .artifacts.artifactFiles.singleFile
 
-        // Reset dependencies in temporary configuration
         project.configurations.remove(project.configurations.getByName(TEMP_POM_CONFIGURATION))
 
         return getPomModel(pomFile)
     }
 
-    private fun createHtmlReport() {
+    private fun createReport() {
         outputFile.delete()
         outputFile.parentFile.mkdirs()
         outputFile.createNewFile()
