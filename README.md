@@ -7,6 +7,15 @@ This Gradle plugin provides tasks to generate a HTML / XML / Json file with the 
 
 ## Usage
 
+Using the plugins DSL
+
+```groovy
+plugins {
+  id "com.cmgapps.licenses" version "1.0"
+}
+```
+
+Using legacy plugin application 
 ```groovy
 buildscript {
   repositories {
@@ -18,7 +27,6 @@ buildscript {
   }
 }
 
-apply(plugin: "com.android.application")
 apply(plugin: "com.cmgapps.licenses")
 ```
 ### Tasks
@@ -43,8 +51,6 @@ The plugin can output different formats.
     generates a valid XML version 1.0 file
 
 ```groovy
-apply(plugin: "com.cmgapps.licenses")
-
 licenses {
     outputType = OutputType.HTML
 }
