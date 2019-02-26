@@ -3,10 +3,19 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Bintray](https://img.shields.io/bintray/v/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin.svg)](https://bintray.com/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin)
 
-This Gradle plugin provides tasks to generate a Html/Xml/Json file with the licenses used from the libraries.
+This Gradle plugin provides tasks to generate a HTML / XML / Json file with the licenses used from the libraries.
 
 ## Usage
 
+Using the plugins DSL
+
+```groovy
+plugins {
+  id "com.cmgapps.licenses" version "1.0"
+}
+```
+
+Using legacy plugin application 
 ```groovy
 buildscript {
   repositories {
@@ -18,7 +27,6 @@ buildscript {
   }
 }
 
-apply(plugin: "com.android.application")
 apply(plugin: "com.cmgapps.licenses")
 ```
 ### Tasks
@@ -43,8 +51,6 @@ The plugin can output different formats.
     generates a valid XML version 1.0 file
 
 ```groovy
-apply(plugin: "com.cmgapps.licenses")
-
 licenses {
     outputType = OutputType.HTML
 }

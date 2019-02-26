@@ -25,6 +25,7 @@ plugins {
     id("com.github.ben-manes.versions") version "0.20.0"
     kotlin("jvm") version Deps.kotlinVersion
     id("com.jfrog.bintray") version "1.8.4"
+    id("com.gradle.plugin-publish") version "0.10.0"
 }
 
 repositories {
@@ -58,56 +59,33 @@ configurations {
 
 val group: String by project
 val versionName: String by project
+val projectUrl: String by project
+val pomArtifactId: String by project
+val pomName: String by project
+val pomDescription: String by project
+val scmUrl: String by project
 
 project.group = group
 version = versionName
+
+pluginBundle {
+    website = projectUrl
+    vcsUrl = scmUrl
+    tags = listOf("license-managment", "android", "java", "java-library", "licenses")
+}
 
 gradlePlugin {
     plugins {
         create("licensesPlugin") {
             id = "com.cmgapps.licenses"
             implementationClass = "com.cmgapps.license.LicensesPlugin"
+            displayName = pomName
+            description = pomDescription
         }
     }
 
     testSourceSets(sourceSets["functionalTest"])
 }
-
-tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
-    revision = "release"
-
-    resolutionStrategy {
-        componentSelection {
-            all {
-                listOf("alpha", "beta", "rc", "cr", "m", "preview")
-                        .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
-                        .any { it.matches(candidate.version) }.let {
-                            if (it) {
-                                reject("Release candidate")
-                            }
-                        }
-
-            }
-        }
-    }
-}
-
-dependencies {
-    compileOnly(Deps.androidGradlePlugin)
-    implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
-    implementation(Deps.mavenModel)
-    implementation(Deps.moshi)
-
-    testImplementation(Deps.jUnit) {
-        exclude(group = "org.hamcrest")
-    }
-    testImplementation(Deps.hamcrest)
-    "functionalTestImplementation"(gradleTestKit())
-}
-
-val pomArtifactId: String by project
-val pomName: String by project
-val pomDescription: String by project
 
 val sourcesJar by tasks.registering(Jar::class) {
     classifier = "sources"
@@ -118,10 +96,6 @@ val javadocJar by tasks.registering(Jar::class) {
     classifier = "javadoc"
     from(tasks.javadoc)
 }
-
-val connectionUrl: String by project
-val developerConnectionUrl: String by project
-val projectUrl: String by project
 
 publishing {
     publications {
@@ -142,9 +116,11 @@ publishing {
                     }
                 }
                 scm {
+                    val connectionUrl: String by project
                     connection.set(connectionUrl)
+                    val developerConnectionUrl: String by project
                     developerConnection.set(developerConnectionUrl)
-                    url.set(projectUrl)
+                    url.set(scmUrl)
                 }
             }
         }
@@ -164,6 +140,8 @@ bintray {
         userOrg = user
         setLicenses("Apache-2.0")
         vcsUrl = projectUrl
+        val issuesTrackerUrl: String by project
+        issueTrackerUrl = issuesTrackerUrl
         version(closureOf<BintrayExtension.VersionConfig> {
             name = versionName
             vcsTag = versionName
@@ -172,13 +150,57 @@ bintray {
     })
 }
 
-val functionalTest by tasks.registering(Test::class) {
-    group = "verification"
-    testClassesDirs = sourceSets["functionalTest"].output.classesDirs
-    classpath = sourceSets["functionalTest"].runtimeClasspath
+tasks {
+    val functionalTest by registering(Test::class) {
+        group = "verification"
+        testClassesDirs = sourceSets["functionalTest"].output.classesDirs
+        classpath = sourceSets["functionalTest"].runtimeClasspath
+    }
+
+    check {
+        dependsOn(functionalTest)
+    }
+
+    jar {
+        manifest {
+            attributes(mapOf("Implementation-Title" to pomName,
+                    "Implementation-Version" to versionName,
+                    "Built-By" to System.getProperty("user.name"),
+                    "Built-Date" to Date(),
+                    "Built-JDK" to System.getProperty("java.version"),
+                    "Built-Gradle" to gradle.gradleVersion))
+        }
+    }
+
+    named<DependencyUpdatesTask>("dependencyUpdates") {
+        revision = "release"
+
+        resolutionStrategy {
+            componentSelection {
+                all {
+                    listOf("alpha", "beta", "rc", "cr", "m", "preview")
+                            .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
+                            .any { it.matches(candidate.version) }.let {
+                                if (it) {
+                                    reject("Release candidate")
+                                }
+                            }
+
+                }
+            }
+        }
+    }
 }
 
-tasks.check { dependsOn(functionalTest) }
+dependencies {
+    compileOnly(Deps.androidGradlePlugin)
+    implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
+    implementation(Deps.mavenModel)
+    implementation(Deps.moshi)
 
-
-
+    testImplementation(Deps.jUnit) {
+        exclude(group = "org.hamcrest")
+    }
+    testImplementation(Deps.hamcrest)
+    "functionalTestImplementation"(gradleTestKit())
+}
