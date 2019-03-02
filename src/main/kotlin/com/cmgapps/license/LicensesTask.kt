@@ -19,9 +19,7 @@ package com.cmgapps.license
 import com.android.builder.model.ProductFlavor
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
-import com.cmgapps.license.reporter.HtmlReport
-import com.cmgapps.license.reporter.JsonReport
-import com.cmgapps.license.reporter.XmlReport
+import com.cmgapps.license.reporter.*
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
@@ -222,6 +220,8 @@ open class LicensesTask : DefaultTask() {
                 OutputType.HTML -> HtmlReport(libraries)
                 OutputType.XML -> XmlReport(libraries)
                 OutputType.JSON -> JsonReport(libraries)
+                OutputType.TEXT -> TextReport(libraries)
+                OutputType.MD -> MarkdownReport(libraries)
             }
             print(report.generate())
         }

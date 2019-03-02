@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
 plugins {
+    idea
     `java-gradle-plugin`
     `maven-publish`
     signing
@@ -37,7 +38,7 @@ repositories {
 sourceSets {
     create("functionalTest") {
         java {
-            srcDir(file("src/functionalTest/kotlin"))
+            srcDirs(file("src/functionalTest/kotlin"), file("src/commonTest/kotlin"))
         }
         resources {
             srcDir(file("src/functionalTest/resources"))
@@ -45,6 +46,12 @@ sourceSets {
 
         compileClasspath += sourceSets.main.get().output + configurations.testRuntime
         runtimeClasspath += output + compileClasspath
+    }
+
+    named("test") {
+        java {
+            srcDir(file("src/commonTest/kotlin"))
+        }
     }
 }
 
@@ -55,6 +62,13 @@ configurations {
 
     named("functionalTestRuntime") {
         extendsFrom(testRuntime.get())
+    }
+}
+
+idea {
+    module {
+        testSourceDirs = testSourceDirs + sourceSets["functionalTest"].allJava.srcDirs
+        testResourceDirs = testResourceDirs + sourceSets["functionalTest"].resources.srcDirs
     }
 }
 
