@@ -163,6 +163,7 @@ bintray {
         vcsUrl = projectUrl
         val issuesTrackerUrl: String by project
         issueTrackerUrl = issuesTrackerUrl
+        githubRepo = projectUrl
         version(closureOf<BintrayExtension.VersionConfig> {
             name = versionName
             vcsTag = versionName

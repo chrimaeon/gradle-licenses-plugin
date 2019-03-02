@@ -1,7 +1,8 @@
 # Gradle Licenses Plugin
 
-[![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg?style=for-the-badge&logo=apache)](http://www.apache.org/licenses/LICENSE-2.0)
+[![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg?style=for-the-badge)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Bintray](https://img.shields.io/bintray/v/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin.svg?style=for-the-badge)](https://bintray.com/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin)
+[![gradlePluginPortal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/cmgapps/licenses/com.cmgapps.licenses.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin%20Portal&style=for-the-badge)](https://plugins.gradle.org/plugin/com.cmgapps.licenses)
 
 This Gradle plugin provides tasks to generate a HTML / XML / Json file with the licenses used from the libraries.
 
