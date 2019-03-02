@@ -37,14 +37,14 @@ For `"java"` and `"java-library`
 *  `licenseReport`
 
 For `"com.android.application"`, `"com.android.library"` and `"com.android.feature"`
-* `licenar<variant>Report`
+* `license<variant>Report`
 
 ### Configuration
 
 The plugin can output different formats.
 
 * `OutputType.HTML`
-    generates a formated HTML website
+    generates a formatted HTML website
 * `OutputType.JSON`
     generates a Json file
 * `OutputType.XML`

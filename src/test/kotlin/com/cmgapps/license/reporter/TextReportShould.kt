@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package com.cmgapps.license
+package com.cmgapps.license.reporter
 
-open class LicensesExtension {
-    var outputType: OutputType? = null
-}
+import com.cmgapps.license.helper.LibrariesHelper
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.`is`
+import org.junit.jupiter.api.Test
 
-enum class OutputType {
-    HTML,
-    XML,
-    JSON,
-    TEXT,
-    MD
+class TextReportShould {
+
+    @Test
+    fun `generate Text report`() {
+        val report = TextReport(LibrariesHelper.libraries).generate()
+        assertThat(report, `is`("Test lib 1 1.0:\n" +
+                "\tApache 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)\n" +
+                "\tMIT License (http://opensource.org/licenses/MIT)\n\n"))
+    }
 }

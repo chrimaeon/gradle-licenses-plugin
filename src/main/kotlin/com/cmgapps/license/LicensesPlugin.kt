@@ -89,11 +89,13 @@ class LicensesPlugin : Plugin<Project> {
 
         @JvmStatic
         private fun getFileName(type: OutputType): String {
-            val filename = "licenses."
+            val filename = "licenses"
             return when (type) {
-                OutputType.HTML -> filename + "html"
-                OutputType.XML -> filename + "xml"
-                OutputType.JSON -> filename + "json"
+                OutputType.HTML -> "$filename.html"
+                OutputType.XML -> "$filename.xml"
+                OutputType.JSON -> "$filename.json"
+                OutputType.TEXT -> "$filename.txt"
+                OutputType.MD -> "$filename.md"
             }
         }
     }

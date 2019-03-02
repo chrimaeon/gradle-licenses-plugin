@@ -21,26 +21,27 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.matchesPattern
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 import java.util.regex.Pattern
 
 class LicensePluginAndroidShould {
 
-    @Rule
-    @JvmField
-    val testProjectDir = TemporaryFolder()
+    @TempDir
+    lateinit var testProjectDir: Path
 
     private lateinit var buildFile: File
     private lateinit var reportFolder: String
     private lateinit var mavenRepoUrl: String
     private lateinit var pluginClasspath: String
 
-    @Before
+    @BeforeEach
     fun setUp() {
         val pluginClasspathResource = javaClass.classLoader.getResourceAsStream("plugin-under-test-metadata.properties")
                 ?: throw IllegalStateException(
@@ -55,8 +56,8 @@ class LicensePluginAndroidShould {
                     .joinToString(", ")
         }
 
-        buildFile = testProjectDir.newFile("build.gradle")
-        reportFolder = "${testProjectDir.root.path}/build/reports/licenses"
+        buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
+        reportFolder = "${testProjectDir}/build/reports/licenses"
         mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
     }
 
@@ -88,7 +89,7 @@ class LicensePluginAndroidShould {
         for (taskName in listOf("licenseDebugReport", "licenseReleaseReport")) {
 
             val result = GradleRunner.create()
-                    .withProjectDir(testProjectDir.root)
+                    .withProjectDir(testProjectDir.toFile())
                     .withArguments(":$taskName")
                     .build()
 
@@ -138,7 +139,7 @@ class LicensePluginAndroidShould {
 
 
             val result = GradleRunner.create()
-                    .withProjectDir(testProjectDir.root)
+                    .withProjectDir(testProjectDir.toFile())
                     .withArguments(":$taskName")
                     .build()
 
