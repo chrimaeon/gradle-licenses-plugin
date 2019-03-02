@@ -8,26 +8,26 @@ import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+
 import java.io.File
+import java.nio.file.Path
 
 class LicensesTaskShould {
 
-    @Rule
-    @JvmField
-    val testProjectDir = TemporaryFolder()
+    @TempDir
+    lateinit var testProjectDir: Path
 
     private lateinit var reportFolder: String
     private lateinit var project: Project
 
-    @Before
+    @BeforeEach
     fun setUp() {
-        reportFolder = "${testProjectDir.root.path}/build/reports/licenses/licenseReport"
+        reportFolder = "${testProjectDir}/build/reports/licenses/licenseReport"
         project = ProjectBuilder.builder()
-                .withProjectDir(testProjectDir.root)
+                .withProjectDir(testProjectDir.toFile())
                 .build()
 
     }

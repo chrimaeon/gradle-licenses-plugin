@@ -22,32 +22,36 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.matchesPattern
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.regex.Pattern
 
 class LicensePluginJavaShould {
 
-    @Rule
-    @JvmField
-    val testProjectDir = TemporaryFolder()
+    @TempDir
+    lateinit var testProjectDir: Path
 
     private lateinit var buildFile: File
     private lateinit var reportFolder: String
     private lateinit var mavenRepoUrl: String
 
-    @Before
+    @BeforeEach
     fun setUp() {
-        buildFile = testProjectDir.newFile("build.gradle")
-        reportFolder = "${testProjectDir.root.path}/build/reports/licenses/licenseReport"
+        buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
+        reportFolder = "${testProjectDir}/build/reports/licenses/licenseReport"
         mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
     }
 
-    @Test
-    fun `apply Licenses plugin to various Gradle versions`() {
+    @ParameterizedTest
+    @ValueSource(strings = ["3.5", "4.0", "4.5", "4.1", "5.0", "5.1", "5.2"])
+    fun `apply Licenses plugin to various Gradle versions`(version: String) {
         buildFile.writeText("""
             |plugins {
             |   id("java")
@@ -55,17 +59,15 @@ class LicensePluginJavaShould {
             |}
         """.trimMargin())
 
-        for (version in listOf("3.5", "4.0", "4.5", "4.1", "5.0", "5.1", "5.2")) {
-            val result = GradleRunner.create()
-                    .withGradleVersion(version)
-                    .withProjectDir(testProjectDir.root)
-                    .withArguments(":licenseReport")
-                    .withPluginClasspath()
-                    .build()
+        val result = GradleRunner.create()
+                .withGradleVersion(version)
+                .withProjectDir(testProjectDir.toFile())
+                .withArguments(":licenseReport")
+                .withPluginClasspath()
+                .build()
 
-            assertThat("Gradle version $version", result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
-            assertThat("Gradle version $version", result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
-        }
+        assertThat("Gradle version $version", result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
+        assertThat("Gradle version $version", result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
     }
 
     @Test
@@ -78,7 +80,7 @@ class LicensePluginJavaShould {
         """.trimMargin())
 
         val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
+                .withProjectDir(testProjectDir.toFile())
                 .withArguments(":licenseReport")
                 .withPluginClasspath()
                 .build()
@@ -105,7 +107,7 @@ class LicensePluginJavaShould {
         """.trimMargin())
 
         val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
+                .withProjectDir(testProjectDir.toFile())
                 .withArguments(":licenseReport")
                 .withPluginClasspath()
                 .build()
@@ -143,7 +145,7 @@ class LicensePluginJavaShould {
         """.trimMargin())
 
         val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
+                .withProjectDir(testProjectDir.toFile())
                 .withArguments(":licenseReport")
                 .withPluginClasspath()
                 .build()
@@ -187,7 +189,7 @@ class LicensePluginJavaShould {
         """.trimMargin())
 
         val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
+                .withProjectDir(testProjectDir.toFile())
                 .withArguments(":licenseReport")
                 .withPluginClasspath()
                 .build()

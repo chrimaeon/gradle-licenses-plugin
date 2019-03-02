@@ -7,7 +7,7 @@ package com.cmgapps.license.reporter
 import com.cmgapps.license.helper.LibrariesHelper
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class JsonReportShould {
 

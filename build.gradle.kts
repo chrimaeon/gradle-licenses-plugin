@@ -16,6 +16,7 @@
 
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.jfrog.bintray.gradle.BintrayExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
 plugins {
@@ -189,6 +190,17 @@ tasks {
                 }
             }
         }
+    }
+
+    withType<Test> {
+        useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
+    }
+
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "1.8"
     }
 }
 
