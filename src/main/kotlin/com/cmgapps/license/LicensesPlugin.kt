@@ -55,8 +55,6 @@ class LicensesPlugin : Plugin<Project> {
                 val path = "${project.buildDir}/reports/licenses/$taskName/"
                 val outputType = extension.outputType ?: OutputType.HTML
 
-                println(path)
-
                 val task = project.tasks.create(taskName, LicensesTask::class.java)
                 task.outputFile = project.file(path + getFileName(outputType))
                 task.outputType = outputType
