@@ -11,7 +11,7 @@ Using the plugins DSL
 
 ```groovy
 plugins {
-  id "com.cmgapps.licenses" version "1.0"
+  id "com.cmgapps.licenses" version "<version>"
 }
 ```
 
