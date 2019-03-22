@@ -38,20 +38,14 @@ repositories {
 sourceSets {
     create("functionalTest") {
         java {
-            srcDirs(file("src/functionalTest/kotlin"), file("src/commonTest/kotlin"))
+            srcDir("src/functionalTest/kotlin")
         }
         resources {
-            srcDir(file("src/functionalTest/resources"))
+            srcDir("src/functionalTest/resources")
         }
 
         compileClasspath += sourceSets.main.get().output + configurations.testRuntime
         runtimeClasspath += output + compileClasspath
-    }
-
-    named("test") {
-        java {
-            srcDir(file("src/commonTest/kotlin"))
-        }
     }
 }
 
@@ -103,12 +97,12 @@ gradlePlugin {
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
-    classifier = "sources"
+    archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
 }
 
 val javadocJar by tasks.registering(Jar::class) {
-    classifier = "javadoc"
+    archiveClassifier.set("javadoc")
     from(tasks.javadoc)
 }
 
