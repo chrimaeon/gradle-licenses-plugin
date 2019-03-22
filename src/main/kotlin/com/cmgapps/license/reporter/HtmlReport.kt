@@ -134,15 +134,14 @@ class Head : TagWithText("head") {
 }
 
 class Title : TagWithText("title")
-class Meta : Element {
-    val attributes = hashMapOf<String, String>()
+class Meta : Tag("meta") {
 
     override fun render(builder: StringBuilder, intent: String, format: Boolean) {
         if (format) {
             builder.append(intent)
         }
 
-        builder.append("<meta")
+        builder.append("<$name")
         for ((attr, value) in attributes) {
             builder.append(" $attr=\"$value\"")
         }
