@@ -35,6 +35,9 @@ import java.net.URL
 open class LicensesTask : DefaultTask() {
 
     companion object {
+        const val DEFAULT_PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
+        const val DEFAULT_BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
+
         private const val POM_CONFIGURATION = "poms"
         private const val TEMP_POM_CONFIGURATION = "tempPoms"
 
@@ -56,12 +59,20 @@ open class LicensesTask : DefaultTask() {
     @Input
     var buildType: String? = null
 
-    @Internal
-    val libraries = mutableListOf<Library>()
-
     @Optional
     @Internal
     var productFlavors: List<ProductFlavor>? = null
+
+    @Optional
+    @Input
+    var bodyCss: String? = null
+
+    @Optional
+    @Input
+    var preCss: String? = null
+
+    @Internal
+    val libraries = mutableListOf<Library>()
 
     @TaskAction
     fun licensesReport() {
@@ -218,7 +229,9 @@ open class LicensesTask : DefaultTask() {
 
         PrintStream(outputFile.outputStream()).use {
             val report = when (outputType) {
-                OutputType.HTML -> HtmlReport(libraries)
+                OutputType.HTML -> {
+                    HtmlReport(libraries, bodyCss ?: DEFAULT_BODY_CSS, preCss ?: DEFAULT_PRE_CSS)
+                }
                 OutputType.XML -> XmlReport(libraries)
                 OutputType.JSON -> JsonReport(libraries)
                 OutputType.TEXT -> TextReport(libraries)

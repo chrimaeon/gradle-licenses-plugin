@@ -24,10 +24,10 @@ plugins {
     `java-gradle-plugin`
     `maven-publish`
     signing
-    id("com.github.ben-manes.versions") version "0.20.0"
+    id("com.github.ben-manes.versions") version "0.21.0"
     kotlin("jvm") version Deps.kotlinVersion
     id("com.jfrog.bintray") version "1.8.4"
-    id("com.gradle.plugin-publish") version "0.10.0"
+    id("com.gradle.plugin-publish") version "0.10.1"
 }
 
 repositories {
@@ -221,6 +221,9 @@ dependencies {
     testImplementation(Deps.jUnit) {
         exclude(group = "org.hamcrest")
     }
+    testImplementation(Deps.androidGradlePlugin)
     testImplementation(Deps.hamcrest)
+
+    "functionalTestImplementation"(Deps.androidGradlePlugin)
     "functionalTestImplementation"(gradleTestKit())
 }

@@ -16,8 +16,10 @@
 
 package com.cmgapps.license
 
-open class LicensesExtension {
-    var outputType: OutputType? = null
+open class LicensesExtension() {
+    var outputType = OutputType.HTML
+    var bodyCss = LicensesTask.DEFAULT_BODY_CSS
+    var preCss = LicensesTask.DEFAULT_PRE_CSS
 }
 
 enum class OutputType {
