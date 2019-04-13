@@ -36,7 +36,7 @@ class TextElement(private val text: String) : Element {
 annotation class HtmlTagMarker
 
 @HtmlTagMarker
-abstract class Tag(private val name: String) : Element {
+abstract class Tag(protected val name: String) : Element {
     val children = arrayListOf<Element>()
     val attributes = hashMapOf<String, String>()
 

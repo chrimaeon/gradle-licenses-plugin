@@ -38,11 +38,13 @@ class LicensesPlugin : Plugin<Project> {
         private fun configureJavaProject(project: Project, extension: LicensesExtension) {
             val taskName = "licenseReport"
             val path = "${project.buildDir}/reports/licenses/$taskName/"
-            val outputType = extension.outputType ?: OutputType.HTML
+            val outputType = extension.outputType
 
             val task = project.tasks.create(taskName, LicensesTask::class.java)
             task.outputFile = project.file(path + getFileName(outputType))
             task.outputType = outputType
+            task.bodyCss = extension.bodyCss
+            task.preCss = extension.preCss
             task.description = TASK_DESC
             task.group = TASK_GROUP
             task.outputs.upToDateWhen { false }
@@ -53,13 +55,13 @@ class LicensesPlugin : Plugin<Project> {
             getAndroidVariants(project)?.all { variant ->
                 val taskName = "license${variant.name.capitalize()}Report"
                 val path = "${project.buildDir}/reports/licenses/$taskName/"
-                val outputType = extension.outputType ?: OutputType.HTML
-
-                println(path)
+                val outputType = extension.outputType
 
                 val task = project.tasks.create(taskName, LicensesTask::class.java)
                 task.outputFile = project.file(path + getFileName(outputType))
                 task.outputType = outputType
+                task.bodyCss = extension.bodyCss
+                task.preCss = extension.preCss
                 task.description = TASK_DESC
                 task.group = TASK_GROUP
                 task.variant = variant.name
@@ -88,15 +90,14 @@ class LicensesPlugin : Plugin<Project> {
         }
 
         @JvmStatic
-        private fun getFileName(type: OutputType): String {
-            val filename = "licenses"
-            return when (type) {
-                OutputType.HTML -> "$filename.html"
-                OutputType.XML -> "$filename.xml"
-                OutputType.JSON -> "$filename.json"
-                OutputType.TEXT -> "$filename.txt"
-                OutputType.MD -> "$filename.md"
-            }
+        private fun getFileName(type: OutputType) = when (type) {
+            OutputType.HTML -> ".html"
+            OutputType.XML -> ".xml"
+            OutputType.JSON -> ".json"
+            OutputType.TEXT -> ".txt"
+            OutputType.MD -> ".md"
+        }.let {
+            "licenses$it"
         }
     }
 

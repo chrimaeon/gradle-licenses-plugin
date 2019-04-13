@@ -50,7 +50,7 @@ class LicensePluginJavaShould {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["3.5", "4.0", "4.5", "4.1", "5.0", "5.1", "5.2"])
+    @ValueSource(strings = ["3.5", "4.0", "4.1", "4.5", "5.0", "5.1", "5.2"])
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
         buildFile.writeText("""
             |plugins {
@@ -60,11 +60,11 @@ class LicensePluginJavaShould {
         """.trimMargin())
 
         val result = GradleRunner.create()
-                .withGradleVersion(version)
-                .withProjectDir(testProjectDir.toFile())
-                .withArguments(":licenseReport")
-                .withPluginClasspath()
-                .build()
+            .withGradleVersion(version)
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .build()
 
         assertThat("Gradle version $version", result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
         assertThat("Gradle version $version", result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
@@ -80,10 +80,11 @@ class LicensePluginJavaShould {
         """.trimMargin())
 
         val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.toFile())
-                .withArguments(":licenseReport")
-                .withPluginClasspath()
-                .build()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .withGradleVersion("5.2")
+            .build()
 
         assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
         assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
@@ -107,24 +108,26 @@ class LicensePluginJavaShould {
         """.trimMargin())
 
         val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.toFile())
-                .withArguments(":licenseReport")
-                .withPluginClasspath()
-                .build()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .withGradleVersion("5.2")
+            .build()
 
         assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
         assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
         assertThat(File("$reportFolder/licenses.html").readText().trim(), `is`("<!DOCTYPE html>" +
-                "<html lang=\"en\">" +
-                "<head>" +
-                "<meta charset=\"UTF-8\">" +
-                "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
-                "<title>Open source licenses</title>" +
-                "</head>" +
-                "<body>" +
-                "<h3>Notice for packages:</h3>" +
-                "</body>" +
-                "</html>"))
+            "<html lang=\"en\">" +
+            "<head>" +
+            "<meta charset=\"UTF-8\">" +
+            "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+            "<title>Open source licenses</title>" +
+            "</head>" +
+            "<body>" +
+            "<h3>Notice for packages:</h3>" +
+            "</body>" +
+            "</html>")
+        )
     }
 
     @Test
@@ -145,30 +148,32 @@ class LicensePluginJavaShould {
         """.trimMargin())
 
         val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.toFile())
-                .withArguments(":licenseReport")
-                .withPluginClasspath()
-                .build()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .withGradleVersion("5.2")
+            .build()
 
         assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
         assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
         assertThat(File("$reportFolder/licenses.html").readText().trim(), `is`("<!DOCTYPE html>" +
-                "<html lang=\"en\">" +
-                "<head>" +
-                "<meta charset=\"UTF-8\">" +
-                "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
-                "<title>Open source licenses</title>" +
-                "</head>" +
-                "<body>" +
-                "<h3>Notice for packages:</h3>" +
-                "<ul>" +
-                "<li>Retrofit</li>" +
-                "</ul>" +
-                "<pre>" +
-                TestUtils.getFileContent("apache-2.0.txt") +
-                "</pre>" +
-                "</body>" +
-                "</html>"))
+            "<html lang=\"en\">" +
+            "<head>" +
+            "<meta charset=\"UTF-8\">" +
+            "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+            "<title>Open source licenses</title>" +
+            "</head>" +
+            "<body>" +
+            "<h3>Notice for packages:</h3>" +
+            "<ul>" +
+            "<li>Retrofit</li>" +
+            "</ul>" +
+            "<pre>" +
+            TestUtils.getFileContent("apache-2.0.txt") +
+            "</pre>" +
+            "</body>" +
+            "</html>")
+        )
     }
 
     @Test
@@ -189,31 +194,80 @@ class LicensePluginJavaShould {
         """.trimMargin())
 
         val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.toFile())
-                .withArguments(":licenseReport")
-                .withPluginClasspath()
-                .build()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .withGradleVersion("5.2")
+            .build()
 
         assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
         assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
         assertThat(File("$reportFolder/licenses.html").readText().trim(), `is`("<!DOCTYPE html>" +
-                "<html lang=\"en\">" +
-                "<head>" +
-                "<meta charset=\"UTF-8\">" +
-                "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
-                "<title>Open source licenses</title>" +
-                "</head>" +
-                "<body>" +
-                "<h3>Notice for packages:</h3>" +
-                "<ul>" +
-                "<li>Fake dependency name</li>" +
-                "</ul>" +
-                "<div class=\"license\">" +
-                "<p>Some license</p>" +
-                "<a href=\"http://website.tld/\">http://website.tld/</a>" +
-                "</div>" +
-                "</body>" +
-                "</html>"))
+            "<html lang=\"en\">" +
+            "<head>" +
+            "<meta charset=\"UTF-8\">" +
+            "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+            "<title>Open source licenses</title>" +
+            "</head>" +
+            "<body>" +
+            "<h3>Notice for packages:</h3>" +
+            "<ul>" +
+            "<li>Fake dependency name</li>" +
+            "</ul>" +
+            "<div class=\"license\">" +
+            "<p>Some license</p>" +
+            "<a href=\"http://website.tld/\">http://website.tld/</a>" +
+            "</div>" +
+            "</body>" +
+            "</html>")
+        )
+    }
+
+    @Test
+    fun `generate Report with lib with no name`() {
+        buildFile.writeText("""
+            |plugins {
+            |   id("java-library")
+            |   id("com.cmgapps.licenses")
+            |}
+            |repositories {
+            |  maven {
+            |    url '$mavenRepoUrl'
+            |  }
+            |}
+            |dependencies {
+            |  compile 'group:noname:1.0.0'
+            |}
+        """.trimMargin())
+
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .withGradleVersion("5.2")
+            .build()
+
+        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
+        assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
+        assertThat(File("$reportFolder/licenses.html").readText().trim(), `is`("<!DOCTYPE html>" +
+            "<html lang=\"en\">" +
+            "<head>" +
+            "<meta charset=\"UTF-8\">" +
+            "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+            "<title>Open source licenses</title>" +
+            "</head>" +
+            "<body>" +
+            "<h3>Notice for packages:</h3>" +
+            "<ul>" +
+            "<li>group:noname</li>" +
+            "</ul>" +
+            "<div class=\"license\">" +
+            "<p>Some license</p>" +
+            "<a href=\"http://website.tld/\">http://website.tld/</a>" +
+            "</div>" +
+            "</body>" +
+            "</html>")
+        )
     }
 }
 

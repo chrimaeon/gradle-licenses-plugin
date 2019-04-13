@@ -35,11 +35,14 @@ import java.net.URL
 open class LicensesTask : DefaultTask() {
 
     companion object {
+        const val DEFAULT_PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
+        const val DEFAULT_BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
+
         private const val POM_CONFIGURATION = "poms"
         private const val TEMP_POM_CONFIGURATION = "tempPoms"
 
         private fun getClickableFileUrl(path: File) =
-                URI("file", "", path.toURI().path, null, null).toString()
+            URI("file", "", path.toURI().path, null, null).toString()
     }
 
     @OutputFile
@@ -56,12 +59,20 @@ open class LicensesTask : DefaultTask() {
     @Input
     var buildType: String? = null
 
-    @Internal
-    val libraries = mutableListOf<Library>()
-
     @Optional
     @Internal
     var productFlavors: List<ProductFlavor>? = null
+
+    @Optional
+    @Input
+    var bodyCss: String? = null
+
+    @Optional
+    @Input
+    var preCss: String? = null
+
+    @Internal
+    val libraries = mutableListOf<Library>()
 
     @TaskAction
     fun licensesReport() {
@@ -76,6 +87,7 @@ open class LicensesTask : DefaultTask() {
         collectDependencies()
         generateLibraries()
         createReport()
+        cleanUpEnvironment()
     }
 
     private fun setupEnvironment() {
@@ -140,7 +152,7 @@ open class LicensesTask : DefaultTask() {
                 "${module.group}:${module.name}:${module.version}@pom"
             }.forEach { pom ->
                 project.configurations.getByName(POM_CONFIGURATION).dependencies.add(
-                        project.dependencies.add(POM_CONFIGURATION, pom)
+                    project.dependencies.add(POM_CONFIGURATION, pom)
                 )
             }
         }
@@ -159,7 +171,7 @@ open class LicensesTask : DefaultTask() {
             }
 
             libraries.add(Library(model.name
-                    ?: "${model.groupId}:${model.artifactId}", model.version, model.description, licenses))
+                ?: "${model.groupId}:${model.artifactId}", model.version, model.description, licenses))
         }
     }
 
@@ -199,11 +211,11 @@ open class LicensesTask : DefaultTask() {
         val dependency = "${parent.groupId}:${parent.artifactId}:${parent.version}@pom"
 
         project.configurations.create(TEMP_POM_CONFIGURATION).dependencies.add(
-                project.dependencies.add(TEMP_POM_CONFIGURATION, dependency)
+            project.dependencies.add(TEMP_POM_CONFIGURATION, dependency)
         )
 
         val pomFile = project.configurations.getByName(TEMP_POM_CONFIGURATION).incoming
-                .artifacts.artifactFiles.singleFile
+            .artifacts.artifactFiles.singleFile
 
         project.configurations.remove(project.configurations.getByName(TEMP_POM_CONFIGURATION))
 
@@ -215,17 +227,24 @@ open class LicensesTask : DefaultTask() {
         outputFile.parentFile.mkdirs()
         outputFile.createNewFile()
 
-        PrintStream(outputFile.outputStream()).run {
+        PrintStream(outputFile.outputStream()).use {
             val report = when (outputType) {
-                OutputType.HTML -> HtmlReport(libraries)
+                OutputType.HTML -> {
+                    HtmlReport(libraries, bodyCss ?: DEFAULT_BODY_CSS, preCss ?: DEFAULT_PRE_CSS)
+                }
                 OutputType.XML -> XmlReport(libraries)
                 OutputType.JSON -> JsonReport(libraries)
                 OutputType.TEXT -> TextReport(libraries)
                 OutputType.MD -> MarkdownReport(libraries)
             }
-            print(report.generate())
+            it.print(report.generate())
+            it.flush()
         }
 
         logger.lifecycle("Wrote ${outputType.name} report to ${getClickableFileUrl(outputFile)}.")
+    }
+
+    private fun cleanUpEnvironment() {
+        project.configurations.remove(project.configurations.getByName(POM_CONFIGURATION))
     }
 }

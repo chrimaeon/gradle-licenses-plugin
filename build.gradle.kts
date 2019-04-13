@@ -24,10 +24,10 @@ plugins {
     `java-gradle-plugin`
     `maven-publish`
     signing
-    id("com.github.ben-manes.versions") version "0.20.0"
+    id("com.github.ben-manes.versions") version "0.21.0"
     kotlin("jvm") version Deps.kotlinVersion
     id("com.jfrog.bintray") version "1.8.4"
-    id("com.gradle.plugin-publish") version "0.10.0"
+    id("com.gradle.plugin-publish") version "0.10.1"
 }
 
 repositories {
@@ -38,20 +38,14 @@ repositories {
 sourceSets {
     create("functionalTest") {
         java {
-            srcDirs(file("src/functionalTest/kotlin"), file("src/commonTest/kotlin"))
+            srcDir("src/functionalTest/kotlin")
         }
         resources {
-            srcDir(file("src/functionalTest/resources"))
+            srcDir("src/functionalTest/resources")
         }
 
         compileClasspath += sourceSets.main.get().output + configurations.testRuntime
         runtimeClasspath += output + compileClasspath
-    }
-
-    named("test") {
-        java {
-            srcDir(file("src/commonTest/kotlin"))
-        }
     }
 }
 
@@ -103,12 +97,12 @@ gradlePlugin {
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
-    classifier = "sources"
+    archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
 }
 
 val javadocJar by tasks.registering(Jar::class) {
-    classifier = "javadoc"
+    archiveClassifier.set("javadoc")
     from(tasks.javadoc)
 }
 
@@ -227,6 +221,9 @@ dependencies {
     testImplementation(Deps.jUnit) {
         exclude(group = "org.hamcrest")
     }
+    testImplementation(Deps.androidGradlePlugin)
     testImplementation(Deps.hamcrest)
+
+    "functionalTestImplementation"(Deps.androidGradlePlugin)
     "functionalTestImplementation"(gradleTestKit())
 }

@@ -1,7 +1,7 @@
 # Gradle Licenses Plugin
 
-[![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0)
-[![Bintray](https://img.shields.io/bintray/v/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin.svg)](https://bintray.com/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin)
+[![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg?style=for-the-badge&logo=apache)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Bintray](https://img.shields.io/bintray/v/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin.svg?style=for-the-badge)](https://bintray.com/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin)
 
 This Gradle plugin provides tasks to generate a HTML / XML / Json file with the licenses used from the libraries.
 
@@ -11,7 +11,7 @@ Using the plugins DSL
 
 ```groovy
 plugins {
-  id "com.cmgapps.licenses" version "1.0"
+  id "com.cmgapps.licenses" version "<version>"
 }
 ```
 
@@ -49,12 +49,30 @@ The plugin can output different formats.
     generates a Json file
 * `OutputType.XML`
     generates a valid XML version 1.0 file
+* `OutputType.TEXT`
+    generates a plain text report file
+* `OutputType.MD`
+    generates a Markdown file
 
 ```groovy
 licenses {
     outputType = OutputType.HTML
 }
 ```
+
+### CSS Styles for HTML Report
+
+For a HTML report you can define custom `body`and `pre` styles using:
+
+```groovy
+licenses {
+    bodyCss = "body {font-family: sans-serif; background-color: #eee}"
+    preCss = "pre, .license {background-color: #ddd; padding:1em} pre {white-space: pre-wrap}"
+}
+```
+
+additionally to the `pre` tag, you'll have to provide a styling for 
+the `.license` class which is applied to URL licenses.
 
 ## License
 

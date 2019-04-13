@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-object Deps {
-    const val kotlinVersion = "1.3.30"
+package com.cmgapps.license.util
 
-    const val androidGradlePlugin = "com.android.tools.build:gradle:3.3.2"
-    const val mavenModel = "org.apache.maven:maven-model:3.6.1"
-    const val moshi = "com.squareup.moshi:moshi:1.8.0"
-    const val jUnit = "org.junit.jupiter:junit-jupiter:5.4.2"
-    const val hamcrest = "org.hamcrest:hamcrest:2.1"
+object TestUtils {
+    fun getFileContent(fileName: String) = javaClass.getResource("/licenses/$fileName").readText()
 }
