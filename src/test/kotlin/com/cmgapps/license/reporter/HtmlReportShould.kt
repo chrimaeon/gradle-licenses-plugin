@@ -29,7 +29,7 @@ class HtmlReportShould {
             "<body>" +
             "<h3>Notice for packages:</h3>" +
             "<ul>" +
-            "<li>Test lib 1</li>" +
+            "<li>Test lib 1 (com.example.test:test-lib-1)</li>" +
             "</ul>" +
             "<pre>" +
             TestUtils.getFileContent("apache-2.0.txt") +

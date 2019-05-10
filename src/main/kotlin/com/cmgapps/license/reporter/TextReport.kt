@@ -25,7 +25,11 @@ class TextReport(private val libraries: List<Library>) : Report {
                 append(library.name)
                 append(' ')
                 append(library.version)
-                append(':')
+                append(" (")
+                append(library.group)
+                append(":")
+                append(library.artifact)
+                append("):")
                 library.licenses.forEach { license ->
                     append("\n\t")
                     append(license.name)

@@ -170,15 +170,13 @@ open class LicensesTask : DefaultTask() {
                 licenses = emptyList()
             }
 
-            libraries.add(Library(model.name
-                ?: "${model.groupId}:${model.artifactId}", model.version, model.description, licenses))
+            libraries.add(Library(model.name ?: model.artifactId, model.groupId, model.artifactId, model.version, model.description, licenses))
         }
     }
 
     private fun getPomModel(file: File): Model = MavenXpp3Reader().run {
         read(file.inputStream())
     }
-
 
     private fun findLicenses(pom: Model): List<License>? {
 

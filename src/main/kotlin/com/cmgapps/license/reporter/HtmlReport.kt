@@ -69,7 +69,7 @@ class HtmlReport(private val libraries: List<Library>,
                             sortBy { it.name }
                             forEach { library ->
                                 li {
-                                    +library.name
+                                    +"${library.name} (${library.group}:${library.artifact})"
                                 }
                             }
                         }

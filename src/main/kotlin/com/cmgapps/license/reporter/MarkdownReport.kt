@@ -28,7 +28,12 @@ class MarkdownReport(private val libraries: List<Library>) : Report {
                 append(' ')
                 append('_')
                 append(library.version)
-                append("_:")
+                append("_ ")
+                append("(")
+                append(library.group)
+                append(":")
+                append(library.artifact)
+                append("):")
                 library.licenses.forEach { license ->
                     append("\n* ")
                     append(license.name)
