@@ -166,7 +166,7 @@ class LicensePluginJavaShould {
             "<body>" +
             "<h3>Notice for packages:</h3>" +
             "<ul>" +
-            "<li>Retrofit</li>" +
+            "<li>Retrofit (retrofit)</li>" +
             "</ul>" +
             "<pre>" +
             TestUtils.getFileContent("apache-2.0.txt") +
@@ -212,7 +212,7 @@ class LicensePluginJavaShould {
             "<body>" +
             "<h3>Notice for packages:</h3>" +
             "<ul>" +
-            "<li>Fake dependency name</li>" +
+            "<li>Fake dependency name (group:name)</li>" +
             "</ul>" +
             "<div class=\"license\">" +
             "<p>Some license</p>" +
@@ -259,7 +259,7 @@ class LicensePluginJavaShould {
             "<body>" +
             "<h3>Notice for packages:</h3>" +
             "<ul>" +
-            "<li>group:noname</li>" +
+            "<li>group:noname (group:noname)</li>" +
             "</ul>" +
             "<div class=\"license\">" +
             "<p>Some license</p>" +

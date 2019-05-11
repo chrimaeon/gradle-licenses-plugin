@@ -24,6 +24,12 @@ class XmlReportShould {
                                   |    <name>
                                   |      Test lib 1
                                   |    </name>
+                                  |    <artifact>
+                                  |      test-lib-1
+                                  |    </artifact>
+                                  |    <group>
+                                  |      com.example.test
+                                  |    </group>
                                   |    <version>
                                   |      1.0
                                   |    </version>

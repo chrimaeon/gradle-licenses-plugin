@@ -25,6 +25,12 @@ class XmlReport(private val libraries: List<com.cmgapps.license.model.Library>) 
                     name {
                         +library.name
                     }
+                    artifact {
+                        +library.artifact
+                    }
+                    group {
+                        +library.group
+                    }
                     version {
                         +(library.version ?: "")
                     }
@@ -68,12 +74,16 @@ class Libraries : Tag("libraries") {
 
 class Library : Tag("library") {
     fun name(init: Name.() -> Unit) = initTag(Name(), init)
+    fun artifact(init: Artifact.() -> Unit) = initTag(Artifact(), init)
+    fun group(init: Group.() -> Unit) = initTag(Group(), init)
     fun version(init: Version.() -> Unit) = initTag(Version(), init)
     fun description(init: Description.() -> Unit) = initTag(Description(), init)
     fun licenses(init: Licenses.() -> Unit) = initTag(Licenses(), init)
 }
 
 class Name : TagWithText("name")
+class Artifact : TagWithText("artifact")
+class Group : TagWithText("group")
 class Version : TagWithText("version")
 class Description : TagWithText("description")
 class Licenses : Tag("licenses") {

@@ -16,7 +16,9 @@ class JsonReportShould {
         val report = JsonReport(LibrariesHelper.libraries).generate()
         assertThat(report, `is`("""[
                                   |  {
+                                  |    "artifact": "test-lib-1",
                                   |    "description": "proper description",
+                                  |    "group": "com.example.test",
                                   |    "licenses": [
                                   |      {
                                   |        "name": "Apache 2.0",

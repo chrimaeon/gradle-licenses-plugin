@@ -9,7 +9,7 @@ import com.cmgapps.license.model.License
 
 object LibrariesHelper {
 
-    val libraries = listOf(Library("Test lib 1", "1.0", "proper description", listOf(
+    val libraries = listOf(Library("Test lib 1","com.example.test", "test-lib-1", "1.0", "proper description", listOf(
             License("Apache 2.0", "http://www.apache.org/licenses/LICENSE-2.0.txt"), License("MIT License", "http://opensource.org/licenses/MIT"))))
 
 }

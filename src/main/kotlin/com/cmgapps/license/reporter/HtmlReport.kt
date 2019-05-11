@@ -69,7 +69,8 @@ class HtmlReport(private val libraries: List<Library>,
                             sortBy { it.name }
                             forEach { library ->
                                 li {
-                                    +library.name
+                                    val combinedName = if (library.group.isNotEmpty()) "(${library.group}:${library.artifact})" else "(${library.artifact})"
+                                    +"${library.name} $combinedName"
                                 }
                             }
                         }

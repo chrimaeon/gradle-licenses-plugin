@@ -26,7 +26,7 @@ class TextReportShould {
     @Test
     fun `generate Text report`() {
         val report = TextReport(LibrariesHelper.libraries).generate()
-        assertThat(report, `is`("Test lib 1 1.0:\n" +
+        assertThat(report, `is`("Test lib 1 1.0 (com.example.test:test-lib-1):\n" +
                 "\tApache 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)\n" +
                 "\tMIT License (http://opensource.org/licenses/MIT)\n\n"))
     }

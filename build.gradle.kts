@@ -136,28 +136,28 @@ publishing {
     }
 }
 
-bintray {
-    val credentialProps = Properties()
-    credentialProps.load(file("${project.rootDir}/credentials.properties").inputStream())
-    user = credentialProps.getProperty("user")
-    key = credentialProps.getProperty("key")
-    setPublications("pluginMaven")
-
-    pkg(closureOf<BintrayExtension.PackageConfig> {
-        repo = "maven"
-        name = "${project.group}:$pomArtifactId"
-        userOrg = user
-        setLicenses("Apache-2.0")
-        vcsUrl = projectUrl
-        val issuesTrackerUrl: String by project
-        issueTrackerUrl = issuesTrackerUrl
-        version(closureOf<BintrayExtension.VersionConfig> {
-            name = versionName
-            vcsTag = versionName
-            released = Date().toString()
-        })
-    })
-}
+//bintray {
+//    val credentialProps = Properties()
+//    credentialProps.load(file("${project.rootDir}/credentials.properties").inputStream())
+//    user = credentialProps.getProperty("user")
+//    key = credentialProps.getProperty("key")
+//    setPublications("pluginMaven")
+//
+//    pkg(closureOf<BintrayExtension.PackageConfig> {
+//        repo = "maven"
+//        name = "${project.group}:$pomArtifactId"
+//        userOrg = user
+//        setLicenses("Apache-2.0")
+//        vcsUrl = projectUrl
+//        val issuesTrackerUrl: String by project
+//        issueTrackerUrl = issuesTrackerUrl
+//        version(closureOf<BintrayExtension.VersionConfig> {
+//            name = versionName
+//            vcsTag = versionName
+//            released = Date().toString()
+//        })
+//    })
+//}
 
 tasks {
     val functionalTest by registering(Test::class) {

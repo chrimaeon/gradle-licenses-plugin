@@ -169,16 +169,15 @@ open class LicensesTask : DefaultTask() {
                 logger.warn("${model.name} dependency does not have a license.")
                 licenses = emptyList()
             }
-
-            libraries.add(Library(model.name
-                ?: "${model.groupId}:${model.artifactId}", model.version, model.description, licenses))
+            val group = model.groupId ?: ""
+            val name = if (group.isNotEmpty()) "${group}:${model.artifactId}" else model.artifactId
+            libraries.add(Library(model.name ?: name, group, model.artifactId, model.version, model.description, licenses))
         }
     }
 
     private fun getPomModel(file: File): Model = MavenXpp3Reader().run {
         read(file.inputStream())
     }
-
 
     private fun findLicenses(pom: Model): List<License>? {
 
