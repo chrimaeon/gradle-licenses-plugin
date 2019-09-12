@@ -19,16 +19,28 @@ import com.jfrog.bintray.gradle.BintrayExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
+buildscript {
+    repositories {
+        mavenLocal()
+    }
+
+    dependencies {
+        classpath("com.cmgapps:gradle-licenses-plugin:1.2.1-SNAPSHOT")
+    }
+}
+
 plugins {
     idea
     `java-gradle-plugin`
     `maven-publish`
     signing
-    id("com.github.ben-manes.versions") version "0.21.0"
+    id("com.github.ben-manes.versions") version "0.25.0"
     kotlin("jvm") version Deps.kotlinVersion
     id("com.jfrog.bintray") version "1.8.4"
     id("com.gradle.plugin-publish") version "0.10.1"
 }
+
+apply(plugin = "com.cmgapps.licenses")
 
 repositories {
     jcenter()
@@ -44,7 +56,7 @@ sourceSets {
             srcDir("src/functionalTest/resources")
         }
 
-        compileClasspath += sourceSets.main.get().output + configurations.testRuntime
+        compileClasspath += sourceSets.main.get().output + configurations.testRuntime.get()
         runtimeClasspath += output + compileClasspath
     }
 }
@@ -80,7 +92,7 @@ version = versionName
 pluginBundle {
     website = projectUrl
     vcsUrl = scmUrl
-    tags = listOf("license-managment", "android", "java", "java-library", "licenses")
+    tags = listOf("license-management", "android", "java", "java-library", "licenses")
 }
 
 gradlePlugin {
@@ -173,30 +185,21 @@ tasks {
     jar {
         manifest {
             attributes(mapOf("Implementation-Title" to pomName,
-                    "Implementation-Version" to versionName,
-                    "Built-By" to System.getProperty("user.name"),
-                    "Built-Date" to Date(),
-                    "Built-JDK" to System.getProperty("java.version"),
-                    "Built-Gradle" to gradle.gradleVersion))
+                "Implementation-Version" to versionName,
+                "Built-By" to System.getProperty("user.name"),
+                "Built-Date" to Date(),
+                "Built-JDK" to System.getProperty("java.version"),
+                "Built-Gradle" to gradle.gradleVersion))
         }
     }
 
     named<DependencyUpdatesTask>("dependencyUpdates") {
         revision = "release"
 
-        resolutionStrategy {
-            componentSelection {
-                all {
-                    listOf("alpha", "beta", "rc", "cr", "m", "preview")
-                            .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
-                            .any { it.matches(candidate.version) }.let {
-                                if (it) {
-                                    reject("Release candidate")
-                                }
-                            }
-
-                }
-            }
+        rejectVersionIf {
+            listOf("alpha", "beta", "rc", "cr", "m", "preview")
+                .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
+                .any { it.matches(candidate.version) }
         }
     }
 
@@ -209,6 +212,10 @@ tasks {
 
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
+    }
+
+    wrapper {
+        distributionType = Wrapper.DistributionType.ALL
     }
 }
 
