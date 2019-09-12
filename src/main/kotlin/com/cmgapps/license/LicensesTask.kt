@@ -25,7 +25,7 @@ import org.apache.maven.model.Parent
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ExternalModuleDependency
+import org.gradle.api.artifacts.ExternalDependency
 import org.gradle.api.tasks.*
 import java.io.File
 import java.io.PrintStream
@@ -53,18 +53,6 @@ open class LicensesTask : DefaultTask() {
 
     @Optional
     @Input
-    var variant: String? = null
-
-    @Optional
-    @Input
-    var buildType: String? = null
-
-    @Optional
-    @Internal
-    var productFlavors: List<ProductFlavor>? = null
-
-    @Optional
-    @Input
     var bodyCss: String? = null
 
     @Optional
@@ -76,13 +64,9 @@ open class LicensesTask : DefaultTask() {
 
     @TaskAction
     fun licensesReport() {
-        if (!this::outputFile.isInitialized) {
-            throw IllegalStateException("outputFile must be set")
-        }
+        check(this::outputFile.isInitialized) { "outputFile must be set" }
+        check(this::outputType.isInitialized) { "outputType must be set" }
 
-        if (!this::outputType.isInitialized) {
-            throw IllegalStateException("outputType must be set")
-        }
         setupEnvironment()
         collectDependencies()
         generateLibraries()
@@ -91,87 +75,63 @@ open class LicensesTask : DefaultTask() {
     }
 
     private fun setupEnvironment() {
-        project.configurations.create(POM_CONFIGURATION)
+        project.configurations.apply {
+            create(POM_CONFIGURATION)
 
-        project.configurations.forEach {
-            try {
-                it.isCanBeResolved = true
-            } catch (ignore: Exception) {
+            forEach {
+                try {
+                    it.isCanBeResolved = true
+                } catch (ignore: Exception) {
+                }
             }
         }
     }
 
-    private fun collectDependencies() {
+    protected open fun collectDependencies() {
         val configurations = mutableSetOf<Configuration>()
 
-        if (project.configurations.find { it.name == "compile" } != null) {
+        project.configurations.find { it.name == "compile" }?.let {
             configurations.add(project.configurations.getByName("compile"))
         }
 
-        if (project.configurations.find { it.name == "api" } != null) {
+        project.configurations.find { it.name == "api" }?.let {
             configurations.add(project.configurations.getByName("api"))
         }
 
-        if (project.configurations.find { it.name == "implementation" } != null) {
+        project.configurations.find { it.name == "implementation" }?.let {
             configurations.add(project.configurations.getByName("implementation"))
         }
 
-        //Android project -> add additional configurations
-        if (variant != null) {
+        addConfigurations(configurations)
+    }
 
-            if (project.configurations.find { it.name == "compile" } != null) {
-                configurations.add(project.configurations.getByName("${buildType}Compile"))
-            }
-
-            if (project.configurations.find { it.name == "api" } != null) {
-                configurations.add(project.configurations.getByName("${buildType}Api"))
-            }
-
-            if (project.configurations.find { it.name == "implementation" } != null) {
-                configurations.add(project.configurations.getByName("${buildType}Implementation"))
-            }
-
-            productFlavors?.forEach { flavor ->
-                // Works for productFlavors and productFlavors with dimensions
-                if (variant!!.capitalize().contains(flavor.name.capitalize())) {
-                    if (project.configurations.find { it.name == "compile" } != null) {
-                        configurations.add(project.configurations.getByName("${flavor.name}Compile"))
-                    }
-                    if (project.configurations.find { it.name == "api" } != null) {
-                        configurations.add(project.configurations.getByName("${flavor.name}Api"))
-                    }
-                    if (project.configurations.find { it.name == "implementation" } != null) {
-                        configurations.add(project.configurations.getByName("${flavor.name}Implementation"))
-                    }
-                }
-            }
-        }
-
+    protected fun addConfigurations(configurations: Set<Configuration>) {
         configurations.forEach { configuration ->
-            configuration.incoming.dependencies.withType(ExternalModuleDependency::class.java).map { module ->
-                "${module.group}:${module.name}:${module.version}@pom"
-            }.forEach { pom ->
-                project.configurations.getByName(POM_CONFIGURATION).dependencies.add(
-                    project.dependencies.add(POM_CONFIGURATION, pom)
-                )
+            if (configuration.isCanBeResolved) {
+                configuration.incoming.dependencies.withType(ExternalDependency::class.java).map { dep ->
+                    "${dep.group}:${dep.name}:${dep.version}@pom"
+                }.forEach { pom ->
+                    project.configurations.getByName(POM_CONFIGURATION).dependencies.add(
+                        project.dependencies.add(POM_CONFIGURATION, pom)
+                    )
+                }
             }
         }
     }
 
     private fun generateLibraries() {
-        project.configurations.getByName(POM_CONFIGURATION).incoming.artifacts.forEach { pom ->
+        project.configurations.getByName(POM_CONFIGURATION).resolvedConfiguration.lenientConfiguration.artifacts.forEach {
 
-            val model = getPomModel(pom.file)
+            getPomModel(it.file).let { model ->
+                val licenses = findLicenses(model)
 
-            var licenses = findLicenses(model)
+                if (licenses.isEmpty()) {
+                    logger.warn("${model.name} dependency does not have a license.")
+                }
 
-            if (licenses == null) {
-                logger.warn("${model.name} dependency does not have a license.")
-                licenses = emptyList()
+                libraries.add(Library(model.name
+                    ?: "${model.groupId}:${model.artifactId}", model.version, model.description, licenses))
             }
-
-            libraries.add(Library(model.name
-                ?: "${model.groupId}:${model.artifactId}", model.version, model.description, licenses))
         }
     }
 
@@ -180,9 +140,9 @@ open class LicensesTask : DefaultTask() {
     }
 
 
-    private fun findLicenses(pom: Model): List<License>? {
+    private fun findLicenses(pom: Model): List<License> {
 
-        if (!pom.licenses.isEmpty()) {
+        if (pom.licenses.isNotEmpty()) {
             val licenses = mutableListOf<License>()
             pom.licenses.forEach { license ->
                 try {
@@ -203,7 +163,7 @@ open class LicensesTask : DefaultTask() {
             return findLicenses(parentPom)
         }
 
-        return null
+        return emptyList()
     }
 
     private fun getParentPomFile(parent: Parent): Model {
@@ -247,4 +207,61 @@ open class LicensesTask : DefaultTask() {
     private fun cleanUpEnvironment() {
         project.configurations.remove(project.configurations.getByName(POM_CONFIGURATION))
     }
+}
+
+open class AndroidLicensesTask : LicensesTask() {
+
+    @Optional
+    @Input
+    var variant: String? = null
+
+    @Optional
+    @Input
+    var buildType: String? = null
+
+    @Optional
+    @Internal
+    var productFlavors: List<ProductFlavor>? = null
+
+    override fun collectDependencies() {
+
+        super.collectDependencies()
+
+        val configurations = mutableSetOf<Configuration>()
+
+        variant?.let {
+
+            project.configurations.find { it.name == "compile" }?.let {
+                configurations.add(project.configurations.getByName("${buildType}Compile"))
+            }
+
+            project.configurations.find { it.name == "api" }?.let {
+                configurations.add(project.configurations.getByName("${buildType}Api"))
+            }
+
+            project.configurations.find { it.name == "implementation" }?.let {
+                configurations.add(project.configurations.getByName("${buildType}Implementation"))
+            }
+
+            productFlavors?.forEach { flavor ->
+                // Works for productFlavors and productFlavors with dimensions
+                if (it.capitalize().contains(flavor.name.capitalize())) {
+                    project.configurations.find { it.name == "compile" }?.let {
+                        configurations.add(project.configurations.getByName("${flavor.name}Compile"))
+                    }
+
+                    project.configurations.find { it.name == "api" }?.let {
+                        configurations.add(project.configurations.getByName("${flavor.name}Api"))
+                    }
+
+                    project.configurations.find { it.name == "implementation" }?.let {
+                        configurations.add(project.configurations.getByName("${flavor.name}Implementation"))
+                    }
+                }
+            }
+        }
+
+        addConfigurations(configurations)
+    }
+
 }
