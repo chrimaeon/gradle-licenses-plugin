@@ -19,16 +19,6 @@ import com.jfrog.bintray.gradle.BintrayExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
-buildscript {
-    repositories {
-        mavenLocal()
-    }
-
-    dependencies {
-        classpath("com.cmgapps:gradle-licenses-plugin:1.2.1-SNAPSHOT")
-    }
-}
-
 plugins {
     idea
     `java-gradle-plugin`
@@ -38,9 +28,8 @@ plugins {
     kotlin("jvm") version Deps.kotlinVersion
     id("com.jfrog.bintray") version "1.8.4"
     id("com.gradle.plugin-publish") version "0.10.1"
+    id("com.cmgapps.licenses") version "1.2.1"
 }
-
-apply(plugin = "com.cmgapps.licenses")
 
 repositories {
     jcenter()
