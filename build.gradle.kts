@@ -139,9 +139,14 @@ publishing {
 
 bintray {
     val credentialProps = Properties()
-    credentialProps.load(file("${project.rootDir}/credentials.properties").inputStream())
-    user = credentialProps.getProperty("user")
-    key = credentialProps.getProperty("key")
+    val propsFile = file("${project.rootDir}/credentials.properties")
+
+    if (propsFile.exists()) {
+        credentialProps.load(propsFile.inputStream())
+        user = credentialProps.getProperty("user")
+        key = credentialProps.getProperty("key")
+    }
+
     setPublications("pluginMaven")
 
     pkg(closureOf<BintrayExtension.PackageConfig> {
@@ -175,11 +180,11 @@ tasks {
     jar {
         manifest {
             attributes(mapOf("Implementation-Title" to pomName,
-                "Implementation-Version" to versionName,
-                "Built-By" to System.getProperty("user.name"),
-                "Built-Date" to Date(),
-                "Built-JDK" to System.getProperty("java.version"),
-                "Built-Gradle" to gradle.gradleVersion))
+                    "Implementation-Version" to versionName,
+                    "Built-By" to System.getProperty("user.name"),
+                    "Built-Date" to Date(),
+                    "Built-JDK" to System.getProperty("java.version"),
+                    "Built-Gradle" to gradle.gradleVersion))
         }
     }
 
@@ -188,8 +193,8 @@ tasks {
 
         rejectVersionIf {
             listOf("alpha", "beta", "rc", "cr", "m", "preview")
-                .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
-                .any { it.matches(candidate.version) }
+                    .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
+                    .any { it.matches(candidate.version) }
         }
     }
 
