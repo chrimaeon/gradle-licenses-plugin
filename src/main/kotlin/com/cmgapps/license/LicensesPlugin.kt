@@ -26,67 +26,69 @@ import org.gradle.api.Project
 class LicensesPlugin : Plugin<Project> {
 
     companion object {
-        private const val TASK_DESC = "Collect licenses from libraries"
+        private const val TASK_DESC = "Collect licenses from project"
         private const val TASK_GROUP = "Reporting"
 
         private const val APP_PLUGIN_ID = "com.android.application"
         private const val LIBRARY_PLUGIN_ID = "com.android.library"
         private const val FEATURE_PLUGIN_ID = "com.android.feature"
-        private val ANDROID_IDS = listOf(APP_PLUGIN_ID, LIBRARY_PLUGIN_ID, FEATURE_PLUGIN_ID)
+        private const val DYNAMIC_FEATURE_PLUGIN_ID = "com.android.dynamic-feature"
+        private val ANDROID_IDS = listOf(APP_PLUGIN_ID, LIBRARY_PLUGIN_ID, FEATURE_PLUGIN_ID, DYNAMIC_FEATURE_PLUGIN_ID)
 
         @JvmStatic
         private fun configureJavaProject(project: Project, extension: LicensesExtension) {
             val taskName = "licenseReport"
             val path = "${project.buildDir}/reports/licenses/$taskName/"
-            val outputType = extension.outputType
 
-            val task = project.tasks.create(taskName, LicensesTask::class.java)
-            task.outputFile = project.file(path + getFileName(outputType))
-            task.outputType = outputType
-            task.bodyCss = extension.bodyCss
-            task.preCss = extension.preCss
-            task.description = TASK_DESC
-            task.group = TASK_GROUP
-            task.outputs.upToDateWhen { false }
+            project.tasks.create(taskName, LicensesTask::class.java).apply {
+                outputType = extension.outputType
+                outputFile = project.file(path + getFileName(outputType))
+                bodyCss = extension.bodyCss
+                preCss = extension.preCss
+                description = TASK_DESC
+                group = TASK_GROUP
+                outputs.upToDateWhen { false }
+            }
         }
 
         @JvmStatic
         private fun configureAndroidProject(project: Project, extension: LicensesExtension) {
-            getAndroidVariants(project)?.all { variant ->
-                val taskName = "license${variant.name.capitalize()}Report"
+            getAndroidVariants(project)?.all { androidVariant ->
+                val taskName = "license${androidVariant.name.capitalize()}Report"
                 val path = "${project.buildDir}/reports/licenses/$taskName/"
-                val outputType = extension.outputType
 
-                val task = project.tasks.create(taskName, LicensesTask::class.java)
-                task.outputFile = project.file(path + getFileName(outputType))
-                task.outputType = outputType
-                task.bodyCss = extension.bodyCss
-                task.preCss = extension.preCss
-                task.description = TASK_DESC
-                task.group = TASK_GROUP
-                task.variant = variant.name
-                task.buildType = variant.buildType.name
-                task.productFlavors = variant.productFlavors
+                project.tasks.create(taskName, AndroidLicensesTask::class.java).apply {
+                    outputType = extension.outputType
+                    outputFile = project.file(path + getFileName(outputType))
+                    bodyCss = extension.bodyCss
+                    preCss = extension.preCss
+                    description = TASK_DESC
+                    group = TASK_GROUP
+                    variant = androidVariant.name
+                    buildType = androidVariant.buildType.name
+                    productFlavors = androidVariant.productFlavors
 
-                task.outputs.upToDateWhen { false }
+                    outputs.upToDateWhen { false }
+                }
             }
         }
 
         @JvmStatic
         private fun getAndroidVariants(project: Project): DomainObjectSet<out BaseVariant>? {
-            if (project.plugins.hasPlugin(AppPlugin::class.java)) {
-                return project.extensions.getByType(AppExtension::class.java).applicationVariants
+            return when {
+                project.plugins.hasPlugin(AppPlugin::class.java)
+                    || project.plugins.hasPlugin(DynamicFeaturePlugin::class.java) ->
+                    project.extensions.getByType(AppExtension::class.java).applicationVariants
+
+                project.plugins.hasPlugin(FeaturePlugin::class.java) ->
+                    project.extensions.getByType(FeatureExtension::class.java).featureVariants
+
+                project.plugins.hasPlugin(LibraryPlugin::class.java) ->
+                    project.extensions.getByType(LibraryExtension::class.java).libraryVariants
+
+                else -> null
             }
 
-            if (project.plugins.hasPlugin(LibraryPlugin::class.java)) {
-                return project.extensions.getByType(LibraryExtension::class.java).libraryVariants
-            }
-
-            if (project.plugins.hasPlugin(FeaturePlugin::class.java)) {
-                return project.extensions.getByType(FeatureExtension::class.java).featureVariants
-            }
-
-            return null
         }
 
         @JvmStatic
@@ -105,10 +107,15 @@ class LicensesPlugin : Plugin<Project> {
 
         val extension = project.extensions.create("licenses", LicensesExtension::class.java)
 
-        project.plugins.withId("java") { configureJavaProject(project, extension) }
+        project.plugins.withId("java") {
+            configureJavaProject(project, extension)
+        }
 
         ANDROID_IDS.forEach { id ->
-            project.plugins.withId(id) { configureAndroidProject(project, extension) }
+            project.plugins.withId(id) {
+                configureAndroidProject(project, extension)
+            }
         }
     }
 }
+
