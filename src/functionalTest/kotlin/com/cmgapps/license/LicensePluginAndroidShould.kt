@@ -71,7 +71,7 @@ class LicensePluginAndroidShould {
             |    google()
             |  }
             |  dependencies {
-            |    classpath "com.android.tools.build:gradle:3.3.0"
+            |    classpath "com.android.tools.build:gradle:3.5.0"
             |    classpath files($pluginClasspath)
             |  }
             |}
@@ -107,7 +107,7 @@ class LicensePluginAndroidShould {
             |    google()
             |  }
             |  dependencies {
-            |    classpath "com.android.tools.build:gradle:3.3.0"
+            |    classpath "com.android.tools.build:gradle:3.5.0"
             |    classpath files($pluginClasspath)
             |  }
             |}
