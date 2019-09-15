@@ -47,18 +47,18 @@ class LicensePluginJavaShould {
         buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
         reportFolder = "${testProjectDir}/build/reports/licenses/licenseReport"
         mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
+        buildFile.writeText("""
+            plugins {
+               id("java")
+               id("com.cmgapps.licenses")
+            }
+
+        """.trimIndent())
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["4.0", "4.1", "4.5", "5.0", "5.1", "5.2", "5.3", "5.4", "5.5", "5.6"])
+    @ValueSource(strings = ["3.5", "4.0", "4.1", "4.5", "4.9", "5.0", "5.1", "5.5", "5.6"])
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
-        buildFile.writeText("""
-            |plugins {
-            |   id("java")
-            |   id("com.cmgapps.licenses")
-            |}
-        """.trimMargin())
-
         val result = GradleRunner.create()
             .withGradleVersion(version)
             .withProjectDir(testProjectDir.toFile())
@@ -67,18 +67,10 @@ class LicensePluginJavaShould {
             .build()
 
         assertThat("Gradle version $version", result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
-        assertThat("Gradle version $version", result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
     }
 
     @Test
     fun `generate report with no dependencies`() {
-        buildFile.writeText("""
-            |plugins {
-            |   id("java-library")
-            |   id("com.cmgapps.licenses")
-            |}
-        """.trimMargin())
-
         val result = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
             .withArguments(":licenseReport")
@@ -91,20 +83,16 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate report with no open source dependencies`() {
-        buildFile.writeText("""
-            |plugins {
-            |   id("java-library")
-            |   id("com.cmgapps.licenses")
-            |}
-            |repositories {
-            |  maven {
-            |    url '$mavenRepoUrl'
-            |  }
-            |}
-            |dependencies {
-            |  compile 'com.google.firebase:firebase-core:10.0.1'
-            |}
-        """.trimMargin())
+        buildFile.appendText("""
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'com.google.firebase:firebase-core:10.0.1'
+            }
+        """.trimIndent())
 
         val result = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -130,20 +118,16 @@ class LicensePluginJavaShould {
 
     @Test
     fun `java library with parent pom dependency`() {
-        buildFile.writeText("""
-            |plugins {
-            |   id("java-library")
-            |   id("com.cmgapps.licenses")
-            |}
-            |repositories {
-            |  maven {
-            |    url '$mavenRepoUrl'
-            |  }
-            |}
-            |dependencies {
-            |  compile 'com.squareup.retrofit2:retrofit:2.3.0'
-            |}
-        """.trimMargin())
+        buildFile.appendText("""
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'com.squareup.retrofit2:retrofit:2.3.0'
+            }
+        """.trimIndent())
 
         val result = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -175,20 +159,16 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate Report with custom license`() {
-        buildFile.writeText("""
-            |plugins {
-            |   id("java-library")
-            |   id("com.cmgapps.licenses")
-            |}
-            |repositories {
-            |  maven {
-            |    url '$mavenRepoUrl'
-            |  }
-            |}
-            |dependencies {
-            |  compile 'group:name:1.0.0'
-            |}
-        """.trimMargin())
+        buildFile.appendText("""
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'group:name:1.0.0'
+            }
+        """.trimIndent())
 
         val result = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -221,20 +201,16 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate Report with lib with no name`() {
-        buildFile.writeText("""
-            |plugins {
-            |   id("java-library")
-            |   id("com.cmgapps.licenses")
-            |}
-            |repositories {
-            |  maven {
-            |    url '$mavenRepoUrl'
-            |  }
-            |}
-            |dependencies {
-            |  compile 'group:noname:1.0.0'
-            |}
-        """.trimMargin())
+        buildFile.appendText("""
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'group:noname:1.0.0'
+            }
+        """.trimIndent())
 
         val result = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -263,6 +239,35 @@ class LicensePluginJavaShould {
             "</body>" +
             "</html>")
         )
+    }
+
+    @Test
+    fun `generate Report with different 'OutputType'`() {
+        buildFile.appendText("""
+            import com.cmgapps.license.OutputType
+            licenses {
+              outputType OutputType.TEXT
+            }
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'group:noname:1.0.0'
+            }
+        """.trimIndent())
+
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .build()
+
+        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
+        assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote TEXT report to .*$reportFolder/licenses.txt.*", Pattern.DOTALL)))
+        assertThat(File("$reportFolder/licenses.txt").readText().trim(),
+            `is`("group:noname 1.0.0:\n\tSome license (http://website.tld/)"))
     }
 }
 

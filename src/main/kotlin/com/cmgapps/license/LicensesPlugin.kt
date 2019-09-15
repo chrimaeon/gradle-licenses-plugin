@@ -18,9 +18,11 @@ package com.cmgapps.license
 
 import com.android.build.gradle.*
 import com.android.build.gradle.api.BaseVariant
+import org.gradle.api.Action
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.util.GradleVersion
 
 @Suppress("unused")
 class LicensesPlugin : Plugin<Project> {
@@ -40,14 +42,14 @@ class LicensesPlugin : Plugin<Project> {
             val taskName = "licenseReport"
             val path = "${project.buildDir}/reports/licenses/$taskName/"
 
-            project.tasks.create(taskName, LicensesTask::class.java).apply {
-                outputType = extension.outputType
-                outputFile = project.file(path + getFileName(outputType))
-                bodyCss = extension.bodyCss
-                preCss = extension.preCss
-                description = TASK_DESC
-                group = TASK_GROUP
-                outputs.upToDateWhen { false }
+            val configuration = Action<LicensesTask> { task ->
+                addBasicConfiguration(project, task, extension, path)
+            }
+
+            if (GradleVersion.current() >= GradleVersion.version("4.9")) {
+                project.tasks.register(taskName, LicensesTask::class.java, configuration)
+            } else {
+                project.tasks.create(taskName, LicensesTask::class.java, configuration)
             }
         }
 
@@ -57,20 +59,34 @@ class LicensesPlugin : Plugin<Project> {
                 val taskName = "license${androidVariant.name.capitalize()}Report"
                 val path = "${project.buildDir}/reports/licenses/$taskName/"
 
-                project.tasks.create(taskName, AndroidLicensesTask::class.java).apply {
-                    outputType = extension.outputType
-                    outputFile = project.file(path + getFileName(outputType))
-                    bodyCss = extension.bodyCss
-                    preCss = extension.preCss
-                    description = TASK_DESC
-                    group = TASK_GROUP
-                    variant = androidVariant.name
-                    buildType = androidVariant.buildType.name
-                    productFlavors = androidVariant.productFlavors
+                val configuration = Action<AndroidLicensesTask> { task ->
+                    addBasicConfiguration(project, task, extension, path)
+                    task.variant = androidVariant.name
+                    task.buildType = androidVariant.buildType.name
+                    task.productFlavors = androidVariant.productFlavors
+                }
 
-                    outputs.upToDateWhen { false }
+                try {
+                    project.tasks.register(taskName, AndroidLicensesTask::class.java, configuration)
+                } catch (exc: NoSuchMethodException) {
+                    project.tasks.create(taskName, AndroidLicensesTask::class.java, configuration)
                 }
             }
+        }
+
+        @JvmStatic
+        private fun addBasicConfiguration(project: Project,
+                                          task: LicensesTask,
+                                          extension: LicensesExtension,
+                                          path: String) {
+            task.projects = extension.additionalProjects
+            task.outputType = extension.outputType
+            task.outputFile = project.file(path + getFileName(extension.outputType))
+            task.bodyCss = extension.bodyCss
+            task.preCss = extension.preCss
+            task.description = TASK_DESC
+            task.group = TASK_GROUP
+            task.outputs.upToDateWhen { false }
         }
 
         @JvmStatic
