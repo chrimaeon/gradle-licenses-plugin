@@ -70,19 +70,24 @@ open class LicensesTask : DefaultTask() {
 
     @Internal
     @Input
-    var projects: Set<String> = emptySet()
+    var additionalProjects: Set<String> = emptySet()
 
-    @Internal
     private val libraries = mutableListOf<Library>()
 
-    @Internal
     private lateinit var pomConfiguration: Configuration
+
+    protected val allProjects: Set<Project> by lazy {
+        val allProjects = project.rootProject.allprojects
+
+        setOf(project) + additionalProjects.map { moduleName ->
+            allProjects.find {
+                it.path == moduleName
+            } ?: throw IllegalArgumentException("$moduleName not found")
+        }.toSet()
+    }
 
     @TaskAction
     fun licensesReport() {
-        check(this::outputFile.isInitialized) { "outputFile must be set" }
-        check(this::outputType.isInitialized) { "outputType must be set" }
-
         pomConfiguration = project.configurations.create(POM_CONFIGURATION)
         collectDependencies()
         generateLibraries()
@@ -93,7 +98,7 @@ open class LicensesTask : DefaultTask() {
     protected open fun collectDependencies() {
         val configurations = mutableSetOf<Configuration>()
 
-        getAllProjects().forEach { project ->
+        allProjects.forEach { project ->
             project.configurations.find { it.name == "compile" }?.let {
                 configurations.add(project.configurations.getByName("compile"))
             }
@@ -108,16 +113,6 @@ open class LicensesTask : DefaultTask() {
         }
 
         addConfigurations(configurations)
-    }
-
-    protected fun getAllProjects(): List<Project> {
-        val allProjects = project.rootProject.allprojects
-
-        return listOf(project) + projects.map { moduleName ->
-            allProjects.find {
-                it.path == moduleName
-            } ?: throw IllegalArgumentException("$moduleName not found")
-        }
     }
 
     protected fun addConfigurations(configurations: Set<Configuration>) {
@@ -142,8 +137,12 @@ open class LicensesTask : DefaultTask() {
                     logger.warn("${model.name} dependency does not have a license.")
                 }
 
-                libraries.add(Library(model.name
-                    ?: "${model.groupId}:${model.artifactId}", model.version, model.description, licenses))
+                libraries.add(
+                    Library(
+                        model.name
+                            ?: "${model.groupId}:${model.artifactId}", model.version, model.description, licenses
+                    )
+                )
             }
         }
     }
@@ -219,17 +218,14 @@ open class LicensesTask : DefaultTask() {
 
 open class AndroidLicensesTask : LicensesTask() {
 
-    @Optional
     @Input
-    var variant: String? = null
+    lateinit var variant: String
 
-    @Optional
     @Input
-    var buildType: String? = null
+    lateinit var buildType: String
 
-    @Optional
     @Internal
-    var productFlavors: List<ProductFlavor>? = null
+    lateinit var productFlavors: List<ProductFlavor>
 
     override fun collectDependencies() {
 
@@ -237,36 +233,33 @@ open class AndroidLicensesTask : LicensesTask() {
 
         val configurations = mutableSetOf<Configuration>()
 
-        getAllProjects().forEach { project ->
+        allProjects.forEach { project ->
 
-            variant?.let {
+            project.configurations.find { it.name == "compile" }?.let {
+                configurations.add(project.configurations.getByName("${buildType}Compile"))
+            }
 
-                project.configurations.find { it.name == "compile" }?.let {
-                    configurations.add(project.configurations.getByName("${buildType}Compile"))
-                }
+            project.configurations.find { it.name == "api" }?.let {
+                configurations.add(project.configurations.getByName("${buildType}Api"))
+            }
 
-                project.configurations.find { it.name == "api" }?.let {
-                    configurations.add(project.configurations.getByName("${buildType}Api"))
-                }
+            project.configurations.find { it.name == "implementation" }?.let {
+                configurations.add(project.configurations.getByName("${buildType}Implementation"))
+            }
 
-                project.configurations.find { it.name == "implementation" }?.let {
-                    configurations.add(project.configurations.getByName("${buildType}Implementation"))
-                }
+            productFlavors.forEach { flavor ->
+                // Works for productFlavors and productFlavors with dimensions
+                if (variant.capitalize().contains(flavor.name.capitalize())) {
+                    project.configurations.find { it.name == "compile" }?.let {
+                        configurations.add(project.configurations.getByName("${flavor.name}Compile"))
+                    }
 
-                productFlavors?.forEach { flavor ->
-                    // Works for productFlavors and productFlavors with dimensions
-                    if (it.capitalize().contains(flavor.name.capitalize())) {
-                        project.configurations.find { it.name == "compile" }?.let {
-                            configurations.add(project.configurations.getByName("${flavor.name}Compile"))
-                        }
+                    project.configurations.find { it.name == "api" }?.let {
+                        configurations.add(project.configurations.getByName("${flavor.name}Api"))
+                    }
 
-                        project.configurations.find { it.name == "api" }?.let {
-                            configurations.add(project.configurations.getByName("${flavor.name}Api"))
-                        }
-
-                        project.configurations.find { it.name == "implementation" }?.let {
-                            configurations.add(project.configurations.getByName("${flavor.name}Implementation"))
-                        }
+                    project.configurations.find { it.name == "implementation" }?.let {
+                        configurations.add(project.configurations.getByName("${flavor.name}Implementation"))
                     }
                 }
             }
