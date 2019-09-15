@@ -42,6 +42,8 @@ For `"com.android.application"`, `"com.android.library"` and `"com.android.featu
 
 ### Configuration
 
+#### Output Format
+
 The plugin can output different formats.
 
 * `OutputType.HTML`
@@ -56,8 +58,21 @@ The plugin can output different formats.
     generates a Markdown file
 
 ```groovy
+import com.cmgapps.license.OutputType
+
 licenses {
     outputType = OutputType.HTML
+}
+```
+
+#### Multi-project Builds
+
+If you have a multi-project build you can add projects you want to collect license information
+from in the main project.
+
+```groovy
+licenses {
+    additionalProjects ':module2', ':module3'
 }
 ```
 
