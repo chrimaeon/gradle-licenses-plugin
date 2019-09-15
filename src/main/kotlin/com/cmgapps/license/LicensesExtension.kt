@@ -41,5 +41,6 @@ enum class OutputType {
     XML,
     JSON,
     TEXT,
-    MD
+    MD,
+    CSV
 }

@@ -20,7 +20,7 @@ import com.cmgapps.license.model.Library
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 
-class JsonReport(private val libraries: List<Library>) : Report {
+internal class JsonReport(libraries: List<Library>) : Report(libraries) {
 
     private val moshi = Moshi.Builder().build()
     override fun generate(): String {
