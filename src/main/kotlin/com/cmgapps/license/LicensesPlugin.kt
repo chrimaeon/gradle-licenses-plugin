@@ -46,37 +46,31 @@ class LicensesPlugin : Plugin<Project> {
         @JvmStatic
         private fun configureJavaProject(project: Project, extension: LicensesExtension) {
             val taskName = "licenseReport"
-            val path = "${project.buildDir}/reports/licenses/$taskName/"
 
             val configuration = Action<LicensesTask> { task ->
+                val path = "${project.buildDir}/reports/licenses/$taskName/"
+
                 addBasicConfiguration(project, task, extension, path)
             }
 
-            if (GradleVersion.current() >= GradleVersion.version("4.9")) {
-                project.tasks.register(taskName, LicensesTask::class.java, configuration)
-            } else {
-                project.tasks.create(taskName, LicensesTask::class.java, configuration)
-            }
+            registerTask(project, LicensesTask::class.java, taskName, configuration)
         }
 
         @JvmStatic
         private fun configureAndroidProject(project: Project, extension: LicensesExtension) {
             getAndroidVariants(project)?.all { androidVariant ->
                 val taskName = "license${androidVariant.name.capitalize()}Report"
-                val path = "${project.buildDir}/reports/licenses/$taskName/"
 
                 val configuration = Action<AndroidLicensesTask> { task ->
+                    val path = "${project.buildDir}/reports/licenses/$taskName/"
+
                     addBasicConfiguration(project, task, extension, path)
                     task.variant = androidVariant.name
                     task.buildType = androidVariant.buildType.name
                     task.productFlavors = androidVariant.productFlavors
                 }
 
-                try {
-                    project.tasks.register(taskName, AndroidLicensesTask::class.java, configuration)
-                } catch (exc: NoSuchMethodException) {
-                    project.tasks.create(taskName, AndroidLicensesTask::class.java, configuration)
-                }
+                registerTask(project, AndroidLicensesTask::class.java, taskName, configuration)
             }
         }
 
@@ -87,7 +81,7 @@ class LicensesPlugin : Plugin<Project> {
             extension: LicensesExtension,
             path: String
         ) {
-            task.projects = extension.additionalProjects
+            task.additionalProjects = extension.additionalProjects
             task.outputType = extension.outputType
             task.outputFile = project.file(path + getFileName(extension.outputType))
             task.bodyCss = extension.bodyCss
@@ -95,6 +89,20 @@ class LicensesPlugin : Plugin<Project> {
             task.description = TASK_DESC
             task.group = TASK_GROUP
             task.outputs.upToDateWhen { false }
+        }
+
+        @JvmStatic
+        private fun <T : LicensesTask> registerTask(
+            project: Project,
+            type: Class<T>,
+            taskName: String,
+            configuration: Action<T>
+        ) {
+            if (GradleVersion.current() >= GradleVersion.version("4.9")) {
+                project.tasks.register(taskName, type, configuration)
+            } else {
+                project.tasks.create(taskName, type, configuration)
+            }
         }
 
         @JvmStatic
