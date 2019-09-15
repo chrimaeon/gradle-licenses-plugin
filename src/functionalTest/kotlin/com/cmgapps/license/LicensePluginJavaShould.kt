@@ -45,7 +45,7 @@ class LicensePluginJavaShould {
     @BeforeEach
     fun setUp() {
         buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
-        reportFolder = "${testProjectDir}/build/reports/licenses/licenseReport"
+        reportFolder = "$testProjectDir/build/reports/licenses/licenseReport"
         mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
         buildFile.writeText("""
             plugins {
@@ -308,4 +308,3 @@ class LicensePluginJavaShould {
                 "</html>"))
     }
 }
-

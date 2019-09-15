@@ -19,7 +19,11 @@ package com.cmgapps.license
 import com.android.builder.model.ProductFlavor
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
-import com.cmgapps.license.reporter.*
+import com.cmgapps.license.reporter.HtmlReport
+import com.cmgapps.license.reporter.JsonReport
+import com.cmgapps.license.reporter.MarkdownReport
+import com.cmgapps.license.reporter.TextReport
+import com.cmgapps.license.reporter.XmlReport
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
@@ -27,7 +31,11 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ExternalDependency
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.io.PrintStream
 import java.net.URI
@@ -114,13 +122,13 @@ open class LicensesTask : DefaultTask() {
 
     protected fun addConfigurations(configurations: Set<Configuration>) {
         configurations.forEach { configuration ->
-                configuration.incoming.dependencies.withType(ExternalDependency::class.java).map { dep ->
-                    "${dep.group}:${dep.name}:${dep.version}@pom"
-                }.forEach { pom ->
-                    pomConfiguration.dependencies.add(
-                        project.dependencies.add(POM_CONFIGURATION, pom)
-                    )
-                }
+            configuration.incoming.dependencies.withType(ExternalDependency::class.java).map { dep ->
+                "${dep.group}:${dep.name}:${dep.version}@pom"
+            }.forEach { pom ->
+                pomConfiguration.dependencies.add(
+                    project.dependencies.add(POM_CONFIGURATION, pom)
+                )
+            }
         }
     }
 
@@ -229,7 +237,6 @@ open class AndroidLicensesTask : LicensesTask() {
 
         val configurations = mutableSetOf<Configuration>()
 
-
         getAllProjects().forEach { project ->
 
             variant?.let {
@@ -267,5 +274,4 @@ open class AndroidLicensesTask : LicensesTask() {
 
         addConfigurations(configurations)
     }
-
 }

@@ -42,7 +42,6 @@ class XmlReport(private val libraries: List<com.cmgapps.license.model.Library>) 
                                 url {
                                     +license.url
                                 }
-
                             }
                         }
                     }
@@ -51,7 +50,6 @@ class XmlReport(private val libraries: List<com.cmgapps.license.model.Library>) 
         }.toString()
     }
 }
-
 
 class Libraries : Tag("libraries") {
 
