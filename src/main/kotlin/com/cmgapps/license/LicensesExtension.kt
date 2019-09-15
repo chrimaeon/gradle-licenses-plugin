@@ -16,8 +16,24 @@
 
 package com.cmgapps.license
 
-open class LicensesExtension {
-    var outputType: OutputType? = null
+open class LicensesExtension() {
+    var outputType = OutputType.HTML
+    var bodyCss = LicensesTask.DEFAULT_BODY_CSS
+    var preCss = LicensesTask.DEFAULT_PRE_CSS
+
+    var additionalProjects = emptySet<String>()
+        private set
+
+    fun additionalProjects(vararg modules: String) {
+        additionalProjects = setOf(*modules)
+    }
+
+    fun additionalProjects(modules: Collection<String>) {
+        additionalProjects = when (modules) {
+            is Set -> modules
+            else -> modules.toSet()
+        }
+    }
 }
 
 enum class OutputType {

@@ -19,14 +19,23 @@ package com.cmgapps.license
 import com.android.builder.model.ProductFlavor
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
-import com.cmgapps.license.reporter.*
+import com.cmgapps.license.reporter.HtmlReport
+import com.cmgapps.license.reporter.JsonReport
+import com.cmgapps.license.reporter.MarkdownReport
+import com.cmgapps.license.reporter.TextReport
+import com.cmgapps.license.reporter.XmlReport
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ExternalModuleDependency
-import org.gradle.api.tasks.*
+import org.gradle.api.artifacts.ExternalDependency
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.io.PrintStream
 import java.net.URI
@@ -35,11 +44,14 @@ import java.net.URL
 open class LicensesTask : DefaultTask() {
 
     companion object {
+        const val DEFAULT_PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
+        const val DEFAULT_BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
+
         private const val POM_CONFIGURATION = "poms"
         private const val TEMP_POM_CONFIGURATION = "tempPoms"
 
         private fun getClickableFileUrl(path: File) =
-                URI("file", "", path.toURI().path, null, null).toString()
+            URI("file", "", path.toURI().path, null, null).toString()
     }
 
     @OutputFile
@@ -50,116 +62,88 @@ open class LicensesTask : DefaultTask() {
 
     @Optional
     @Input
-    var variant: String? = null
+    var bodyCss: String? = null
 
     @Optional
     @Input
-    var buildType: String? = null
+    var preCss: String? = null
 
     @Internal
-    val libraries = mutableListOf<Library>()
+    @Input
+    var additionalProjects: Set<String> = emptySet()
 
-    @Optional
-    @Internal
-    var productFlavors: List<ProductFlavor>? = null
+    private val libraries = mutableListOf<Library>()
+
+    private lateinit var pomConfiguration: Configuration
+
+    protected val allProjects: Set<Project> by lazy {
+        val allProjects = project.rootProject.allprojects
+
+        setOf(project) + additionalProjects.map { moduleName ->
+            allProjects.find {
+                it.path == moduleName
+            } ?: throw IllegalArgumentException("$moduleName not found")
+        }.toSet()
+    }
 
     @TaskAction
     fun licensesReport() {
-        if (!this::outputFile.isInitialized) {
-            throw IllegalStateException("outputFile must be set")
-        }
-
-        if (!this::outputType.isInitialized) {
-            throw IllegalStateException("outputType must be set")
-        }
-        setupEnvironment()
+        pomConfiguration = project.configurations.create(POM_CONFIGURATION)
         collectDependencies()
         generateLibraries()
         createReport()
+        project.configurations.remove(pomConfiguration)
     }
 
-    private fun setupEnvironment() {
-        project.configurations.create(POM_CONFIGURATION)
-
-        project.configurations.forEach {
-            try {
-                it.isCanBeResolved = true
-            } catch (ignore: Exception) {
-            }
-        }
-    }
-
-    private fun collectDependencies() {
+    protected open fun collectDependencies() {
         val configurations = mutableSetOf<Configuration>()
 
-        if (project.configurations.find { it.name == "compile" } != null) {
-            configurations.add(project.configurations.getByName("compile"))
-        }
-
-        if (project.configurations.find { it.name == "api" } != null) {
-            configurations.add(project.configurations.getByName("api"))
-        }
-
-        if (project.configurations.find { it.name == "implementation" } != null) {
-            configurations.add(project.configurations.getByName("implementation"))
-        }
-
-        //Android project -> add additional configurations
-        if (variant != null) {
-
-            if (project.configurations.find { it.name == "compile" } != null) {
-                configurations.add(project.configurations.getByName("${buildType}Compile"))
+        allProjects.forEach { project ->
+            project.configurations.find { it.name == "compile" }?.let {
+                configurations.add(project.configurations.getByName("compile"))
             }
 
-            if (project.configurations.find { it.name == "api" } != null) {
-                configurations.add(project.configurations.getByName("${buildType}Api"))
+            project.configurations.find { it.name == "api" }?.let {
+                configurations.add(project.configurations.getByName("api"))
             }
 
-            if (project.configurations.find { it.name == "implementation" } != null) {
-                configurations.add(project.configurations.getByName("${buildType}Implementation"))
-            }
-
-            productFlavors?.forEach { flavor ->
-                // Works for productFlavors and productFlavors with dimensions
-                if (variant!!.capitalize().contains(flavor.name.capitalize())) {
-                    if (project.configurations.find { it.name == "compile" } != null) {
-                        configurations.add(project.configurations.getByName("${flavor.name}Compile"))
-                    }
-                    if (project.configurations.find { it.name == "api" } != null) {
-                        configurations.add(project.configurations.getByName("${flavor.name}Api"))
-                    }
-                    if (project.configurations.find { it.name == "implementation" } != null) {
-                        configurations.add(project.configurations.getByName("${flavor.name}Implementation"))
-                    }
-                }
+            project.configurations.find { it.name == "implementation" }?.let {
+                configurations.add(project.configurations.getByName("implementation"))
             }
         }
 
+        addConfigurations(configurations)
+    }
+
+    protected fun addConfigurations(configurations: Set<Configuration>) {
         configurations.forEach { configuration ->
-            configuration.incoming.dependencies.withType(ExternalModuleDependency::class.java).map { module ->
-                "${module.group}:${module.name}:${module.version}@pom"
+            configuration.incoming.dependencies.withType(ExternalDependency::class.java).map { dep ->
+                "${dep.group}:${dep.name}:${dep.version}@pom"
             }.forEach { pom ->
-                project.configurations.getByName(POM_CONFIGURATION).dependencies.add(
-                        project.dependencies.add(POM_CONFIGURATION, pom)
+                pomConfiguration.dependencies.add(
+                    project.dependencies.add(POM_CONFIGURATION, pom)
                 )
             }
         }
     }
 
     private fun generateLibraries() {
-        project.configurations.getByName(POM_CONFIGURATION).incoming.artifacts.forEach { pom ->
+        pomConfiguration.resolvedConfiguration.lenientConfiguration.artifacts.forEach {
 
-            val model = getPomModel(pom.file)
+            getPomModel(it.file).let { model ->
+                val licenses = findLicenses(model)
 
-            var licenses = findLicenses(model)
+                if (licenses.isEmpty()) {
+                    logger.warn("${model.name} dependency does not have a license.")
+                }
 
-            if (licenses == null) {
-                logger.warn("${model.name} dependency does not have a license.")
-                licenses = emptyList()
+                libraries.add(
+                    Library(
+                        model.name
+                            ?: "${model.groupId}:${model.artifactId}", model.version, model.description, licenses
+                    )
+                )
             }
-
-            libraries.add(Library(model.name
-                    ?: "${model.groupId}:${model.artifactId}", model.version, model.description, licenses))
         }
     }
 
@@ -167,10 +151,9 @@ open class LicensesTask : DefaultTask() {
         read(file.inputStream())
     }
 
+    private fun findLicenses(pom: Model): List<License> {
 
-    private fun findLicenses(pom: Model): List<License>? {
-
-        if (!pom.licenses.isEmpty()) {
+        if (pom.licenses.isNotEmpty()) {
             val licenses = mutableListOf<License>()
             pom.licenses.forEach { license ->
                 try {
@@ -191,7 +174,7 @@ open class LicensesTask : DefaultTask() {
             return findLicenses(parentPom)
         }
 
-        return null
+        return emptyList()
     }
 
     private fun getParentPomFile(parent: Parent): Model {
@@ -199,11 +182,11 @@ open class LicensesTask : DefaultTask() {
         val dependency = "${parent.groupId}:${parent.artifactId}:${parent.version}@pom"
 
         project.configurations.create(TEMP_POM_CONFIGURATION).dependencies.add(
-                project.dependencies.add(TEMP_POM_CONFIGURATION, dependency)
+            project.dependencies.add(TEMP_POM_CONFIGURATION, dependency)
         )
 
         val pomFile = project.configurations.getByName(TEMP_POM_CONFIGURATION).incoming
-                .artifacts.artifactFiles.singleFile
+            .artifacts.artifactFiles.singleFile
 
         project.configurations.remove(project.configurations.getByName(TEMP_POM_CONFIGURATION))
 
@@ -215,17 +198,73 @@ open class LicensesTask : DefaultTask() {
         outputFile.parentFile.mkdirs()
         outputFile.createNewFile()
 
-        PrintStream(outputFile.outputStream()).run {
+        PrintStream(outputFile.outputStream()).use {
             val report = when (outputType) {
-                OutputType.HTML -> HtmlReport(libraries)
+                OutputType.HTML -> {
+                    HtmlReport(libraries, bodyCss ?: DEFAULT_BODY_CSS, preCss ?: DEFAULT_PRE_CSS)
+                }
                 OutputType.XML -> XmlReport(libraries)
                 OutputType.JSON -> JsonReport(libraries)
                 OutputType.TEXT -> TextReport(libraries)
                 OutputType.MD -> MarkdownReport(libraries)
             }
-            print(report.generate())
+            it.print(report.generate())
+            it.flush()
         }
 
         logger.lifecycle("Wrote ${outputType.name} report to ${getClickableFileUrl(outputFile)}.")
+    }
+}
+
+open class AndroidLicensesTask : LicensesTask() {
+
+    @Input
+    lateinit var variant: String
+
+    @Input
+    lateinit var buildType: String
+
+    @Internal
+    lateinit var productFlavors: List<ProductFlavor>
+
+    override fun collectDependencies() {
+
+        super.collectDependencies()
+
+        val configurations = mutableSetOf<Configuration>()
+
+        allProjects.forEach { project ->
+
+            project.configurations.find { it.name == "${buildType}Compile" }?.let {
+                configurations.add(it)
+            }
+
+            project.configurations.find { it.name == "${buildType}Api" }?.let {
+                configurations.add(it)
+            }
+
+            project.configurations.find { it.name == "${buildType}Implementation" }?.let {
+                configurations.add(it)
+            }
+
+            productFlavors.forEach { flavor ->
+                // Works for productFlavors and productFlavors with dimensions
+                if (variant.capitalize().contains(flavor.name.capitalize())) {
+                    project.configurations.find { it.name == "${flavor.name}Compile" }?.let {
+                        configurations.add(it)
+                    }
+
+                    project.configurations.find { it.name == "${flavor.name}Api" }?.let {
+                        configurations.add(it)
+                    }
+
+                    project.configurations.find { it.name == "${flavor.name}Implementation" }?.let {
+                        configurations.add(it)
+                    }
+                }
+            }
+        }
+
+        addConfigurations(configurations)
     }
 }

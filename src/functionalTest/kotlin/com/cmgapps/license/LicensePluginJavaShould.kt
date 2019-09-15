@@ -45,169 +45,261 @@ class LicensePluginJavaShould {
     @BeforeEach
     fun setUp() {
         buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
-        reportFolder = "${testProjectDir}/build/reports/licenses/licenseReport"
+        reportFolder = "$testProjectDir/build/reports/licenses/licenseReport"
         mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
+        buildFile.writeText("""
+            plugins {
+               id("java")
+               id("com.cmgapps.licenses")
+            }
+
+        """.trimIndent())
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["3.5", "4.0", "4.5", "4.1", "5.0", "5.1", "5.2"])
+    @ValueSource(strings = ["3.5", "4.0", "4.1", "4.5", "4.9", "5.0", "5.1", "5.5", "5.6"])
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
-        buildFile.writeText("""
-            |plugins {
-            |   id("java")
-            |   id("com.cmgapps.licenses")
-            |}
-        """.trimMargin())
-
         val result = GradleRunner.create()
-                .withGradleVersion(version)
-                .withProjectDir(testProjectDir.toFile())
-                .withArguments(":licenseReport")
-                .withPluginClasspath()
-                .build()
+            .withGradleVersion(version)
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .build()
 
         assertThat("Gradle version $version", result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
-        assertThat("Gradle version $version", result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
     }
 
     @Test
     fun `generate report with no dependencies`() {
-        buildFile.writeText("""
-            |plugins {
-            |   id("java-library")
-            |   id("com.cmgapps.licenses")
-            |}
-        """.trimMargin())
-
         val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.toFile())
-                .withArguments(":licenseReport")
-                .withPluginClasspath()
-                .build()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .build()
 
         assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
-        assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
     }
 
     @Test
     fun `generate report with no open source dependencies`() {
-        buildFile.writeText("""
-            |plugins {
-            |   id("java-library")
-            |   id("com.cmgapps.licenses")
-            |}
-            |repositories {
-            |  maven {
-            |    url '$mavenRepoUrl'
-            |  }
-            |}
-            |dependencies {
-            |  compile 'com.google.firebase:firebase-core:10.0.1'
-            |}
-        """.trimMargin())
+        buildFile.appendText("""
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'com.google.firebase:firebase-core:10.0.1'
+            }
+        """.trimIndent())
 
         val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.toFile())
-                .withArguments(":licenseReport")
-                .withPluginClasspath()
-                .build()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .build()
 
-        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
         assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
         assertThat(File("$reportFolder/licenses.html").readText().trim(), `is`("<!DOCTYPE html>" +
-                "<html lang=\"en\">" +
-                "<head>" +
-                "<meta charset=\"UTF-8\">" +
-                "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
-                "<title>Open source licenses</title>" +
-                "</head>" +
-                "<body>" +
-                "<h3>Notice for packages:</h3>" +
-                "</body>" +
-                "</html>"))
+            "<html lang=\"en\">" +
+            "<head>" +
+            "<meta charset=\"UTF-8\">" +
+            "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+            "<title>Open source licenses</title>" +
+            "</head>" +
+            "<body>" +
+            "<h3>Notice for packages:</h3>" +
+            "</body>" +
+            "</html>")
+        )
     }
 
     @Test
     fun `java library with parent pom dependency`() {
-        buildFile.writeText("""
-            |plugins {
-            |   id("java-library")
-            |   id("com.cmgapps.licenses")
-            |}
-            |repositories {
-            |  maven {
-            |    url '$mavenRepoUrl'
-            |  }
-            |}
-            |dependencies {
-            |  compile 'com.squareup.retrofit2:retrofit:2.3.0'
-            |}
-        """.trimMargin())
+        buildFile.appendText("""
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'com.squareup.retrofit2:retrofit:2.3.0'
+            }
+        """.trimIndent())
 
         val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.toFile())
-                .withArguments(":licenseReport")
-                .withPluginClasspath()
-                .build()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .build()
 
-        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
         assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
         assertThat(File("$reportFolder/licenses.html").readText().trim(), `is`("<!DOCTYPE html>" +
-                "<html lang=\"en\">" +
-                "<head>" +
-                "<meta charset=\"UTF-8\">" +
-                "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
-                "<title>Open source licenses</title>" +
-                "</head>" +
-                "<body>" +
-                "<h3>Notice for packages:</h3>" +
-                "<ul>" +
-                "<li>Retrofit</li>" +
-                "</ul>" +
-                "<pre>" +
-                TestUtils.getFileContent("apache-2.0.txt") +
-                "</pre>" +
-                "</body>" +
-                "</html>"))
+            "<html lang=\"en\">" +
+            "<head>" +
+            "<meta charset=\"UTF-8\">" +
+            "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+            "<title>Open source licenses</title>" +
+            "</head>" +
+            "<body>" +
+            "<h3>Notice for packages:</h3>" +
+            "<ul>" +
+            "<li>Retrofit</li>" +
+            "</ul>" +
+            "<pre>" +
+            TestUtils.getFileContent("apache-2.0.txt") +
+            "</pre>" +
+            "</body>" +
+            "</html>")
+        )
     }
 
     @Test
     fun `generate Report with custom license`() {
-        buildFile.writeText("""
-            |plugins {
-            |   id("java-library")
-            |   id("com.cmgapps.licenses")
-            |}
-            |repositories {
-            |  maven {
-            |    url '$mavenRepoUrl'
-            |  }
-            |}
-            |dependencies {
-            |  compile 'group:name:1.0.0'
-            |}
-        """.trimMargin())
+        buildFile.appendText("""
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'group:name:1.0.0'
+            }
+        """.trimIndent())
 
         val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.toFile())
-                .withArguments(":licenseReport")
-                .withPluginClasspath()
-                .build()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .build()
 
-        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
         assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
         assertThat(File("$reportFolder/licenses.html").readText().trim(), `is`("<!DOCTYPE html>" +
+            "<html lang=\"en\">" +
+            "<head>" +
+            "<meta charset=\"UTF-8\">" +
+            "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+            "<title>Open source licenses</title>" +
+            "</head>" +
+            "<body>" +
+            "<h3>Notice for packages:</h3>" +
+            "<ul>" +
+            "<li>Fake dependency name</li>" +
+            "</ul>" +
+            "<div class=\"license\">" +
+            "<p>Some license</p>" +
+            "<a href=\"http://website.tld/\">http://website.tld/</a>" +
+            "</div>" +
+            "</body>" +
+            "</html>")
+        )
+    }
+
+    @Test
+    fun `generate Report with lib with no name`() {
+        buildFile.appendText("""
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'group:noname:1.0.0'
+            }
+        """.trimIndent())
+
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .build()
+
+        assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
+        assertThat(File("$reportFolder/licenses.html").readText().trim(), `is`("<!DOCTYPE html>" +
+            "<html lang=\"en\">" +
+            "<head>" +
+            "<meta charset=\"UTF-8\">" +
+            "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+            "<title>Open source licenses</title>" +
+            "</head>" +
+            "<body>" +
+            "<h3>Notice for packages:</h3>" +
+            "<ul>" +
+            "<li>group:noname</li>" +
+            "</ul>" +
+            "<div class=\"license\">" +
+            "<p>Some license</p>" +
+            "<a href=\"http://website.tld/\">http://website.tld/</a>" +
+            "</div>" +
+            "</body>" +
+            "</html>")
+        )
+    }
+
+    @Test
+    fun `generate Report with different 'OutputType'`() {
+        buildFile.appendText("""
+            import com.cmgapps.license.OutputType
+            licenses {
+              outputType OutputType.TEXT
+            }
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'group:noname:1.0.0'
+            }
+        """.trimIndent())
+
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .build()
+
+        assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote TEXT report to .*$reportFolder/licenses.txt.*", Pattern.DOTALL)))
+        assertThat(File("$reportFolder/licenses.txt").readText().trim(),
+            `is`("group:noname 1.0.0:\n\tSome license (http://website.tld/)"))
+    }
+
+    @Test
+    fun `generate Report with different html styles`() {
+        buildFile.appendText("""
+            import com.cmgapps.license.OutputType
+            licenses {
+              bodyCss 'custom body css'
+              preCss 'custom pre css'
+            }
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'group:name:1.0.0'
+            }
+        """.trimIndent())
+
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .build()
+
+        assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
+        assertThat(File("$reportFolder/licenses.html").readText().trim(),
+            `is`("<!DOCTYPE html>" +
                 "<html lang=\"en\">" +
                 "<head>" +
                 "<meta charset=\"UTF-8\">" +
-                "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                "<style>custom body csscustom pre css</style>" +
                 "<title>Open source licenses</title>" +
                 "</head>" +
                 "<body>" +
                 "<h3>Notice for packages:</h3>" +
-                "<ul>" +
-                "<li>Fake dependency name</li>" +
-                "</ul>" +
+                "<ul><li>Fake dependency name</li></ul>" +
                 "<div class=\"license\">" +
                 "<p>Some license</p>" +
                 "<a href=\"http://website.tld/\">http://website.tld/</a>" +
@@ -216,4 +308,3 @@ class LicensePluginJavaShould {
                 "</html>"))
     }
 }
-

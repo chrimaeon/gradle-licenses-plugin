@@ -37,7 +37,6 @@ class MarkdownReport(private val libraries: List<Library>) : Report {
                     append(")")
                 }
                 append("\n\n")
-
             }
         }.toString()
     }

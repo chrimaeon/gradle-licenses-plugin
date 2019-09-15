@@ -17,17 +17,19 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.jfrog.bintray.gradle.BintrayExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.*
+import java.util.Date
+import java.util.Properties
 
 plugins {
     idea
     `java-gradle-plugin`
     `maven-publish`
     signing
-    id("com.github.ben-manes.versions") version "0.20.0"
+    id("com.github.ben-manes.versions") version "0.25.0"
     kotlin("jvm") version Deps.kotlinVersion
     id("com.jfrog.bintray") version "1.8.4"
-    id("com.gradle.plugin-publish") version "0.10.0"
+    id("com.gradle.plugin-publish") version "0.10.1"
+    id("com.cmgapps.licenses") version "1.2.1"
 }
 
 repositories {
@@ -38,22 +40,18 @@ repositories {
 sourceSets {
     create("functionalTest") {
         java {
-            srcDirs(file("src/functionalTest/kotlin"), file("src/commonTest/kotlin"))
+            srcDir("src/functionalTest/kotlin")
         }
         resources {
-            srcDir(file("src/functionalTest/resources"))
+            srcDir("src/functionalTest/resources")
         }
 
-        compileClasspath += sourceSets.main.get().output + configurations.testRuntime
+        compileClasspath += sourceSets.main.get().output + configurations.testRuntime.get()
         runtimeClasspath += output + compileClasspath
     }
-
-    named("test") {
-        java {
-            srcDir(file("src/commonTest/kotlin"))
-        }
-    }
 }
+
+val ktlint by configurations.creating
 
 configurations {
     named("functionalTestImplementation") {
@@ -86,7 +84,7 @@ version = versionName
 pluginBundle {
     website = projectUrl
     vcsUrl = scmUrl
-    tags = listOf("license-managment", "android", "java", "java-library", "licenses")
+    tags = listOf("license-management", "android", "java", "java-library", "licenses")
 }
 
 gradlePlugin {
@@ -103,12 +101,12 @@ gradlePlugin {
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
-    classifier = "sources"
+    archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
 }
 
 val javadocJar by tasks.registering(Jar::class) {
-    classifier = "javadoc"
+    archiveClassifier.set("javadoc")
     from(tasks.javadoc)
 }
 
@@ -144,9 +142,14 @@ publishing {
 
 bintray {
     val credentialProps = Properties()
-    credentialProps.load(file("${project.rootDir}/credentials.properties").inputStream())
-    user = credentialProps.getProperty("user")
-    key = credentialProps.getProperty("key")
+    val propsFile = file("${project.rootDir}/credentials.properties")
+
+    if (propsFile.exists()) {
+        credentialProps.load(propsFile.inputStream())
+        user = credentialProps.getProperty("user")
+        key = credentialProps.getProperty("key")
+    }
+
     setPublications("pluginMaven")
 
     pkg(closureOf<BintrayExtension.PackageConfig> {
@@ -157,6 +160,7 @@ bintray {
         vcsUrl = projectUrl
         val issuesTrackerUrl: String by project
         issueTrackerUrl = issuesTrackerUrl
+        githubRepo = projectUrl
         version(closureOf<BintrayExtension.VersionConfig> {
             name = versionName
             vcsTag = versionName
@@ -172,37 +176,43 @@ tasks {
         classpath = sourceSets["functionalTest"].runtimeClasspath
     }
 
+    val ktlint by registering(JavaExec::class) {
+        group = "Verification"
+        description = "Check Kotlin code style."
+        main = "com.pinterest.ktlint.Main"
+        classpath = ktlint
+        args = listOf("src/**/*.kt", "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/reports/ktlint.xml")
+
+    }
+
     check {
         dependsOn(functionalTest)
+        dependsOn(ktlint)
     }
 
     jar {
         manifest {
-            attributes(mapOf("Implementation-Title" to pomName,
+            attributes(
+                mapOf(
+                    "Implementation-Title" to pomName,
                     "Implementation-Version" to versionName,
                     "Built-By" to System.getProperty("user.name"),
                     "Built-Date" to Date(),
                     "Built-JDK" to System.getProperty("java.version"),
-                    "Built-Gradle" to gradle.gradleVersion))
+                    "Built-Gradle" to gradle.gradleVersion,
+                    "Built-Kotlin" to Deps.kotlinVersion
+                )
+            )
         }
     }
 
     named<DependencyUpdatesTask>("dependencyUpdates") {
         revision = "release"
 
-        resolutionStrategy {
-            componentSelection {
-                all {
-                    listOf("alpha", "beta", "rc", "cr", "m", "preview")
-                            .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
-                            .any { it.matches(candidate.version) }.let {
-                                if (it) {
-                                    reject("Release candidate")
-                                }
-                            }
-
-                }
-            }
+        rejectVersionIf {
+            listOf("alpha", "beta", "rc", "cr", "m", "preview")
+                .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
+                .any { it.matches(candidate.version) }
         }
     }
 
@@ -216,6 +226,10 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
     }
+
+    wrapper {
+        distributionType = Wrapper.DistributionType.ALL
+    }
 }
 
 dependencies {
@@ -224,9 +238,14 @@ dependencies {
     implementation(Deps.mavenModel)
     implementation(Deps.moshi)
 
+    ktlint(Deps.ktlint)
+
     testImplementation(Deps.jUnit) {
         exclude(group = "org.hamcrest")
     }
+    testImplementation(Deps.androidGradlePlugin)
     testImplementation(Deps.hamcrest)
+
+    "functionalTestImplementation"(Deps.androidGradlePlugin)
     "functionalTestImplementation"(gradleTestKit())
 }
