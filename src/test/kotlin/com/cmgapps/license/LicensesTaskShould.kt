@@ -158,6 +158,20 @@ class LicensesTaskShould {
         val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
-        assertThat(outputFile.readText(), `is`("""""".trimMargin()))
+        assertThat(outputFile.readText(), `is`(""))
+    }
+
+    @Test
+    fun `generate CSV Report`() {
+        val outputFile = File(reportFolder, "licensesReport.csv")
+        project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+            task.outputType = OutputType.CSV
+            task.outputFile = outputFile
+        }
+
+        val task = project.tasks.getByName("licensesReport") as LicensesTask
+        task.licensesReport()
+
+        assertThat(outputFile.readText(), `is`("name,version,description,license name, license url\r\n"))
     }
 }

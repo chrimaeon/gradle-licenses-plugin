@@ -18,23 +18,25 @@ package com.cmgapps.license.reporter
 
 import com.cmgapps.license.model.Library
 
-internal class TextReport(libraries: List<Library>) : Report(libraries) {
+internal class CsvReport(libraries: List<Library>) : Report(libraries) {
+
     override fun generate(): String {
-        return StringBuilder().apply {
+        return StringBuilder("name,version,description,license name,license url$LINE_SEPERATOR").apply {
             libraries.forEach { library ->
-                append(library.name)
-                append(' ')
-                append(library.version)
-                append(':')
-                library.licenses.forEach { license ->
-                    append("\n\t")
-                    append(license.name)
-                    append(" (")
-                    append(license.url)
-                    append(")")
-                }
-                append("\n\n")
+                append(library.name.escape()).append(',')
+                append(library.version?.escape()).append(',')
+                append(library.description?.escape()).append(',')
+                append(library.licenses[0].name.escape()).append(',')
+                append(library.licenses[0].url.escape())
+                append(LINE_SEPERATOR)
             }
         }.toString()
     }
+
+    companion object {
+        const val LINE_SEPERATOR = "\r\n"
+    }
 }
+
+private fun String.escape() =
+    if (this.findAnyOf(listOf(",", "\r", "\n", "\"")) != null) "\"${this.replace("\"", "\"\"")}\"" else this

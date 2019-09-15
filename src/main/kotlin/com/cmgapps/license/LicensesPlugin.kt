@@ -129,6 +129,7 @@ class LicensesPlugin : Plugin<Project> {
             OutputType.JSON -> ".json"
             OutputType.TEXT -> ".txt"
             OutputType.MD -> ".md"
+            OutputType.CSV -> ".csv"
         }.let {
             "licenses$it"
         }

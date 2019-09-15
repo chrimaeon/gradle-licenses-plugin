@@ -19,6 +19,7 @@ package com.cmgapps.license
 import com.android.builder.model.ProductFlavor
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import com.cmgapps.license.reporter.CsvReport
 import com.cmgapps.license.reporter.HtmlReport
 import com.cmgapps.license.reporter.JsonReport
 import com.cmgapps.license.reporter.MarkdownReport
@@ -207,6 +208,7 @@ open class LicensesTask : DefaultTask() {
                 OutputType.JSON -> JsonReport(libraries)
                 OutputType.TEXT -> TextReport(libraries)
                 OutputType.MD -> MarkdownReport(libraries)
+                OutputType.CSV -> CsvReport(libraries)
             }
             it.print(report.generate())
             it.flush()

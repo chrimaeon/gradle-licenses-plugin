@@ -16,7 +16,7 @@
 
 package com.cmgapps.license.reporter
 
-class XmlReport(private val libraries: List<com.cmgapps.license.model.Library>) : Report {
+class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : Report(libraries) {
 
     override fun generate(): String {
         return libraries {

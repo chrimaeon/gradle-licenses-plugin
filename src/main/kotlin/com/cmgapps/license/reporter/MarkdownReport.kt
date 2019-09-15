@@ -18,7 +18,7 @@ package com.cmgapps.license.reporter
 
 import com.cmgapps.license.model.Library
 
-class MarkdownReport(private val libraries: List<Library>) : Report {
+internal class MarkdownReport(libraries: List<Library>) : Report(libraries) {
     override fun generate(): String {
         return StringBuilder().apply {
             append("# Open source licenses\n")
