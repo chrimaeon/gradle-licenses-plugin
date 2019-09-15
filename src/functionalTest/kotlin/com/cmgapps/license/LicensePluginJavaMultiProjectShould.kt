@@ -89,7 +89,7 @@ class LicensePluginJavaMultiProjectShould {
             .build()
 
         assertThat(
-            File("${testProjectDir}/module1/build/reports/licenses/licenseReport/licenses.html")
+            File("$testProjectDir/module1/build/reports/licenses/licenseReport/licenses.html")
                 .readText().trim(),
             `is`("<!DOCTYPE html>" +
                 "<html lang=\"en\">" +
@@ -143,7 +143,7 @@ class LicensePluginJavaMultiProjectShould {
             .build()
 
         assertThat(
-            File("${testProjectDir}/module1/build/reports/licenses/licenseReport/licenses.html")
+            File("$testProjectDir/module1/build/reports/licenses/licenseReport/licenses.html")
                 .readText().trim(),
             `is`("<!DOCTYPE html>" +
                 "<html lang=\"en\">" +
@@ -200,7 +200,7 @@ class LicensePluginJavaMultiProjectShould {
             .build()
 
         assertThat(
-            File("${testProjectDir}/module1/build/reports/licenses/licenseReport/licenses.html")
+            File("$testProjectDir/module1/build/reports/licenses/licenseReport/licenses.html")
                 .readText().trim(),
             `is`("<!DOCTYPE html>" +
                 "<html lang=\"en\">" +

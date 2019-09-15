@@ -22,4 +22,5 @@ object Deps {
     const val moshi = "com.squareup.moshi:moshi:1.8.0"
     const val jUnit = "org.junit.jupiter:junit-jupiter:5.5.2"
     const val hamcrest = "org.hamcrest:hamcrest:2.1"
+    const val ktlint = "com.pinterest:ktlint:0.34.2"
 }

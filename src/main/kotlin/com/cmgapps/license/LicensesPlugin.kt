@@ -16,7 +16,13 @@
 
 package com.cmgapps.license
 
-import com.android.build.gradle.*
+import com.android.build.gradle.AppExtension
+import com.android.build.gradle.AppPlugin
+import com.android.build.gradle.DynamicFeaturePlugin
+import com.android.build.gradle.FeatureExtension
+import com.android.build.gradle.FeaturePlugin
+import com.android.build.gradle.LibraryExtension
+import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.BaseVariant
 import org.gradle.api.Action
 import org.gradle.api.DomainObjectSet
@@ -75,10 +81,12 @@ class LicensesPlugin : Plugin<Project> {
         }
 
         @JvmStatic
-        private fun addBasicConfiguration(project: Project,
-                                          task: LicensesTask,
-                                          extension: LicensesExtension,
-                                          path: String) {
+        private fun addBasicConfiguration(
+            project: Project,
+            task: LicensesTask,
+            extension: LicensesExtension,
+            path: String
+        ) {
             task.projects = extension.additionalProjects
             task.outputType = extension.outputType
             task.outputFile = project.file(path + getFileName(extension.outputType))
@@ -104,7 +112,6 @@ class LicensesPlugin : Plugin<Project> {
 
                 else -> null
             }
-
         }
 
         @JvmStatic
@@ -134,4 +141,3 @@ class LicensesPlugin : Plugin<Project> {
         }
     }
 }
-

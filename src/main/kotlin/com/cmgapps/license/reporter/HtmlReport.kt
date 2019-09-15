@@ -20,9 +20,11 @@ import com.cmgapps.license.helper.LicensesHelper
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 
-class HtmlReport(private val libraries: List<Library>,
-                 private val bodyCss: String,
-                 private val preCss: String) : Report {
+class HtmlReport(
+    private val libraries: List<Library>,
+    private val bodyCss: String,
+    private val preCss: String
+) : Report {
 
     companion object {
         private const val OPEN_SOURCE_LIBRARIES = "Open source licenses"
@@ -91,7 +93,6 @@ class HtmlReport(private val libraries: List<Library>,
                             }
                         }
                     }
-
                 }
             }
         }.toString(false)
@@ -100,7 +101,6 @@ class HtmlReport(private val libraries: List<Library>,
     private fun getLicenseText(fileName: String?): String? =
         javaClass.getResource("/licenses/$fileName")?.readText()
 }
-
 
 class HTML : TagWithText("html") {
 

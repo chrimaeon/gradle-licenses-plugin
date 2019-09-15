@@ -17,7 +17,8 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.jfrog.bintray.gradle.BintrayExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.*
+import java.util.Date
+import java.util.Properties
 
 plugins {
     idea
@@ -49,6 +50,8 @@ sourceSets {
         runtimeClasspath += output + compileClasspath
     }
 }
+
+val ktlint by configurations.creating
 
 configurations {
     named("functionalTestImplementation") {
@@ -173,8 +176,18 @@ tasks {
         classpath = sourceSets["functionalTest"].runtimeClasspath
     }
 
+    val ktlint by registering(JavaExec::class) {
+        group = "Verification"
+        description = "Check Kotlin code style."
+        main = "com.pinterest.ktlint.Main"
+        classpath = ktlint
+        args = listOf("src/**/*.kt", "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/reports/ktlint.xml")
+
+    }
+
     check {
         dependsOn(functionalTest)
+        dependsOn(ktlint)
     }
 
     jar {
@@ -219,6 +232,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
     implementation(Deps.mavenModel)
     implementation(Deps.moshi)
+
+    ktlint(Deps.ktlint)
 
     testImplementation(Deps.jUnit) {
         exclude(group = "org.hamcrest")

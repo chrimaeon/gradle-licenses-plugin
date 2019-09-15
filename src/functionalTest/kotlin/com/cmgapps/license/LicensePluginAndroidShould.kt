@@ -27,7 +27,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.*
+import java.util.Properties
 
 class LicensePluginAndroidShould {
 
@@ -54,7 +54,7 @@ class LicensePluginAndroidShould {
         }
 
         buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
-        reportFolder = "${testProjectDir}/build/reports/licenses"
+        reportFolder = "$testProjectDir/build/reports/licenses"
         mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
 
         buildFile.writeText("""
@@ -122,7 +122,6 @@ class LicensePluginAndroidShould {
             "licenseFullDebugReport",
             "licenseDemoReleaseReport",
             "licenseFullReleaseReport")) {
-
 
             val result = GradleRunner.create()
                 .withProjectDir(testProjectDir.toFile())
