@@ -192,12 +192,17 @@ tasks {
 
     jar {
         manifest {
-            attributes(mapOf("Implementation-Title" to pomName,
+            attributes(
+                mapOf(
+                    "Implementation-Title" to pomName,
                     "Implementation-Version" to versionName,
                     "Built-By" to System.getProperty("user.name"),
                     "Built-Date" to Date(),
                     "Built-JDK" to System.getProperty("java.version"),
-                    "Built-Gradle" to gradle.gradleVersion))
+                    "Built-Gradle" to gradle.gradleVersion,
+                    "Built-Kotlin" to Deps.kotlinVersion
+                )
+            )
         }
     }
 
@@ -206,8 +211,8 @@ tasks {
 
         rejectVersionIf {
             listOf("alpha", "beta", "rc", "cr", "m", "preview")
-                    .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
-                    .any { it.matches(candidate.version) }
+                .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
+                .any { it.matches(candidate.version) }
         }
     }
 

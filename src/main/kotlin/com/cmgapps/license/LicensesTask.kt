@@ -235,31 +235,31 @@ open class AndroidLicensesTask : LicensesTask() {
 
         allProjects.forEach { project ->
 
-            project.configurations.find { it.name == "compile" }?.let {
-                configurations.add(project.configurations.getByName("${buildType}Compile"))
+            project.configurations.find { it.name == "${buildType}Compile" }?.let {
+                configurations.add(it)
             }
 
-            project.configurations.find { it.name == "api" }?.let {
-                configurations.add(project.configurations.getByName("${buildType}Api"))
+            project.configurations.find { it.name == "${buildType}Api" }?.let {
+                configurations.add(it)
             }
 
-            project.configurations.find { it.name == "implementation" }?.let {
-                configurations.add(project.configurations.getByName("${buildType}Implementation"))
+            project.configurations.find { it.name == "${buildType}Implementation" }?.let {
+                configurations.add(it)
             }
 
             productFlavors.forEach { flavor ->
                 // Works for productFlavors and productFlavors with dimensions
                 if (variant.capitalize().contains(flavor.name.capitalize())) {
-                    project.configurations.find { it.name == "compile" }?.let {
-                        configurations.add(project.configurations.getByName("${flavor.name}Compile"))
+                    project.configurations.find { it.name == "${flavor.name}Compile" }?.let {
+                        configurations.add(it)
                     }
 
-                    project.configurations.find { it.name == "api" }?.let {
-                        configurations.add(project.configurations.getByName("${flavor.name}Api"))
+                    project.configurations.find { it.name == "${flavor.name}Api" }?.let {
+                        configurations.add(it)
                     }
 
-                    project.configurations.find { it.name == "implementation" }?.let {
-                        configurations.add(project.configurations.getByName("${flavor.name}Implementation"))
+                    project.configurations.find { it.name == "${flavor.name}Implementation" }?.let {
+                        configurations.add(it)
                     }
                 }
             }
