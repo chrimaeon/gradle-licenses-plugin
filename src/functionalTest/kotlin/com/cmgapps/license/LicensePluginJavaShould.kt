@@ -78,7 +78,6 @@ class LicensePluginJavaShould {
             .build()
 
         assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
-        assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
     }
 
     @Test
@@ -100,7 +99,6 @@ class LicensePluginJavaShould {
             .withPluginClasspath()
             .build()
 
-        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
         assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
         assertThat(File("$reportFolder/licenses.html").readText().trim(), `is`("<!DOCTYPE html>" +
             "<html lang=\"en\">" +
@@ -135,7 +133,6 @@ class LicensePluginJavaShould {
             .withPluginClasspath()
             .build()
 
-        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
         assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
         assertThat(File("$reportFolder/licenses.html").readText().trim(), `is`("<!DOCTYPE html>" +
             "<html lang=\"en\">" +
@@ -176,7 +173,6 @@ class LicensePluginJavaShould {
             .withPluginClasspath()
             .build()
 
-        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
         assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
         assertThat(File("$reportFolder/licenses.html").readText().trim(), `is`("<!DOCTYPE html>" +
             "<html lang=\"en\">" +
@@ -218,7 +214,6 @@ class LicensePluginJavaShould {
             .withPluginClasspath()
             .build()
 
-        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
         assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
         assertThat(File("$reportFolder/licenses.html").readText().trim(), `is`("<!DOCTYPE html>" +
             "<html lang=\"en\">" +
@@ -264,10 +259,53 @@ class LicensePluginJavaShould {
             .withPluginClasspath()
             .build()
 
-        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
         assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote TEXT report to .*$reportFolder/licenses.txt.*", Pattern.DOTALL)))
         assertThat(File("$reportFolder/licenses.txt").readText().trim(),
             `is`("group:noname 1.0.0:\n\tSome license (http://website.tld/)"))
+    }
+
+    @Test
+    fun `generate Report with different html styles`() {
+        buildFile.appendText("""
+            import com.cmgapps.license.OutputType
+            licenses {
+              bodyCss 'custom body css'
+              preCss 'custom pre css'
+            }
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'group:name:1.0.0'
+            }
+        """.trimIndent())
+
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .build()
+
+        assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)))
+        assertThat(File("$reportFolder/licenses.html").readText().trim(),
+            `is`("<!DOCTYPE html>" +
+                "<html lang=\"en\">" +
+                "<head>" +
+                "<meta charset=\"UTF-8\">" +
+                "<style>custom body csscustom pre css</style>" +
+                "<title>Open source licenses</title>" +
+                "</head>" +
+                "<body>" +
+                "<h3>Notice for packages:</h3>" +
+                "<ul><li>Fake dependency name</li></ul>" +
+                "<div class=\"license\">" +
+                "<p>Some license</p>" +
+                "<a href=\"http://website.tld/\">http://website.tld/</a>" +
+                "</div>" +
+                "</body>" +
+                "</html>"))
     }
 }
 
