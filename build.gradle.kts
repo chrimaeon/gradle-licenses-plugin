@@ -29,7 +29,7 @@ plugins {
     kotlin("jvm") version Deps.kotlinVersion
     id("com.jfrog.bintray") version "1.8.4"
     id("com.gradle.plugin-publish") version "0.10.1"
-    id("com.cmgapps.licenses") version "1.2.1"
+    id("com.cmgapps.licenses") version "1.3.0"
 }
 
 repositories {

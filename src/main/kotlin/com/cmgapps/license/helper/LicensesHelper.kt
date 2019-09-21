@@ -126,7 +126,7 @@ internal object LicensesHelper {
         "http://opensource.org/licenses/MPL-2.0" to MPL_2_FILE_NAME,
         "https://opensource.org/licenses/MPL-2.0" to MPL_2_FILE_NAME,
 
-        //Common Development and Distribution License 1.0
+        // Common Development and Distribution License 1.0
         "CDDL-1.0" to CDDL_FILE_NAME,
         "Common Development and Distribution License 1.0" to CDDL_FILE_NAME,
         "http://opensource.org/licenses/cddl1" to CDDL_FILE_NAME,

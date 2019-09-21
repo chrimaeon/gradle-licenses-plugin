@@ -307,4 +307,35 @@ class LicensePluginJavaShould {
                 "</body>" +
                 "</html>"))
     }
+
+    @Test
+    fun `generate custom report`() {
+        buildFile.appendText(
+            """
+            licenses {
+              customReport { list -> list.collect { it.name }.join(', ') }
+            }
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'group:name:1.0.0'
+            }
+        """.trimIndent()
+        )
+
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .build()
+
+        assertThat(
+            result.output,
+            matchesPattern(Pattern.compile(".*Wrote CUSTOM report to .*$reportFolder/licenses.*", Pattern.DOTALL))
+        )
+        assertThat(File("$reportFolder/licenses").readText().trim(), `is`("Fake dependency name"))
+    }
 }

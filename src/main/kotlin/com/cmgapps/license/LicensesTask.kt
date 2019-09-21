@@ -23,6 +23,7 @@ import com.cmgapps.license.reporter.CsvReport
 import com.cmgapps.license.reporter.HtmlReport
 import com.cmgapps.license.reporter.JsonReport
 import com.cmgapps.license.reporter.MarkdownReport
+import com.cmgapps.license.reporter.Report
 import com.cmgapps.license.reporter.TextReport
 import com.cmgapps.license.reporter.XmlReport
 import org.apache.maven.model.Model
@@ -87,9 +88,20 @@ open class LicensesTask : DefaultTask() {
         }.toSet()
     }
 
+    private var customReport: CustomReport? = null
+
+    fun customReport(report: CustomReport?) {
+        this.customReport = report
+    }
+
     @TaskAction
     fun licensesReport() {
         pomConfiguration = project.configurations.create(POM_CONFIGURATION)
+        if (customReport != null && outputType != OutputType.CUSTOM) {
+            logger.warn("'outputType' will be ignored when setting a 'customReport'")
+            outputType = OutputType.CUSTOM
+        }
+
         collectDependencies()
         generateLibraries()
         createReport()
@@ -195,6 +207,10 @@ open class LicensesTask : DefaultTask() {
     }
 
     private fun createReport() {
+        if (libraries.isEmpty()) {
+            return
+        }
+
         outputFile.delete()
         outputFile.parentFile.mkdirs()
         outputFile.createNewFile()
@@ -209,6 +225,15 @@ open class LicensesTask : DefaultTask() {
                 OutputType.TEXT -> TextReport(libraries)
                 OutputType.MD -> MarkdownReport(libraries)
                 OutputType.CSV -> CsvReport(libraries)
+                OutputType.CUSTOM -> {
+                    val customReport = customReport
+                        ?: throw IllegalStateException("customReport is not defined but outputType is OutputType.CUSTOM")
+                    object : Report(libraries) {
+                        override fun generate(): String {
+                            return customReport(libraries)
+                        }
+                    }
+                }
             }
             it.print(report.generate())
             it.flush()

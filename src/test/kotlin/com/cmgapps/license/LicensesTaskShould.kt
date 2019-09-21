@@ -23,7 +23,6 @@ import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-
 import java.io.File
 import java.nio.file.Path
 
@@ -41,6 +40,12 @@ class LicensesTaskShould {
         project = ProjectBuilder.builder()
             .withProjectDir(testProjectDir.toFile())
             .build()
+        val mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
+        project.repositories.add(project.repositories.maven {
+            it.setUrl(mavenRepoUrl)
+        })
+        project.configurations.create("compile")
+        project.dependencies.add("compile", "group:name:1.0.0")
     }
 
     @Test
@@ -56,17 +61,26 @@ class LicensesTaskShould {
         val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
-        assertThat(outputFile.readText(), `is`("<!DOCTYPE html>" +
-            "<html lang=\"en\">" +
-            "<head>" +
-            "<meta charset=\"UTF-8\">" +
-            "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
-            "<title>Open source licenses</title>" +
-            "</head>" +
-            "<body>" +
-            "<h3>Notice for packages:</h3>" +
-            "</body>" +
-            "</html>"))
+        assertThat(
+            outputFile.readText(), `is`(
+                "<!DOCTYPE html>" +
+                    "<html lang=\"en\">" +
+                    "<head>" +
+                    "<meta charset=\"UTF-8\">" +
+                    "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                    "<title>Open source licenses</title>" +
+                    "</head>" +
+                    "<body>" +
+                    "<h3>Notice for packages:</h3>" +
+                    "<ul><li>Fake dependency name</li></ul>" +
+                    "<div class=\"license\">" +
+                    "<p>Some license</p>" +
+                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
+                    "</div>" +
+                    "</body>" +
+                    "</html>"
+            )
+        )
     }
 
     @Test
@@ -84,17 +98,26 @@ class LicensesTaskShould {
         val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
-        assertThat(outputFile.readText(), `is`("<!DOCTYPE html>" +
-            "<html lang=\"en\">" +
-            "<head>" +
-            "<meta charset=\"UTF-8\">" +
-            "<style>BODY CSSPRE CSS</style>" +
-            "<title>Open source licenses</title>" +
-            "</head>" +
-            "<body>" +
-            "<h3>Notice for packages:</h3>" +
-            "</body>" +
-            "</html>"))
+        assertThat(
+            outputFile.readText(), `is`(
+                "<!DOCTYPE html>" +
+                    "<html lang=\"en\">" +
+                    "<head>" +
+                    "<meta charset=\"UTF-8\">" +
+                    "<style>BODY CSSPRE CSS</style>" +
+                    "<title>Open source licenses</title>" +
+                    "</head>" +
+                    "<body>" +
+                    "<h3>Notice for packages:</h3>" +
+                    "<ul><li>Fake dependency name</li></ul>" +
+                    "<div class=\"license\">" +
+                    "<p>Some license</p>" +
+                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
+                    "</div>" +
+                    "</body>" +
+                    "</html>"
+            )
+        )
     }
 
     @Test
@@ -110,7 +133,23 @@ class LicensesTaskShould {
         val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
-        assertThat(outputFile.readText(), `is`("[]"))
+        assertThat(
+            outputFile.readText(), `is`(
+                "[\n" +
+                    "  {\n" +
+                    "    \"description\": \"Fake dependency description\",\n" +
+                    "    \"licenses\": [\n" +
+                    "      {\n" +
+                    "        \"name\": \"Some license\",\n" +
+                    "        \"url\": \"http://website.tld/\"\n" +
+                    "      }\n" +
+                    "    ],\n" +
+                    "    \"name\": \"Fake dependency name\",\n" +
+                    "    \"version\": \"1.0.0\"\n" +
+                    "  }\n" +
+                    "]"
+            )
+        )
     }
 
     @Test
@@ -126,9 +165,34 @@ class LicensesTaskShould {
         val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
-        assertThat(outputFile.readText(), `is`("""<?xml version="1.0" encoding="UTF-8" ?>
-            |<libraries/>
-            |""".trimMargin()))
+        assertThat(
+            outputFile.readText(), `is`(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
+                    "<libraries>\n" +
+                    "  <library>\n" +
+                    "    <name>\n" +
+                    "      Fake dependency name\n" +
+                    "    </name>\n" +
+                    "    <version>\n" +
+                    "      1.0.0\n" +
+                    "    </version>\n" +
+                    "    <description>\n" +
+                    "      Fake dependency description\n" +
+                    "    </description>\n" +
+                    "    <licenses>\n" +
+                    "      <license>\n" +
+                    "        <name>\n" +
+                    "          Some license\n" +
+                    "        </name>\n" +
+                    "        <url>\n" +
+                    "          http://website.tld/\n" +
+                    "        </url>\n" +
+                    "      </license>\n" +
+                    "    </licenses>\n" +
+                    "  </library>\n" +
+                    "</libraries>\n"
+            )
+        )
     }
 
     @Test
@@ -142,9 +206,15 @@ class LicensesTaskShould {
         val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
-        assertThat(outputFile.readText(), `is`("""# Open source licenses
-            |### Notice for packages:
-            |""".trimMargin()))
+        assertThat(
+            outputFile.readText(), `is`(
+                "# Open source licenses\n" +
+                    "### Notice for packages:\n" +
+                    "Fake dependency name _1.0.0_:\n" +
+                    "* Some license (http://website.tld/)\n" +
+                    "\n"
+            )
+        )
     }
 
     @Test
@@ -158,7 +228,13 @@ class LicensesTaskShould {
         val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
-        assertThat(outputFile.readText(), `is`(""))
+        assertThat(
+            outputFile.readText(), `is`(
+                "Fake dependency name 1.0.0:\n" +
+                    "\tSome license (http://website.tld/)\n" +
+                    "\n"
+            )
+        )
     }
 
     @Test
@@ -172,6 +248,26 @@ class LicensesTaskShould {
         val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
-        assertThat(outputFile.readText(), `is`("name,version,description,license name, license url\r\n"))
+        assertThat(
+            outputFile.readText(), `is`(
+                "name,version,description,license name,license url\r\n" +
+                    "Fake dependency name,1.0.0,Fake dependency description,Some license,http://website.tld/\r\n"
+            )
+        )
+    }
+
+    @Test
+    fun `generate custom Report`() {
+        val outputFile = File(reportFolder, "licensesReport")
+        project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+            task.outputType = OutputType.CSV
+            task.outputFile = outputFile
+            task.customReport { list -> list.joinToString { it.name } }
+        }
+
+        val task = project.tasks.getByName("licensesReport") as LicensesTask
+        task.licensesReport()
+
+        assertThat(outputFile.readText(), `is`("Fake dependency name"))
     }
 }

@@ -16,10 +16,17 @@
 
 package com.cmgapps.license
 
+import com.cmgapps.license.model.Library
+
+typealias CustomReport = (List<Library>) -> String
+
 open class LicensesExtension() {
     var outputType = OutputType.HTML
     var bodyCss = LicensesTask.DEFAULT_BODY_CSS
     var preCss = LicensesTask.DEFAULT_PRE_CSS
+
+    var customReport: CustomReport? = null
+        private set
 
     var additionalProjects = emptySet<String>()
         private set
@@ -34,6 +41,10 @@ open class LicensesExtension() {
             else -> modules.toSet()
         }
     }
+
+    fun customReport(report: (List<Library>) -> String) {
+        this.customReport = report
+    }
 }
 
 enum class OutputType {
@@ -42,5 +53,6 @@ enum class OutputType {
     JSON,
     TEXT,
     MD,
-    CSV
+    CSV,
+    CUSTOM
 }
