@@ -48,6 +48,18 @@ The plugin can output different formats.
 
 * `OutputType.HTML`
     generates a formatted HTML website
+    * Styling
+    
+       For a HTML report you can define custom `body`and `pre` styles using:
+       ```groovy
+        licenses {
+          bodyCss = "body {font-family: sans-serif; background-color: #eee}"
+          preCss = "pre, .license {background-color: #ddd; padding:1em} pre {white-space: pre-wrap}"
+        }
+        ```
+        additionally to the `pre` tag, you'll have to provide a styling for 
+        the `.license` class which is applied to URL licenses.
+
 * `OutputType.JSON`
     generates a Json file
 * `OutputType.XML`
@@ -56,14 +68,16 @@ The plugin can output different formats.
     generates a plain text report file
 * `OutputType.MD`
     generates a Markdown file
+* `OutputType.CUSTOM`
+    add your own reporter as a lambda function
+    ```groovy
+    import com.cmgapps.license.OutputType
 
-```groovy
-import com.cmgapps.license.OutputType
-
-licenses {
-    outputType = OutputType.HTML
-}
-```
+    licenses {
+      outputType = OutputType.CUSTOM
+      customReport { list -> list.collect { it.name }.join(', ') }
+    }
+    ```
 
 #### Multi-project Builds
 
@@ -75,20 +89,6 @@ licenses {
     additionalProjects ':module2', ':module3'
 }
 ```
-
-### CSS Styles for HTML Report
-
-For a HTML report you can define custom `body`and `pre` styles using:
-
-```groovy
-licenses {
-    bodyCss = "body {font-family: sans-serif; background-color: #eee}"
-    preCss = "pre, .license {background-color: #ddd; padding:1em} pre {white-space: pre-wrap}"
-}
-```
-
-additionally to the `pre` tag, you'll have to provide a styling for 
-the `.license` class which is applied to URL licenses.
 
 ## License
 
