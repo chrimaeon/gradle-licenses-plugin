@@ -42,7 +42,7 @@ open class LicensesExtension() {
         }
     }
 
-    fun customReport(report: (List<Library>) -> String) {
+    fun customReport(report: CustomReport) {
         this.customReport = report
     }
 }

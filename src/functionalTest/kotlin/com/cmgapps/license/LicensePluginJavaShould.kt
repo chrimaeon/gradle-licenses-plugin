@@ -21,6 +21,7 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
+import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.matchesPattern
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -337,5 +338,34 @@ class LicensePluginJavaShould {
             matchesPattern(Pattern.compile(".*Wrote CUSTOM report to .*$reportFolder/licenses.*", Pattern.DOTALL))
         )
         assertThat(File("$reportFolder/licenses").readText().trim(), `is`("Fake dependency name"))
+    }
+
+    @Test
+    fun `show warning if outputtype is not CUSTOM`() {
+        buildFile.appendText(
+            """
+            import com.cmgapps.license.OutputType
+            licenses {
+              outputType = OutputType.JSON
+              customReport { list -> list.collect { it.name }.join(', ') }
+            }
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            dependencies {
+              compile 'group:name:1.0.0'
+            }
+        """.trimIndent()
+        )
+
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .build()
+
+        assertThat(result.output, containsString("'outputType' will be ignored when setting a 'customReport'"))
     }
 }

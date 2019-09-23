@@ -82,7 +82,8 @@ class LicensesPlugin : Plugin<Project> {
             path: String
         ) {
             val customReport = extension.customReport
-            if (customReport != null) {
+            if (customReport != null && extension.outputType != OutputType.CUSTOM) {
+                project.logger.warn("'outputType' will be ignored when setting a 'customReport'")
                 extension.outputType = OutputType.CUSTOM
             }
 
