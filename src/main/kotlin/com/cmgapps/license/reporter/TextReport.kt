@@ -18,23 +18,57 @@ package com.cmgapps.license.reporter
 
 import com.cmgapps.license.model.Library
 
-class TextReport(private val libraries: List<Library>) : Report {
+internal class TextReport(libraries: List<Library>) : Report(libraries) {
     override fun generate(): String {
         return StringBuilder().apply {
-            libraries.forEach { library ->
-                append(library.name)
-                append(' ')
-                append(library.version)
-                append(':')
-                library.licenses.forEach { license ->
-                    append("\n\t")
-                    append(license.name)
-                    append(" (")
-                    append(license.url)
-                    append(")")
+            append("Licenses\n")
+            val libLength = libraries.size
+            libraries.forEachIndexed { libIndex, library ->
+                if (libIndex < libLength - 1) {
+                    append("$ITEM_PREFIX ")
+                } else {
+                    append("$LAST_ITEM_PREFIX ")
                 }
-                append("\n\n")
+                append(library.name)
+                append(':')
+                append(library.version)
+                val licensesLength = library.licenses.size
+                library.licenses.forEachIndexed { index, license ->
+
+                    if (libIndex < libLength - 1) {
+                        append(LINE_PREFIX)
+                    } else {
+                        append(LAST_LINE_PREFIX)
+                    }
+
+                    append("$ITEM_PREFIX License: ")
+                    append(license.name)
+
+                    if (libIndex < libLength - 1) {
+                        append(LINE_PREFIX)
+                    } else {
+                        append(LAST_LINE_PREFIX)
+                    }
+
+                    if (index < licensesLength - 1) {
+                        append(ITEM_PREFIX)
+                    } else {
+                        append(LAST_ITEM_PREFIX)
+                    }
+                    append(" URL: ")
+                    append(license.url)
+                }
+                if (libIndex < libLength - 1) {
+                    append('\n')
+                }
             }
         }.toString()
+    }
+
+    private companion object {
+        private const val ITEM_PREFIX = "├─"
+        private const val LAST_ITEM_PREFIX = "└─"
+        private const val LINE_PREFIX = "\n│  "
+        private const val LAST_LINE_PREFIX = "\n   "
     }
 }

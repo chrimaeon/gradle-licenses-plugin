@@ -20,11 +20,11 @@ import com.cmgapps.license.helper.LicensesHelper
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 
-class HtmlReport(
-    private val libraries: List<Library>,
+internal class HtmlReport(
+    libraries: List<Library>,
     private val bodyCss: String,
     private val preCss: String
-) : Report {
+) : Report(libraries) {
 
     companion object {
         private const val OPEN_SOURCE_LIBRARIES = "Open source licenses"

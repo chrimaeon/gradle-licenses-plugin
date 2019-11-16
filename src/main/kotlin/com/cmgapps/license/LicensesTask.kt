@@ -19,9 +19,11 @@ package com.cmgapps.license
 import com.android.builder.model.ProductFlavor
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import com.cmgapps.license.reporter.CsvReport
 import com.cmgapps.license.reporter.HtmlReport
 import com.cmgapps.license.reporter.JsonReport
 import com.cmgapps.license.reporter.MarkdownReport
+import com.cmgapps.license.reporter.Report
 import com.cmgapps.license.reporter.TextReport
 import com.cmgapps.license.reporter.XmlReport
 import org.apache.maven.model.Model
@@ -76,7 +78,7 @@ open class LicensesTask : DefaultTask() {
 
     private lateinit var pomConfiguration: Configuration
 
-    protected val allProjects: Set<Project> by lazy {
+    private val _allProjects: Set<Project> by lazy {
         val allProjects = project.rootProject.allprojects
 
         setOf(project) + additionalProjects.map { moduleName ->
@@ -86,9 +88,26 @@ open class LicensesTask : DefaultTask() {
         }.toSet()
     }
 
+    private var customReport: CustomReport? = null
+
+    fun customReport(report: CustomReport?) {
+        this.customReport = report
+    }
+
+    @Internal
+    protected fun getAllProjects(): Set<Project> {
+        return _allProjects
+    }
+
     @TaskAction
     fun licensesReport() {
         pomConfiguration = project.configurations.create(POM_CONFIGURATION)
+
+        if (customReport != null && outputType != OutputType.CUSTOM) {
+            logger.warn("'outputType' will be ignored when setting a 'customReport'")
+            outputType = OutputType.CUSTOM
+        }
+
         collectDependencies()
         generateLibraries()
         createReport()
@@ -98,7 +117,7 @@ open class LicensesTask : DefaultTask() {
     protected open fun collectDependencies() {
         val configurations = mutableSetOf<Configuration>()
 
-        allProjects.forEach { project ->
+        _allProjects.forEach { project ->
             project.configurations.find { it.name == "compile" }?.let {
                 configurations.add(project.configurations.getByName("compile"))
             }
@@ -194,6 +213,10 @@ open class LicensesTask : DefaultTask() {
     }
 
     private fun createReport() {
+        if (libraries.isEmpty()) {
+            return
+        }
+
         outputFile.delete()
         outputFile.parentFile.mkdirs()
         outputFile.createNewFile()
@@ -207,6 +230,16 @@ open class LicensesTask : DefaultTask() {
                 OutputType.JSON -> JsonReport(libraries)
                 OutputType.TEXT -> TextReport(libraries)
                 OutputType.MD -> MarkdownReport(libraries)
+                OutputType.CSV -> CsvReport(libraries)
+                OutputType.CUSTOM -> {
+                    val customReport = customReport
+                        ?: throw IllegalStateException("customReport is not defined but outputType is OutputType.CUSTOM")
+                    object : Report(libraries) {
+                        override fun generate(): String {
+                            return customReport(libraries)
+                        }
+                    }
+                }
             }
             it.print(report.generate())
             it.flush()
@@ -233,8 +266,7 @@ open class AndroidLicensesTask : LicensesTask() {
 
         val configurations = mutableSetOf<Configuration>()
 
-        allProjects.forEach { project ->
-
+        getAllProjects().forEach { project ->
             project.configurations.find { it.name == "${buildType}Compile" }?.let {
                 configurations.add(it)
             }

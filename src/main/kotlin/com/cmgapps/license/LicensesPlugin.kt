@@ -81,6 +81,13 @@ class LicensesPlugin : Plugin<Project> {
             extension: LicensesExtension,
             path: String
         ) {
+
+            val customReport = extension.customReport
+            if (customReport != null && extension.outputType != OutputType.CUSTOM) {
+                project.logger.warn("'outputType' will be ignored when setting a 'customReport'")
+                extension.outputType = OutputType.CUSTOM
+            }
+
             task.additionalProjects = extension.additionalProjects
             task.outputType = extension.outputType
             task.outputFile = project.file(path + getFileName(extension.outputType))
@@ -88,6 +95,7 @@ class LicensesPlugin : Plugin<Project> {
             task.preCss = extension.preCss
             task.description = TASK_DESC
             task.group = TASK_GROUP
+            task.customReport(customReport)
             task.outputs.upToDateWhen { false }
         }
 
@@ -129,6 +137,8 @@ class LicensesPlugin : Plugin<Project> {
             OutputType.JSON -> ".json"
             OutputType.TEXT -> ".txt"
             OutputType.MD -> ".md"
+            OutputType.CSV -> ".csv"
+            else -> ""
         }.let {
             "licenses$it"
         }

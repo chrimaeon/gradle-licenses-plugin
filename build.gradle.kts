@@ -24,12 +24,12 @@ plugins {
     idea
     `java-gradle-plugin`
     `maven-publish`
-    signing
     id("com.github.ben-manes.versions") version "0.25.0"
     kotlin("jvm") version Deps.kotlinVersion
+    kotlin("kapt") version Deps.kotlinVersion
     id("com.jfrog.bintray") version "1.8.4"
     id("com.gradle.plugin-publish") version "0.10.1"
-    id("com.cmgapps.licenses") version "1.2.1"
+    id("com.cmgapps.licenses") version "1.3.0"
 }
 
 repositories {
@@ -237,6 +237,9 @@ dependencies {
     implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
     implementation(Deps.mavenModel)
     implementation(Deps.moshi)
+    kapt(Deps.moshiCodegen)
+
+    ktlint(Deps.ktlint)
 
     ktlint(Deps.ktlint)
 

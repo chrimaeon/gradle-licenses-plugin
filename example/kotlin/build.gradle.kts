@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018. Christian Grach <christian.grach@cmgapps.com>
+ * Copyright (c) 2019. Christian Grach <christian.grach@cmgapps.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package com.cmgapps.license.model
+import com.cmgapps.license.OutputType
 
-import com.squareup.moshi.JsonClass
+plugins {
+    java
+    id("com.cmgapps.licenses") version "1.3.0"
+}
 
-@JsonClass(generateAdapter = true)
-data class Library(val name: String, val version: String?, val description: String?, val licenses: List<License>)
+licenses {
+    outputType = OutputType.TEXT
+}

@@ -16,6 +16,8 @@
 
 package com.cmgapps.license.reporter
 
-interface Report {
-    fun generate(): String
+import com.cmgapps.license.model.Library
+
+abstract class Report(protected val libraries: List<Library>) {
+    abstract fun generate(): String
 }

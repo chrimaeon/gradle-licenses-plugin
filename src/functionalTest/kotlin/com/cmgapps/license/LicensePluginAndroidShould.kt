@@ -43,7 +43,8 @@ class LicensePluginAndroidShould {
     fun setUp() {
         val pluginClasspathResource = javaClass.classLoader.getResourceAsStream("plugin-under-test-metadata.properties")
             ?: throw IllegalStateException(
-                "Did not find plugin classpath resource, run `:pluginUnderTestMetadata` task.")
+                "Did not find plugin classpath resource, run `:pluginUnderTestMetadata` task."
+            )
         pluginClasspath = Properties().run {
             load(pluginClasspathResource)
             getProperty("implementation-classpath")
@@ -57,7 +58,8 @@ class LicensePluginAndroidShould {
         reportFolder = "$testProjectDir/build/reports/licenses"
         mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
 
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             buildscript {
               repositories {
                 jcenter()
@@ -71,20 +73,23 @@ class LicensePluginAndroidShould {
             apply plugin: 'com.android.application'
             apply plugin: 'com.cmgapps.licenses'
 
-        """.trimIndent())
+        """.trimIndent()
+        )
     }
 
     @Test
     fun `generate licenses buildType report`() {
 
-        buildFile.appendText("""
+        buildFile.appendText(
+            """
             android {
               compileSdkVersion 28
               defaultConfig {
                 applicationId 'com.example'
               }
             }
-            """.trimIndent())
+            """.trimIndent()
+        )
 
         for (taskName in listOf("licenseDebugReport", "licenseReleaseReport")) {
 
@@ -99,7 +104,8 @@ class LicensePluginAndroidShould {
 
     @Test
     fun `generate licenses variant report`() {
-        buildFile.appendText("""
+        buildFile.appendText(
+            """
             android {
               compileSdkVersion 28
               defaultConfig {
@@ -116,12 +122,15 @@ class LicensePluginAndroidShould {
                 }
               }
             }
-            """.trimIndent())
+            """.trimIndent()
+        )
 
-        for (taskName in listOf("licenseDemoDebugReport",
+        for (taskName in listOf(
+            "licenseDemoDebugReport",
             "licenseFullDebugReport",
             "licenseDemoReleaseReport",
-            "licenseFullReleaseReport")) {
+            "licenseFullReleaseReport"
+        )) {
 
             val result = GradleRunner.create()
                 .withProjectDir(testProjectDir.toFile())
@@ -134,7 +143,8 @@ class LicensePluginAndroidShould {
 
     @Test
     fun `generate Report for selected configuration`() {
-        buildFile.appendText("""
+        buildFile.appendText(
+            """
             import com.cmgapps.license.OutputType
             repositories {
                 maven {
@@ -157,7 +167,8 @@ class LicensePluginAndroidShould {
                 debugImplementation 'group:noname:1.0.0'
                 releaseImplementation 'com.squareup.retrofit2:retrofit:2.3.0'
             }
-        """.trimIndent())
+        """.trimIndent()
+        )
 
         GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -165,7 +176,17 @@ class LicensePluginAndroidShould {
             .withPluginClasspath()
             .build()
 
-        assertThat(File("$reportFolder/licenseDebugReport/licenses.txt").readText().trim(),
-            `is`("Fake dependency name 1.0.0:\n\tSome license (http://website.tld/)\n\ngroup:noname 1.0.0:\n\tSome license (http://website.tld/)"))
+        assertThat(
+            File("$reportFolder/licenseDebugReport/licenses.txt").readText().trim(),
+            `is`(
+                "Licenses\n" +
+                    "├─ Fake dependency name:1.0.0\n" +
+                    "│  ├─ License: Some license\n" +
+                    "│  └─ URL: http://website.tld/\n" +
+                    "└─ group:noname:1.0.0\n" +
+                    "   ├─ License: Some license\n" +
+                    "   └─ URL: http://website.tld/"
+            )
+        )
     }
 }

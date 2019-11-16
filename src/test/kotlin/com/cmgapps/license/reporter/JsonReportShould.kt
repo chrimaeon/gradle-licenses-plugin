@@ -26,22 +26,26 @@ class JsonReportShould {
     @Test
     fun generateReport() {
         val report = JsonReport(LibrariesHelper.libraries).generate()
-        assertThat(report, `is`("""[
-                                  |  {
-                                  |    "description": "proper description",
-                                  |    "licenses": [
-                                  |      {
-                                  |        "name": "Apache 2.0",
-                                  |        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                                  |      },
-                                  |      {
-                                  |        "name": "MIT License",
-                                  |        "url": "http://opensource.org/licenses/MIT"
-                                  |      }
-                                  |    ],
-                                  |    "name": "Test lib 1",
-                                  |    "version": "1.0"
-                                  |  }
-                                  |]""".trimMargin()))
+        assertThat(
+            report, `is`(
+                "[\n" +
+                    "  {\n" +
+                    "    \"name\": \"Test lib 1\",\n" +
+                    "    \"version\": \"1.0\",\n" +
+                    "    \"description\": \"proper description\",\n" +
+                    "    \"licenses\": [\n" +
+                    "      {\n" +
+                    "        \"name\": \"Apache 2.0\",\n" +
+                    "        \"url\": \"http://www.apache.org/licenses/LICENSE-2.0.txt\"\n" +
+                    "      },\n" +
+                    "      {\n" +
+                    "        \"name\": \"MIT License\",\n" +
+                    "        \"url\": \"http://opensource.org/licenses/MIT\"\n" +
+                    "      }\n" +
+                    "    ]\n" +
+                    "  }\n" +
+                    "]"
+            )
+        )
     }
 }
