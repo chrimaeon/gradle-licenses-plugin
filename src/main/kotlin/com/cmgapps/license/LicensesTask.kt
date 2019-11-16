@@ -78,7 +78,7 @@ open class LicensesTask : DefaultTask() {
 
     private lateinit var pomConfiguration: Configuration
 
-    protected val allProjects: Set<Project> by lazy {
+    private val _allProjects: Set<Project> by lazy {
         val allProjects = project.rootProject.allprojects
 
         setOf(project) + additionalProjects.map { moduleName ->
@@ -92,6 +92,11 @@ open class LicensesTask : DefaultTask() {
 
     fun customReport(report: CustomReport?) {
         this.customReport = report
+    }
+
+    @Internal
+    protected fun getAllProjects(): Set<Project> {
+        return _allProjects
     }
 
     @TaskAction
@@ -111,7 +116,7 @@ open class LicensesTask : DefaultTask() {
     protected open fun collectDependencies() {
         val configurations = mutableSetOf<Configuration>()
 
-        allProjects.forEach { project ->
+        _allProjects.forEach { project ->
             project.configurations.find { it.name == "compile" }?.let {
                 configurations.add(project.configurations.getByName("compile"))
             }
@@ -260,7 +265,7 @@ open class AndroidLicensesTask : LicensesTask() {
 
         val configurations = mutableSetOf<Configuration>()
 
-        allProjects.forEach { project ->
+        getAllProjects().forEach { project ->
 
             project.configurations.find { it.name == "${buildType}Compile" }?.let {
                 configurations.add(it)

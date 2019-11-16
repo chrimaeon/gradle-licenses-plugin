@@ -16,4 +16,7 @@
 
 package com.cmgapps.license.model
 
+import com.squareup.moshi.JsonClass
+
+@JsonClass(generateAdapter = true)
 data class Library(val name: String, val version: String?, val description: String?, val licenses: List<License>)

@@ -15,12 +15,13 @@
  */
 
 object Deps {
-    const val kotlinVersion = "1.3.50"
+    const val kotlinVersion = "1.3.60"
 
-    const val androidGradlePlugin = "com.android.tools.build:gradle:3.5.0"
+    const val androidGradlePlugin = "com.android.tools.build:gradle:3.5.2"
     const val mavenModel = "org.apache.maven:maven-model:3.6.2"
-    const val moshi = "com.squareup.moshi:moshi:1.8.0"
+    const val moshi = "com.squareup.moshi:moshi:1.9.1"
+    const val moshiCodegen = "com.squareup.moshi:moshi-kotlin-codegen:1.9.1"
     const val jUnit = "org.junit.jupiter:junit-jupiter:5.5.2"
-    const val hamcrest = "org.hamcrest:hamcrest:2.1"
-    const val ktlint = "com.pinterest:ktlint:0.34.2"
+    const val hamcrest = "org.hamcrest:hamcrest:2.2"
+    const val ktlint = "com.pinterest:ktlint:0.35.0"
 }

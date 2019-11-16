@@ -137,15 +137,15 @@ class LicensesTaskShould {
             outputFile.readText(), `is`(
                 "[\n" +
                     "  {\n" +
+                    "    \"name\": \"Fake dependency name\",\n" +
+                    "    \"version\": \"1.0.0\",\n" +
                     "    \"description\": \"Fake dependency description\",\n" +
                     "    \"licenses\": [\n" +
                     "      {\n" +
                     "        \"name\": \"Some license\",\n" +
                     "        \"url\": \"http://website.tld/\"\n" +
                     "      }\n" +
-                    "    ],\n" +
-                    "    \"name\": \"Fake dependency name\",\n" +
-                    "    \"version\": \"1.0.0\"\n" +
+                    "    ]\n" +
                     "  }\n" +
                     "]"
             )
@@ -230,9 +230,10 @@ class LicensesTaskShould {
 
         assertThat(
             outputFile.readText(), `is`(
-                "Fake dependency name 1.0.0:\n" +
-                    "\tSome license (http://website.tld/)\n" +
-                    "\n"
+                "Licenses\n" +
+                    "└─ Fake dependency name:1.0.0\n" +
+                    "   ├─ License: Some license\n" +
+                    "   └─ URL: http://website.tld/"
             )
         )
     }

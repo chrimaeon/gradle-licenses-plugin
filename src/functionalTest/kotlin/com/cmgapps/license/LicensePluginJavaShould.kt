@@ -58,7 +58,7 @@ class LicensePluginJavaShould {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["3.5", "4.0", "4.1", "4.5", "4.9", "5.0", "5.1", "5.5", "5.6"])
+    @ValueSource(strings = ["3.5", "4.0", "4.1", "4.5", "4.9", "5.0", "5.1", "5.5", "5.6", "6.0"])
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
         val result = GradleRunner.create()
             .withGradleVersion(version)
@@ -262,7 +262,13 @@ class LicensePluginJavaShould {
 
         assertThat(result.output, matchesPattern(Pattern.compile(".*Wrote TEXT report to .*$reportFolder/licenses.txt.*", Pattern.DOTALL)))
         assertThat(File("$reportFolder/licenses.txt").readText().trim(),
-            `is`("group:noname 1.0.0:\n\tSome license (http://website.tld/)"))
+            `is`(
+                "Licenses\n" +
+                    "└─ group:noname:1.0.0\n" +
+                    "   ├─ License: Some license\n" +
+                    "   └─ URL: http://website.tld/"
+            )
+        )
     }
 
     @Test
