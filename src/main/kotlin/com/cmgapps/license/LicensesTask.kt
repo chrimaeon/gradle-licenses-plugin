@@ -99,6 +99,10 @@ open class LicensesTask : DefaultTask() {
         return _allProjects
     }
 
+    init {
+        outputs.upToDateWhen { false }
+    }
+
     @TaskAction
     fun licensesReport() {
         pomConfiguration = project.configurations.create(POM_CONFIGURATION)

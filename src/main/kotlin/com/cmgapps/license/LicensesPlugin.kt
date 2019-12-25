@@ -37,11 +37,12 @@ class LicensesPlugin : Plugin<Project> {
         private const val TASK_DESC = "Collect licenses from project"
         private const val TASK_GROUP = "Reporting"
 
-        private const val APP_PLUGIN_ID = "com.android.application"
-        private const val LIBRARY_PLUGIN_ID = "com.android.library"
-        private const val FEATURE_PLUGIN_ID = "com.android.feature"
-        private const val DYNAMIC_FEATURE_PLUGIN_ID = "com.android.dynamic-feature"
-        private val ANDROID_IDS = listOf(APP_PLUGIN_ID, LIBRARY_PLUGIN_ID, FEATURE_PLUGIN_ID, DYNAMIC_FEATURE_PLUGIN_ID)
+        private val ANDROID_IDS = listOf(
+            "com.android.application",
+            "com.android.library",
+            "com.android.feature",
+            "com.android.dynamic-feature"
+        )
 
         @JvmStatic
         private fun configureJavaProject(project: Project, extension: LicensesExtension) {
@@ -95,8 +96,6 @@ class LicensesPlugin : Plugin<Project> {
             task.description = TASK_DESC
             task.group = TASK_GROUP
             task.customReport(customReport)
-
-            task.outputs.upToDateWhen { false }
         }
 
         @JvmStatic

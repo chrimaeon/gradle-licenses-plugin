@@ -24,17 +24,18 @@ plugins {
     idea
     `java-gradle-plugin`
     `maven-publish`
-    id("com.github.ben-manes.versions") version "0.25.0"
+    id("com.github.ben-manes.versions") version "0.27.0"
     kotlin("jvm") version Deps.kotlinVersion
     kotlin("kapt") version Deps.kotlinVersion
     id("com.jfrog.bintray") version "1.8.4"
     id("com.gradle.plugin-publish") version "0.10.1"
-    id("com.cmgapps.licenses") version "1.3.0"
+//    id("com.cmgapps.licenses") version "1.4.0"
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
     google()
+    jcenter()
 }
 
 sourceSets {
