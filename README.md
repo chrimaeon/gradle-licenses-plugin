@@ -1,4 +1,4 @@
-# Gradle Licenses Plugin
+# Gradle Licenses Plugin [![CircleCI](https://circleci.com/gh/chrimaeon/gradle-licenses-plugin.svg?style=svg)](https://circleci.com/gh/chrimaeon/gradle-licenses-plugin)
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg?style=for-the-badge)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Bintray](https://www.cmgapps.com/badge/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin/badge.svg)](https://bintray.com/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin)
