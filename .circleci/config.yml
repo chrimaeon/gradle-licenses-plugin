@@ -1,0 +1,39 @@
+version: 2.1
+
+jobs:
+  build:
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx3g"
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=2 -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false"
+    docker:
+      - image: circleci/android:api-29
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+      - restore_cache:
+          key: v1-gradle-cache-{{ checksum "buildSrc/src/main/kotlin/Deps.kt" }}
+      - run:
+          name: Run check task
+          command: ./gradlew build check
+      - save_cache:
+          paths:
+            - ~/.gradle/wrapper
+          key: v1-gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+      - save_cache:
+          paths:
+            - ~/.gradle/caches
+          key: v1-gradle-cache-{{ checksum "buildSrc/src/main/kotlin/Deps.kt" }}
+      - store_test_results:
+          path: build/test-results/test
+      - store_test_results:
+          path: build/test-results/functionalTest
+      - store_artifacts:
+          path: build/reports
+          when: always
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - build

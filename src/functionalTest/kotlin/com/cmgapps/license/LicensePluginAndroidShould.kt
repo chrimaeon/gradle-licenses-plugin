@@ -64,7 +64,7 @@ class LicensePluginAndroidShould {
                 google()
               }
               dependencies {
-                classpath "com.android.tools.build:gradle:3.5.0"
+                classpath "com.android.tools.build:gradle:3.5.3"
                 classpath files($pluginClasspath)
               }
             }
