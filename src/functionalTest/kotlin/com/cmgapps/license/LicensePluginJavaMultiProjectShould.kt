@@ -17,6 +17,7 @@
 package com.cmgapps.license
 
 import com.cmgapps.license.util.TestUtils
+import com.cmgapps.license.util.plus
 import org.gradle.testkit.runner.GradleRunner
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -33,15 +34,14 @@ class LicensePluginJavaMultiProjectShould {
     @TempDir
     lateinit var testProjectDir: Path
 
-    private lateinit var module2File: File
     private lateinit var module1File: File
+    private lateinit var module2File: File
     private lateinit var mavenRepoUrl: String
 
     @BeforeEach
     fun setUp() {
         Files.createFile(Paths.get(testProjectDir.toString(), "settings.gradle"))
-            .toFile()
-            .writeText("include ':module1', ':module2'")
+            .toFile() + "include ':module1', ':module2'"
         module1File = Paths.get(testProjectDir.toString(), "module1").toFile().run {
             mkdirs()
             Files.createFile(Paths.get(this.absolutePath, "build.gradle")).toFile()
@@ -57,7 +57,7 @@ class LicensePluginJavaMultiProjectShould {
 
     @Test
     fun `collect dependencies from additional module`() {
-        module1File.writeText("""
+        module1File + """
             plugins {
                 id("java")
                 id("com.cmgapps.licenses")
@@ -68,9 +68,9 @@ class LicensePluginJavaMultiProjectShould {
             licenses {
                 additionalProjects ':module2'
             }
-        """.trimIndent())
+        """.trimIndent()
 
-        module2File.writeText("""
+        module2File + """
             plugins {
                 id("java-library")
             }
@@ -80,7 +80,7 @@ class LicensePluginJavaMultiProjectShould {
             dependencies {
                 compile 'group:name:1.0.0'
             }
-        """.trimIndent())
+        """.trimIndent()
 
         GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -108,7 +108,7 @@ class LicensePluginJavaMultiProjectShould {
 
     @Test
     fun `merge dependencies of modules`() {
-        module1File.writeText("""
+        module1File + """
             plugins {
                 id("java-library")
                 id("com.cmgapps.licenses")
@@ -122,9 +122,9 @@ class LicensePluginJavaMultiProjectShould {
             dependencies {
                 implementation 'com.squareup.retrofit2:retrofit:2.3.0'
             }
-        """.trimIndent())
+        """.trimIndent()
 
-        module2File.writeText("""
+        module2File + """
             plugins {
                 id("java-library")
             }
@@ -134,7 +134,7 @@ class LicensePluginJavaMultiProjectShould {
             dependencies {
                 implementation 'group:name:1.0.0'
             }
-        """.trimIndent())
+        """.trimIndent()
 
         GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -165,7 +165,7 @@ class LicensePluginJavaMultiProjectShould {
 
     @Test
     fun `not add already added dependencies`() {
-        module1File.writeText("""
+        module1File + """
             plugins {
                 id("java")
                 id("com.cmgapps.licenses")
@@ -179,9 +179,9 @@ class LicensePluginJavaMultiProjectShould {
             dependencies {
                 compile 'group:name:1.0.0'
             }
-        """.trimIndent())
+        """.trimIndent()
 
-        module2File.writeText("""
+        module2File + """
             plugins {
                 id("java-library")
             }
@@ -191,7 +191,7 @@ class LicensePluginJavaMultiProjectShould {
             dependencies {
                 compile 'group:name:1.0.0'
             }
-        """.trimIndent())
+        """.trimIndent()
 
         GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())

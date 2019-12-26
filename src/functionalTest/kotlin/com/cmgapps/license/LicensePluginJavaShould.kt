@@ -17,6 +17,7 @@
 package com.cmgapps.license
 
 import com.cmgapps.license.util.TestUtils
+import com.cmgapps.license.util.plus
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
@@ -48,15 +49,13 @@ class LicensePluginJavaShould {
         buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
         reportFolder = "$testProjectDir/build/reports/licenses/licenseReport"
         mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
-        buildFile.writeText(
-            """
+        buildFile + """
             plugins {
                id("java")
                id("com.cmgapps.licenses")
             }
 
         """.trimIndent()
-        )
     }
 
     /**
@@ -96,8 +95,7 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate report with no open source dependencies`() {
-        buildFile.appendText(
-            """
+        buildFile + """
             repositories {
               maven {
                 url '$mavenRepoUrl'
@@ -107,7 +105,6 @@ class LicensePluginJavaShould {
               compile 'com.google.firebase:firebase-core:10.0.1'
             }
         """.trimIndent()
-        )
 
         val result = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -138,8 +135,7 @@ class LicensePluginJavaShould {
 
     @Test
     fun `java library with parent pom dependency`() {
-        buildFile.appendText(
-            """
+        buildFile + """
             repositories {
               maven {
                 url '$mavenRepoUrl'
@@ -149,7 +145,6 @@ class LicensePluginJavaShould {
               compile 'com.squareup.retrofit2:retrofit:2.3.0'
             }
         """.trimIndent()
-        )
 
         val result = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -186,8 +181,7 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate Report with custom license`() {
-        buildFile.appendText(
-            """
+        buildFile + """
             repositories {
               maven {
                 url '$mavenRepoUrl'
@@ -197,7 +191,6 @@ class LicensePluginJavaShould {
               compile 'group:name:1.0.0'
             }
         """.trimIndent()
-        )
 
         val result = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -235,8 +228,7 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate Report with lib with no name`() {
-        buildFile.appendText(
-            """
+        buildFile + """
             repositories {
               maven {
                 url '$mavenRepoUrl'
@@ -246,7 +238,6 @@ class LicensePluginJavaShould {
               compile 'group:noname:1.0.0'
             }
         """.trimIndent()
-        )
 
         val result = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -284,8 +275,7 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate Report with different 'OutputType'`() {
-        buildFile.appendText(
-            """
+        buildFile + """
             import com.cmgapps.license.OutputType
             licenses {
               outputType OutputType.TEXT
@@ -299,7 +289,6 @@ class LicensePluginJavaShould {
               compile 'group:noname:1.0.0'
             }
         """.trimIndent()
-        )
 
         val result = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -324,8 +313,7 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate Report with different html styles`() {
-        buildFile.appendText(
-            """
+        buildFile + """
             import com.cmgapps.license.OutputType
             licenses {
               bodyCss 'custom body css'
@@ -340,7 +328,6 @@ class LicensePluginJavaShould {
               compile 'group:name:1.0.0'
             }
         """.trimIndent()
-        )
 
         val result = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -377,8 +364,7 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate custom report`() {
-        buildFile.appendText(
-            """
+        buildFile + """
             licenses {
               customReport { list -> list.collect { it.name }.join(', ') }
             }
@@ -391,7 +377,6 @@ class LicensePluginJavaShould {
               compile 'group:name:1.0.0'
             }
         """.trimIndent()
-        )
 
         val result = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -408,8 +393,7 @@ class LicensePluginJavaShould {
 
     @Test
     fun `show warning if outputtype is not CUSTOM`() {
-        buildFile.appendText(
-            """
+        buildFile + """
             import com.cmgapps.license.OutputType
             licenses {
               outputType = OutputType.JSON
@@ -424,7 +408,6 @@ class LicensePluginJavaShould {
               compile 'group:name:1.0.0'
             }
         """.trimIndent()
-        )
 
         val result = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())

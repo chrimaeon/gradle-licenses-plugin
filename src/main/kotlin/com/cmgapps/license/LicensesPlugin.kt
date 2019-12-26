@@ -88,14 +88,16 @@ class LicensesPlugin : Plugin<Project> {
                 extension.outputType = OutputType.CUSTOM
             }
 
-            task.additionalProjects = extension.additionalProjects
-            task.outputType = extension.outputType
-            task.outputFile = project.file(path + getFileName(extension.outputType))
-            task.bodyCss = extension.bodyCss
-            task.preCss = extension.preCss
-            task.description = TASK_DESC
-            task.group = TASK_GROUP
-            task.customReport(customReport)
+            with(task) {
+                additionalProjects = extension.additionalProjects
+                outputType = extension.outputType
+                outputFile = project.file(path + getFileName(extension.outputType))
+                bodyCss = extension.bodyCss
+                preCss = extension.preCss
+                description = TASK_DESC
+                group = TASK_GROUP
+                customReport(customReport)
+            }
         }
 
         @JvmStatic
@@ -113,20 +115,18 @@ class LicensesPlugin : Plugin<Project> {
         }
 
         @JvmStatic
-        private fun getAndroidVariants(project: Project): DomainObjectSet<out BaseVariant>? {
-            return when {
-                project.plugins.hasPlugin(AppPlugin::class.java)
-                    || project.plugins.hasPlugin(DynamicFeaturePlugin::class.java) ->
-                    project.extensions.getByType(AppExtension::class.java).applicationVariants
+        private fun getAndroidVariants(project: Project): DomainObjectSet<out BaseVariant>? = when {
+            project.plugins.hasPlugin(AppPlugin::class.java)
+                || project.plugins.hasPlugin(DynamicFeaturePlugin::class.java) ->
+                project.extensions.getByType(AppExtension::class.java).applicationVariants
 
-                project.plugins.hasPlugin(FeaturePlugin::class.java) ->
-                    project.extensions.getByType(FeatureExtension::class.java).featureVariants
+            project.plugins.hasPlugin(FeaturePlugin::class.java) ->
+                project.extensions.getByType(FeatureExtension::class.java).featureVariants
 
-                project.plugins.hasPlugin(LibraryPlugin::class.java) ->
-                    project.extensions.getByType(LibraryExtension::class.java).libraryVariants
+            project.plugins.hasPlugin(LibraryPlugin::class.java) ->
+                project.extensions.getByType(LibraryExtension::class.java).libraryVariants
 
-                else -> null
-            }
+            else -> null
         }
 
         @JvmStatic
@@ -144,16 +144,15 @@ class LicensesPlugin : Plugin<Project> {
     }
 
     override fun apply(project: Project) {
+        project.extensions.create("licenses", LicensesExtension::class.java).also {
+            if (project.plugins.hasPlugin("java")) {
+                configureJavaProject(project, it)
+            }
 
-        val extension = project.extensions.create("licenses", LicensesExtension::class.java)
-
-        project.plugins.withId("java") {
-            configureJavaProject(project, extension)
-        }
-
-        ANDROID_IDS.forEach { id ->
-            project.plugins.withId(id) {
-                configureAndroidProject(project, extension)
+            ANDROID_IDS.forEach { id ->
+                if (project.plugins.hasPlugin(id)) {
+                    configureAndroidProject(project, it)
+                }
             }
         }
     }

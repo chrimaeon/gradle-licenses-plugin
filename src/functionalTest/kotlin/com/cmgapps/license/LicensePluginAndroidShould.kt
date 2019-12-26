@@ -16,6 +16,8 @@
 
 package com.cmgapps.license
 
+import com.cmgapps.license.util.plus
+import com.cmgapps.license.util.write
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
@@ -28,6 +30,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.Properties
+
+const val AGP = "com.android.tools.build:gradle:3.5.3"
 
 class LicensePluginAndroidShould {
 
@@ -43,7 +47,8 @@ class LicensePluginAndroidShould {
     fun setUp() {
         val pluginClasspathResource = javaClass.classLoader.getResourceAsStream("plugin-under-test-metadata.properties")
             ?: throw IllegalStateException(
-                "Did not find plugin classpath resource, run `:pluginUnderTestMetadata` task.")
+                "Did not find plugin classpath resource, run `:pluginUnderTestMetadata` task."
+            )
         pluginClasspath = Properties().run {
             load(pluginClasspathResource)
             getProperty("implementation-classpath")
@@ -57,34 +62,34 @@ class LicensePluginAndroidShould {
         reportFolder = "$testProjectDir/build/reports/licenses"
         mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
 
-        buildFile.writeText("""
+        buildFile + """
             buildscript {
               repositories {
                 jcenter()
                 google()
               }
               dependencies {
-                classpath "com.android.tools.build:gradle:3.5.3"
+                classpath "$AGP"
                 classpath files($pluginClasspath)
               }
             }
             apply plugin: 'com.android.application'
             apply plugin: 'com.cmgapps.licenses'
 
-        """.trimIndent())
+        """.trimIndent()
     }
 
     @Test
     fun `generate licenses buildType report`() {
 
-        buildFile.appendText("""
+        buildFile + """
             android {
               compileSdkVersion 28
               defaultConfig {
                 applicationId 'com.example'
               }
             }
-            """.trimIndent())
+            """.trimIndent()
 
         for (taskName in listOf("licenseDebugReport", "licenseReleaseReport")) {
 
@@ -99,7 +104,7 @@ class LicensePluginAndroidShould {
 
     @Test
     fun `generate licenses variant report`() {
-        buildFile.appendText("""
+        buildFile + """
             android {
               compileSdkVersion 28
               defaultConfig {
@@ -116,12 +121,14 @@ class LicensePluginAndroidShould {
                 }
               }
             }
-            """.trimIndent())
+            """.trimIndent()
 
-        for (taskName in listOf("licenseDemoDebugReport",
+        for (taskName in listOf(
+            "licenseDemoDebugReport",
             "licenseFullDebugReport",
             "licenseDemoReleaseReport",
-            "licenseFullReleaseReport")) {
+            "licenseFullReleaseReport"
+        )) {
 
             val result = GradleRunner.create()
                 .withProjectDir(testProjectDir.toFile())
@@ -134,7 +141,7 @@ class LicensePluginAndroidShould {
 
     @Test
     fun `generate Report for selected configuration`() {
-        buildFile.appendText("""
+        buildFile + """
             import com.cmgapps.license.OutputType
             repositories {
                 maven {
@@ -157,7 +164,7 @@ class LicensePluginAndroidShould {
                 debugImplementation 'group:noname:1.0.0'
                 releaseImplementation 'com.squareup.retrofit2:retrofit:2.3.0'
             }
-        """.trimIndent())
+        """.trimIndent()
 
         GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
@@ -165,7 +172,8 @@ class LicensePluginAndroidShould {
             .withPluginClasspath()
             .build()
 
-        assertThat(File("$reportFolder/licenseDebugReport/licenses.txt").readText().trim(),
+        assertThat(
+            File("$reportFolder/licenseDebugReport/licenses.txt").readText().trim(),
             `is`(
                 "Licenses\n" +
                     "├─ Fake dependency name:1.0.0\n" +
@@ -176,5 +184,104 @@ class LicensePluginAndroidShould {
                     "   └─ URL: http://website.tld/"
             )
         )
+    }
+
+    @Test
+    fun `should work for LibraryPlugin`() {
+        buildFile.write(
+            """
+            buildscript {
+              repositories {
+                jcenter()
+                google()
+              }
+              dependencies {
+                classpath "$AGP"
+                classpath files($pluginClasspath)
+              }
+            }
+            apply plugin: 'com.android.library'
+            apply plugin: 'com.cmgapps.licenses'
+
+            android {
+              compileSdkVersion 28
+            }
+        """.trimIndent()
+        )
+
+        val taskName = ":licenseDebugReport"
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(taskName)
+            .withPluginClasspath()
+            .build()
+
+        assertThat(result.task(taskName)?.outcome, `is`(TaskOutcome.SUCCESS))
+    }
+
+    @Test
+    fun `should work for DynamicFeaturePlugin`() {
+        buildFile.write(
+            """
+            buildscript {
+              repositories {
+                jcenter()
+                google()
+              }
+              dependencies {
+                classpath "$AGP"
+                classpath files($pluginClasspath)
+              }
+            }
+            apply plugin: 'com.android.dynamic-feature'
+            apply plugin: 'com.cmgapps.licenses'
+
+            android {
+              compileSdkVersion 28
+            }
+        """.trimIndent()
+        )
+
+        val taskName = ":licenseDebugReport"
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(taskName)
+            .withPluginClasspath()
+            .build()
+
+        assertThat(result.task(taskName)?.outcome, `is`(TaskOutcome.SUCCESS))
+    }
+
+    @Test
+    fun `should work for FeaturePlugin`() {
+        buildFile.write(
+            """
+            buildscript {
+              repositories {
+                jcenter()
+                google()
+              }
+              dependencies {
+                classpath "$AGP"
+                classpath files($pluginClasspath)
+              }
+            }
+            apply plugin: 'com.android.feature'
+            apply plugin: 'com.cmgapps.licenses'
+
+            android {
+              compileSdkVersion 28
+            }
+        """.trimIndent()
+        )
+
+        val taskName = ":licenseDebugFeatureReport"
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(taskName)
+            .withPluginClasspath()
+            .build()
+
+        assertThat(result.task(taskName)?.outcome, `is`(TaskOutcome.SUCCESS))
     }
 }

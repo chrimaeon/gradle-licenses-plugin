@@ -16,6 +16,11 @@
 
 package com.cmgapps.license.util
 
+import java.io.File
+
 object TestUtils {
     fun getFileContent(fileName: String) = javaClass.getResource("/licenses/$fileName").readText()
 }
+
+operator fun File.plus(text: String) = appendText(text)
+infix fun File.write(text: String) = writeText(text)

@@ -47,7 +47,7 @@ sourceSets {
             srcDir("src/functionalTest/resources")
         }
 
-        compileClasspath += sourceSets.main.get().output + configurations.testRuntime.get()
+        compileClasspath += configurations.testRuntime.get() + sourceSets.main.get().output
         runtimeClasspath += output + compileClasspath
     }
 }
@@ -183,7 +183,6 @@ tasks {
         main = "com.pinterest.ktlint.Main"
         classpath = ktlint
         args = listOf("src/**/*.kt", "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/reports/ktlint.xml")
-
     }
 
     check {
@@ -230,6 +229,7 @@ tasks {
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
+        gradleVersion = "6.0.1"
     }
 }
 
