@@ -1,29 +1,63 @@
 version: 2.1
 
-jobs:
-  build:
-    environment:
-      JAVA_TOOL_OPTIONS: "-Xmx4g"
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=2 -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false"
+executors:
+  android-executor:
     docker:
       - image: circleci/android:api-29
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx3g"
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=2 -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false"
+
+commands:
+  restore_gradle_wrapper:
+    description: "Restores Gradle Wrapper from cache"
     steps:
-      - checkout
       - restore_cache:
           key: v1-gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+  restore_gradle_cache:
+    description: "Restores Gradle Cache from cache"
+    steps:
       - restore_cache:
           key: v1-gradle-cache-{{ checksum "buildSrc/src/main/kotlin/Deps.kt" }}
-      - run:
-          name: Run check task
-          command: ./gradlew check jacocoTestReport jacocoTestCoverageVerification
+  save_gradle_wrapper:
+    description: "Save Gradle Wrapper to cache"
+    steps:
       - save_cache:
           paths:
             - ~/.gradle/wrapper
           key: v1-gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+  save_gradle_cache:
+    description: "Save Gradle Cache to cache"
+    steps:
       - save_cache:
           paths:
             - ~/.gradle/caches
           key: v1-gradle-cache-{{ checksum "buildSrc/src/main/kotlin/Deps.kt" }}
+
+jobs:
+  build:
+    executor: android-executor
+    steps:
+      - checkout
+      - restore_gradle_wrapper
+      - restore_gradle_cache
+      - run:
+          name: Run build task
+          command: ./gradlew build
+      - save_gradle_wrapper
+      - save_gradle_cache
+
+  check:
+    executor: android-executor
+    steps:
+      - checkout
+      - restore_gradle_wrapper
+      - restore_gradle_cache
+      - run:
+          name: Run check task
+          command: ./gradlew check jacocoTestReport jacocoTestCoverageVerification
+      - save_gradle_wrapper
+      - save_gradle_cache
       - store_test_results:
           path: build/test-results/test
       - store_test_results:
@@ -37,3 +71,4 @@ workflows:
   workflow:
     jobs:
       - build
+      - check
