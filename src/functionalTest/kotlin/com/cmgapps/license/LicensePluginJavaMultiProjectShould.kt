@@ -16,8 +16,9 @@
 
 package com.cmgapps.license
 
-import com.cmgapps.license.util.TestUtils
+import com.cmgapps.license.util.getFileContent
 import com.cmgapps.license.util.plus
+import com.cmgapps.license.util.withJaCoCo
 import org.gradle.testkit.runner.GradleRunner
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -37,6 +38,7 @@ class LicensePluginJavaMultiProjectShould {
     private lateinit var module1File: File
     private lateinit var module2File: File
     private lateinit var mavenRepoUrl: String
+    private lateinit var gradleRunner: GradleRunner
 
     @BeforeEach
     fun setUp() {
@@ -53,6 +55,11 @@ class LicensePluginJavaMultiProjectShould {
         }
 
         mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
+        gradleRunner = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":module1:licenseReport")
+            .withPluginClasspath()
+            .withJaCoCo()
     }
 
     @Test
@@ -82,27 +89,25 @@ class LicensePluginJavaMultiProjectShould {
             }
         """.trimIndent()
 
-        GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":module1:licenseReport")
-            .withPluginClasspath()
-            .build()
+        gradleRunner.build()
 
         assertThat(
             File("$testProjectDir/module1/build/reports/licenses/licenseReport/licenses.html")
                 .readText().trim(),
-            `is`("<!DOCTYPE html>" +
-                "<html lang=\"en\">" +
-                "<head>" +
-                "<meta charset=\"UTF-8\">" +
-                "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
-                "<title>Open source licenses</title>" +
-                "</head>" +
-                "<body>" +
-                "<h3>Notice for packages:</h3>" +
-                "<ul><li>Fake dependency name</li></ul><div class=\"license\"><p>Some license</p><a href=\"http://website.tld/\">http://website.tld/</a></div>" +
-                "</body>" +
-                "</html>")
+            `is`(
+                "<!DOCTYPE html>" +
+                    "<html lang=\"en\">" +
+                    "<head>" +
+                    "<meta charset=\"UTF-8\">" +
+                    "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                    "<title>Open source licenses</title>" +
+                    "</head>" +
+                    "<body>" +
+                    "<h3>Notice for packages:</h3>" +
+                    "<ul><li>Fake dependency name</li></ul><div class=\"license\"><p>Some license</p><a href=\"http://website.tld/\">http://website.tld/</a></div>" +
+                    "</body>" +
+                    "</html>"
+            )
         )
     }
 
@@ -136,30 +141,28 @@ class LicensePluginJavaMultiProjectShould {
             }
         """.trimIndent()
 
-        GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":module1:licenseReport")
-            .withPluginClasspath()
-            .build()
+        gradleRunner.build()
 
         assertThat(
             File("$testProjectDir/module1/build/reports/licenses/licenseReport/licenses.html")
                 .readText().trim(),
-            `is`("<!DOCTYPE html>" +
-                "<html lang=\"en\">" +
-                "<head>" +
-                "<meta charset=\"UTF-8\">" +
-                "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
-                "<title>Open source licenses</title>" +
-                "</head>" +
-                "<body>" +
-                "<h3>Notice for packages:</h3>" +
-                "<ul><li>Retrofit</li></ul><pre>" +
-                TestUtils.getFileContent("apache-2.0.txt") +
-                "</pre>" +
-                "<ul><li>Fake dependency name</li></ul><div class=\"license\"><p>Some license</p><a href=\"http://website.tld/\">http://website.tld/</a></div>" +
-                "</body>" +
-                "</html>")
+            `is`(
+                "<!DOCTYPE html>" +
+                    "<html lang=\"en\">" +
+                    "<head>" +
+                    "<meta charset=\"UTF-8\">" +
+                    "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                    "<title>Open source licenses</title>" +
+                    "</head>" +
+                    "<body>" +
+                    "<h3>Notice for packages:</h3>" +
+                    "<ul><li>Retrofit</li></ul><pre>" +
+                    getFileContent("apache-2.0.txt") +
+                    "</pre>" +
+                    "<ul><li>Fake dependency name</li></ul><div class=\"license\"><p>Some license</p><a href=\"http://website.tld/\">http://website.tld/</a></div>" +
+                    "</body>" +
+                    "</html>"
+            )
         )
     }
 
@@ -193,27 +196,25 @@ class LicensePluginJavaMultiProjectShould {
             }
         """.trimIndent()
 
-        GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":module1:licenseReport")
-            .withPluginClasspath()
-            .build()
+        gradleRunner.build()
 
         assertThat(
             File("$testProjectDir/module1/build/reports/licenses/licenseReport/licenses.html")
                 .readText().trim(),
-            `is`("<!DOCTYPE html>" +
-                "<html lang=\"en\">" +
-                "<head>" +
-                "<meta charset=\"UTF-8\">" +
-                "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
-                "<title>Open source licenses</title>" +
-                "</head>" +
-                "<body>" +
-                "<h3>Notice for packages:</h3>" +
-                "<ul><li>Fake dependency name</li></ul><div class=\"license\"><p>Some license</p><a href=\"http://website.tld/\">http://website.tld/</a></div>" +
-                "</body>" +
-                "</html>")
+            `is`(
+                "<!DOCTYPE html>" +
+                    "<html lang=\"en\">" +
+                    "<head>" +
+                    "<meta charset=\"UTF-8\">" +
+                    "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                    "<title>Open source licenses</title>" +
+                    "</head>" +
+                    "<body>" +
+                    "<h3>Notice for packages:</h3>" +
+                    "<ul><li>Fake dependency name</li></ul><div class=\"license\"><p>Some license</p><a href=\"http://website.tld/\">http://website.tld/</a></div>" +
+                    "</body>" +
+                    "</html>"
+            )
         )
     }
 }

@@ -17,6 +17,13 @@
 object Deps {
     const val kotlinVersion = "1.3.61"
 
+    object Plugins {
+        const val versionsVersion = "0.27.0"
+        const val bintrayVersion = "1.8.4"
+        const val pluginPublishVersion = "0.10.1"
+        const val dokkaVersion = "0.10.0"
+    }
+
     const val androidGradlePlugin = "com.android.tools.build:gradle:3.5.3"
     const val mavenModel = "org.apache.maven:maven-model:3.6.3"
     const val moshi = "com.squareup.moshi:moshi:1.9.2"

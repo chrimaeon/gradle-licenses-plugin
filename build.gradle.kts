@@ -16,6 +16,7 @@
 
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.jfrog.bintray.gradle.BintrayExtension
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
 import java.util.Properties
@@ -24,11 +25,13 @@ plugins {
     idea
     `java-gradle-plugin`
     `maven-publish`
-    id("com.github.ben-manes.versions") version "0.27.0"
+    jacoco
+    id("com.github.ben-manes.versions") version Deps.Plugins.versionsVersion
     kotlin("jvm") version Deps.kotlinVersion
     kotlin("kapt") version Deps.kotlinVersion
-    id("com.jfrog.bintray") version "1.8.4"
-    id("com.gradle.plugin-publish") version "0.10.1"
+    id("com.jfrog.bintray") version Deps.Plugins.bintrayVersion
+    id("com.gradle.plugin-publish") version Deps.Plugins.pluginPublishVersion
+    id("org.jetbrains.dokka") version Deps.Plugins.dokkaVersion
 //    id("com.cmgapps.licenses") version "1.4.0"
 }
 
@@ -38,21 +41,24 @@ repositories {
     jcenter()
 }
 
+val functionalTestName = "functionalTest"
+
 sourceSets {
-    create("functionalTest") {
+    create(functionalTestName) {
         java {
-            srcDir("src/functionalTest/kotlin")
+            srcDir("src/$functionalTestName/kotlin")
         }
         resources {
-            srcDir("src/functionalTest/resources")
+            srcDir("src/$functionalTestName/resources")
+            outputDir = file("$buildDir/resources/$functionalTestName")
         }
 
-        compileClasspath += configurations.testRuntime.get() + sourceSets.main.get().output
+        compileClasspath += sourceSets.main.get().output + configurations.testRuntimeClasspath.get()
         runtimeClasspath += output + compileClasspath
     }
 }
 
-val ktlint by configurations.creating
+val ktlint: Configuration by configurations.creating
 
 configurations {
     named("functionalTestImplementation") {
@@ -62,12 +68,14 @@ configurations {
     named("functionalTestRuntime") {
         extendsFrom(testRuntime.get())
     }
+
+    register("jacocoRuntime")
 }
 
 idea {
     module {
-        testSourceDirs = testSourceDirs + sourceSets["functionalTest"].allJava.srcDirs
-        testResourceDirs = testResourceDirs + sourceSets["functionalTest"].resources.srcDirs
+        testSourceDirs = testSourceDirs + sourceSets[functionalTestName].allJava.srcDirs
+        testResourceDirs = testResourceDirs + sourceSets[functionalTestName].resources.srcDirs
     }
 }
 
@@ -98,7 +106,7 @@ gradlePlugin {
         }
     }
 
-    testSourceSets(sourceSets["functionalTest"])
+    testSourceSets(sourceSets[functionalTestName])
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
@@ -108,7 +116,7 @@ val sourcesJar by tasks.registering(Jar::class) {
 
 val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
-    from(tasks.javadoc)
+    from(tasks["dokka"])
 }
 
 publishing {
@@ -171,10 +179,20 @@ bintray {
 }
 
 tasks {
+    val setupJacocoRuntime by registering(WriteProperties::class) {
+        outputFile =
+            file("${sourceSets.getByName(functionalTestName).resources.outputDir.path}/testkit/testkit-gradle.properties")
+        property(
+            "org.gradle.jvmargs",
+            "-javaagent:${configurations["jacocoRuntime"].asPath}=destfile=$buildDir/jacoco/$functionalTestName.exec"
+        )
+    }
+
     val functionalTest by registering(Test::class) {
         group = "verification"
-        testClassesDirs = sourceSets["functionalTest"].output.classesDirs
-        classpath = sourceSets["functionalTest"].runtimeClasspath
+        testClassesDirs = sourceSets[functionalTestName].output.classesDirs
+        classpath = sourceSets[functionalTestName].runtimeClasspath
+        dependsOn(setupJacocoRuntime)
     }
 
     val ktlint by registering(JavaExec::class) {
@@ -188,6 +206,22 @@ tasks {
     check {
         dependsOn(functionalTest)
         dependsOn(ktlint)
+    }
+
+    jacocoTestReport {
+        executionData(test.get(), functionalTest.get())
+    }
+
+    jacocoTestCoverageVerification {
+        executionData(test.get(), functionalTest.get())
+        violationRules {
+            rule {
+                limit {
+                    counter = "INSTRUCTION"
+                    minimum = "0.8".toBigDecimal()
+                }
+            }
+        }
     }
 
     jar {
@@ -227,6 +261,11 @@ tasks {
         kotlinOptions.jvmTarget = "1.8"
     }
 
+    withType<DokkaTask> {
+        outputFormat = "javadoc"
+        outputDirectory = "$buildDir/javadoc"
+    }
+
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
         gradleVersion = "6.0.1"
@@ -250,4 +289,6 @@ dependencies {
 
     "functionalTestImplementation"(Deps.androidGradlePlugin)
     "functionalTestImplementation"(gradleTestKit())
+
+    "jacocoRuntime"("org.jacoco:org.jacoco.agent:${jacoco.toolVersion}:runtime")
 }

@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build:
     environment:
-      JAVA_TOOL_OPTIONS: "-Xmx3g"
+      JAVA_TOOL_OPTIONS: "-Xmx4g"
       GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=2 -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false"
     docker:
       - image: circleci/android:api-29
@@ -15,7 +15,7 @@ jobs:
           key: v1-gradle-cache-{{ checksum "buildSrc/src/main/kotlin/Deps.kt" }}
       - run:
           name: Run check task
-          command: ./gradlew build check
+          command: ./gradlew check jacocoTestReport jacocoTestCoverageVerification
       - save_cache:
           paths:
             - ~/.gradle/wrapper

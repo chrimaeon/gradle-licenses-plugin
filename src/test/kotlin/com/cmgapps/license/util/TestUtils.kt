@@ -16,6 +16,4 @@
 
 package com.cmgapps.license.util
 
-object TestUtils {
-    fun getFileContent(fileName: String) = javaClass.getResource("/licenses/$fileName").readText()
-}
+fun Any.getFileContent(fileName: String) = javaClass.getResource("/licenses/$fileName").readText()

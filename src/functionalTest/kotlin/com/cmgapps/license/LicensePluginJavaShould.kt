@@ -16,8 +16,9 @@
 
 package com.cmgapps.license
 
-import com.cmgapps.license.util.TestUtils
+import com.cmgapps.license.util.getFileContent
 import com.cmgapps.license.util.plus
+import com.cmgapps.license.util.withJaCoCo
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
@@ -26,6 +27,7 @@ import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.matchesPattern
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -43,6 +45,7 @@ class LicensePluginJavaShould {
     private lateinit var buildFile: File
     private lateinit var reportFolder: String
     private lateinit var mavenRepoUrl: String
+    private lateinit var gradleRunner: GradleRunner
 
     @BeforeEach
     fun setUp() {
@@ -56,6 +59,12 @@ class LicensePluginJavaShould {
             }
 
         """.trimIndent()
+
+        gradleRunner = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments(":licenseReport")
+            .withPluginClasspath()
+            .withJaCoCo()
     }
 
     /**
@@ -69,14 +78,12 @@ class LicensePluginJavaShould {
      * 3.5.0+	      | 5.4.1-5.6.4
      * ------------------------------
      */
+    @DisabledIfEnvironmentVariable(named = "CIRCLECI", matches = "true")
     @ParameterizedTest
     @ValueSource(strings = ["3.5", "4.4", "5.1.1", "6.0.1"])
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
-        val result = GradleRunner.create()
+        val result = gradleRunner
             .withGradleVersion(version)
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
             .build()
 
         assertThat("Gradle version $version", result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
@@ -84,11 +91,7 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate report with no dependencies`() {
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
     }
@@ -106,11 +109,7 @@ class LicensePluginJavaShould {
             }
         """.trimIndent()
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(
             result.output,
@@ -146,11 +145,7 @@ class LicensePluginJavaShould {
             }
         """.trimIndent()
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(
             result.output,
@@ -171,7 +166,7 @@ class LicensePluginJavaShould {
                     "<li>Retrofit</li>" +
                     "</ul>" +
                     "<pre>" +
-                    TestUtils.getFileContent("apache-2.0.txt") +
+                    getFileContent("apache-2.0.txt") +
                     "</pre>" +
                     "</body>" +
                     "</html>"
@@ -192,11 +187,7 @@ class LicensePluginJavaShould {
             }
         """.trimIndent()
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(
             result.output,
@@ -239,11 +230,7 @@ class LicensePluginJavaShould {
             }
         """.trimIndent()
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(
             result.output,
@@ -290,11 +277,7 @@ class LicensePluginJavaShould {
             }
         """.trimIndent()
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(
             result.output,
@@ -329,11 +312,7 @@ class LicensePluginJavaShould {
             }
         """.trimIndent()
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(
             result.output,
@@ -378,11 +357,7 @@ class LicensePluginJavaShould {
             }
         """.trimIndent()
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(
             result.output,
@@ -409,11 +384,7 @@ class LicensePluginJavaShould {
             }
         """.trimIndent()
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(result.output, containsString("'outputType' will be ignored when setting a 'customReport'"))
     }

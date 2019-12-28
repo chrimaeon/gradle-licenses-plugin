@@ -17,6 +17,7 @@
 package com.cmgapps.license
 
 import com.cmgapps.license.util.plus
+import com.cmgapps.license.util.withJaCoCo
 import com.cmgapps.license.util.write
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -42,6 +43,7 @@ class LicensePluginAndroidShould {
     private lateinit var reportFolder: String
     private lateinit var mavenRepoUrl: String
     private lateinit var pluginClasspath: String
+    private lateinit var gradleRunner: GradleRunner
 
     @BeforeEach
     fun setUp() {
@@ -77,6 +79,10 @@ class LicensePluginAndroidShould {
             apply plugin: 'com.cmgapps.licenses'
 
         """.trimIndent()
+
+        gradleRunner = GradleRunner.create()
+            .withProjectDir(testProjectDir.toFile())
+            .withJaCoCo()
     }
 
     @Test
@@ -130,9 +136,7 @@ class LicensePluginAndroidShould {
             "licenseFullReleaseReport"
         )) {
 
-            val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.toFile())
-                .withArguments(":$taskName")
+            val result = gradleRunner.withArguments(":$taskName")
                 .build()
 
             assertThat(result.task(":$taskName")?.outcome, `is`(TaskOutcome.SUCCESS))
@@ -166,11 +170,7 @@ class LicensePluginAndroidShould {
             }
         """.trimIndent()
 
-        GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseDebugReport")
-            .withPluginClasspath()
-            .build()
+        gradleRunner.withArguments(":licenseDebugReport").build()
 
         assertThat(
             File("$reportFolder/licenseDebugReport/licenses.txt").readText().trim(),
@@ -210,11 +210,7 @@ class LicensePluginAndroidShould {
         )
 
         val taskName = ":licenseDebugReport"
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(taskName)
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.withArguments(taskName).build()
 
         assertThat(result.task(taskName)?.outcome, `is`(TaskOutcome.SUCCESS))
     }
@@ -243,11 +239,7 @@ class LicensePluginAndroidShould {
         )
 
         val taskName = ":licenseDebugReport"
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(taskName)
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.withArguments(taskName).build()
 
         assertThat(result.task(taskName)?.outcome, `is`(TaskOutcome.SUCCESS))
     }
@@ -276,10 +268,7 @@ class LicensePluginAndroidShould {
         )
 
         val taskName = ":licenseDebugFeatureReport"
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(taskName)
-            .withPluginClasspath()
+        val result = gradleRunner.withArguments(taskName)
             .build()
 
         assertThat(result.task(taskName)?.outcome, `is`(TaskOutcome.SUCCESS))
