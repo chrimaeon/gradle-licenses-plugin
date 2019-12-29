@@ -17,13 +17,24 @@
 package com.cmgapps.license
 
 import com.cmgapps.license.model.Library
+import com.cmgapps.license.reporter.LicensesReportsContainer
+import groovy.lang.Closure
+import org.gradle.api.Action
+import org.gradle.util.ClosureBackedAction
 
 typealias CustomReport = (List<Library>) -> String
 
 open class LicensesExtension() {
-    var outputType = OutputType.HTML
-    var bodyCss = LicensesTask.DEFAULT_BODY_CSS
-    var preCss = LicensesTask.DEFAULT_PRE_CSS
+    var reports: Action<in LicensesReportsContainer> = Action { }
+        private set
+
+    fun reports(closure: Closure<LicensesReportsContainer>) {
+        reports(ClosureBackedAction<LicensesReportsContainer>(closure))
+    }
+
+    fun reports(configureAction: Action<in LicensesReportsContainer>) {
+        reports = configureAction
+    }
 
     var customReport: CustomReport? = null
         private set

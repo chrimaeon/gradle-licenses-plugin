@@ -49,9 +49,7 @@ class LicensesPlugin : Plugin<Project> {
             val taskName = "licenseReport"
 
             val configuration = Action<LicensesTask> { task ->
-                val path = "${project.buildDir}/reports/licenses/$taskName/"
-
-                addBasicConfiguration(project, task, extension, path)
+                task.addBasicConfiguration(extension)
             }
 
             registerTask(project, LicensesTask::class.java, taskName, configuration)
@@ -63,9 +61,7 @@ class LicensesPlugin : Plugin<Project> {
                 val taskName = "license${androidVariant.name.capitalize()}Report"
 
                 val configuration = Action<AndroidLicensesTask> { task ->
-                    val path = "${project.buildDir}/reports/licenses/$taskName/"
-
-                    addBasicConfiguration(project, task, extension, path)
+                    task.addBasicConfiguration(extension)
                     task.variant = androidVariant.name
                     task.buildType = androidVariant.buildType.name
                     task.productFlavors = androidVariant.productFlavors
@@ -76,28 +72,12 @@ class LicensesPlugin : Plugin<Project> {
         }
 
         @JvmStatic
-        private fun addBasicConfiguration(
-            project: Project,
-            task: LicensesTask,
-            extension: LicensesExtension,
-            path: String
-        ) {
-            val customReport = extension.customReport
-            if (customReport != null && extension.outputType != OutputType.CUSTOM) {
-                project.logger.warn("'outputType' will be ignored when setting a 'customReport'")
-                extension.outputType = OutputType.CUSTOM
-            }
-
-            with(task) {
-                additionalProjects = extension.additionalProjects
-                outputType = extension.outputType
-                outputFile = project.file(path + getFileName(extension.outputType))
-                bodyCss = extension.bodyCss
-                preCss = extension.preCss
-                description = TASK_DESC
-                group = TASK_GROUP
-                customReport(customReport)
-            }
+        private fun LicensesTask.addBasicConfiguration(extension: LicensesExtension) {
+            additionalProjects = extension.additionalProjects
+            description = TASK_DESC
+            group = TASK_GROUP
+//                customReport(customReport)
+            reports(extension.reports)
         }
 
         @JvmStatic

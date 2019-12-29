@@ -17,7 +17,71 @@
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.model.Library
+import org.gradle.api.Task
+import org.gradle.api.resources.TextResource
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputFile
+import java.io.File
 
 abstract class Report(protected val libraries: List<Library>) {
     abstract fun generate(): String
+}
+
+interface LicensesReport {
+    @get:Internal
+    val name: String
+    @get:OutputFile
+    var destination: File
+    @get:Input
+    var enabled: Boolean
+}
+
+open class SimpleLicenseReport(final override val name: String, task: Task) : LicensesReport {
+    final override var destination = File("${task.project.buildDir}/reports/licenses/${task.name}/licenses.$name")
+    override var enabled: Boolean = false
+}
+
+class CustomizableHtmlReport(name: String, task: Task) : SimpleLicenseReport(name, task) {
+    var stylesheet: TextResource? = null
+}
+
+interface LicensesReportsContainer {
+    @get:Internal
+    val csv: LicensesReport
+
+    @get:Internal
+    val html: CustomizableHtmlReport
+
+    @get:Internal
+    val json: LicensesReport
+
+    @get:Internal
+    val markdown: LicensesReport
+
+    @get:Internal
+    val text: LicensesReport
+
+    @get:Internal
+    val xml: LicensesReport
+}
+
+internal class LicensesReportsContainerImpl(task: Task) : LicensesReportsContainer {
+    val reports = mutableMapOf<String, LicensesReport>()
+
+    init {
+        reports.put("csv", SimpleLicenseReport("csv", task))
+        reports.put("html", CustomizableHtmlReport("html", task))
+        reports.put("json", SimpleLicenseReport("json", task))
+        reports.put("md", SimpleLicenseReport("md", task))
+        reports.put("txt", SimpleLicenseReport("txt", task))
+        reports.put("xml", SimpleLicenseReport("xml", task))
+    }
+
+    override val csv: LicensesReport = checkNotNull(reports["csv"])
+    override val html: CustomizableHtmlReport = checkNotNull(reports["html"]) as CustomizableHtmlReport
+    override val json: LicensesReport = checkNotNull(reports["json"])
+    override val markdown: LicensesReport = checkNotNull(reports["md"])
+    override val text: LicensesReport = checkNotNull(reports["txt"])
+    override val xml: LicensesReport = checkNotNull(reports["xml"])
 }
