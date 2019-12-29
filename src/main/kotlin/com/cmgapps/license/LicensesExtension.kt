@@ -16,13 +16,10 @@
 
 package com.cmgapps.license
 
-import com.cmgapps.license.model.Library
 import com.cmgapps.license.reporter.LicensesReportsContainer
 import groovy.lang.Closure
 import org.gradle.api.Action
 import org.gradle.util.ClosureBackedAction
-
-typealias CustomReport = (List<Library>) -> String
 
 open class LicensesExtension() {
     var reports: Action<in LicensesReportsContainer> = Action { }
@@ -36,9 +33,6 @@ open class LicensesExtension() {
         reports = configureAction
     }
 
-    var customReport: CustomReport? = null
-        private set
-
     var additionalProjects = emptySet<String>()
         private set
 
@@ -51,10 +45,6 @@ open class LicensesExtension() {
             is Set -> modules
             else -> modules.toSet()
         }
-    }
-
-    fun customReport(report: CustomReport) {
-        this.customReport = report
     }
 }
 

@@ -25,7 +25,6 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.matchesPattern
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import org.junit.jupiter.api.io.TempDir
@@ -370,13 +369,14 @@ class LicensePluginJavaShould {
         )
     }
 
-    @Disabled
     @Test
     fun `generate custom report`() {
-        // TODO
         buildFile + """
             licenses {
-              customReport { list -> list.collect { it.name }.join(', ') }
+                reports {
+                    custom.enabled = true
+                    custom.action = { list -> list.collect { it.name }.join(', ') }
+                }
             }
             repositories {
               maven {
@@ -388,7 +388,7 @@ class LicensePluginJavaShould {
             }
         """.trimIndent()
 
-        val result = gradleRunner.build()
+        val result = gradleRunner.withDebug(true).build()
 
         assertThat(
             result.output,

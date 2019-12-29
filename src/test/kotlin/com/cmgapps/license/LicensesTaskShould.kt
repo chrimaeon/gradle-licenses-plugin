@@ -264,18 +264,19 @@ class LicensesTaskShould {
         )
     }
 
-//    @Test
-//    fun `generate custom Report`() {
-//        val outputFile = File(reportFolder, "licenses")
-//        project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
-//            task.outputType = OutputType.CSV
-//            task.outputFile = outputFile
-//            task.customReport { list -> list.joinToString { it.name } }
-//        }
-//
-//        val task = project.tasks.getByName("licensesReport") as LicensesTask
-//        task.licensesReport()
-//
-//        assertThat(outputFile.readText(), `is`("Fake dependency name"))
-//    }
+    @Test
+    fun `generate custom Report`() {
+        val outputFile = File(reportFolder, "licenses")
+        project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+            task.reports(Action {
+                it.custom.enabled = true
+                it.custom.action = { list -> list.joinToString { it.name } }
+            })
+        }
+
+        val task = project.tasks.getByName("licensesReport") as LicensesTask
+        task.licensesReport()
+
+        assertThat(outputFile.readText(), `is`("Fake dependency name"))
+    }
 }

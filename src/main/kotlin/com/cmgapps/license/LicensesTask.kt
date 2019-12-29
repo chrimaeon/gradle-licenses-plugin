@@ -20,6 +20,7 @@ import com.android.builder.model.ProductFlavor
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import com.cmgapps.license.reporter.CsvReport
+import com.cmgapps.license.reporter.CustomReport
 import com.cmgapps.license.reporter.HtmlReport
 import com.cmgapps.license.reporter.JsonReport
 import com.cmgapps.license.reporter.LicensesReport
@@ -75,12 +76,6 @@ open class LicensesTask : DefaultTask() {
                 it.path == moduleName
             } ?: throw IllegalArgumentException("$moduleName not found")
         }.toSet()
-    }
-
-    private var customReport: CustomReport? = null
-
-    fun customReport(report: CustomReport?) {
-        this.customReport = report
     }
 
     @Internal
@@ -234,13 +229,13 @@ open class LicensesTask : DefaultTask() {
         if (reports.markdown.enabled) reports.markdown.writeFileReport(MarkdownReport(libraries))
         if (reports.text.enabled) reports.text.writeFileReport(TextReport(libraries))
         if (reports.xml.enabled) reports.xml.writeFileReport(XmlReport(libraries))
-//        val customReport = reports.custom.report
-//        if (reports.custom.isEnabled && customReport != null) reports.custom.writeFileReport(
-//            CustomReport(
-//                libraries,
-//                customReport
-//            )
-//        )
+        val customReport = reports.custom.action
+        if (reports.custom.enabled && customReport != null) reports.custom.writeFileReport(
+            CustomReport(
+                libraries,
+                customReport
+            )
+        )
     }
 
     private fun LicensesReport.writeFileReport(report: Report) {

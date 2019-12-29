@@ -76,7 +76,6 @@ class LicensesPlugin : Plugin<Project> {
             additionalProjects = extension.additionalProjects
             description = TASK_DESC
             group = TASK_GROUP
-//                customReport(customReport)
             reports(extension.reports)
         }
 

@@ -38,13 +38,24 @@ interface LicensesReport {
 }
 
 open class SimpleLicenseReport(final override val name: String, task: Task) : LicensesReport {
-    final override var destination = File("${task.project.buildDir}/reports/licenses/${task.name}/licenses.$name")
+    final override var destination: File
     override var enabled: Boolean = false
+
+    init {
+        val name = if (name == "custom") "" else ".$name"
+        destination = File("${task.project.buildDir}/reports/licenses/${task.name}/licenses$name")
+    }
 }
 
 class CustomizableHtmlReport(name: String, task: Task) : SimpleLicenseReport(name, task) {
     var stylesheet: TextResource? = null
 }
+
+class CustomizableReport(name: String, task: Task) : SimpleLicenseReport(name, task) {
+    var action: CustomReportAction? = null
+}
+
+typealias CustomReportAction = (List<Library>) -> String
 
 interface LicensesReportsContainer {
     @get:Internal
@@ -64,18 +75,22 @@ interface LicensesReportsContainer {
 
     @get:Internal
     val xml: LicensesReport
+
+    @get:Internal
+    val custom: CustomizableReport
 }
 
 internal class LicensesReportsContainerImpl(task: Task) : LicensesReportsContainer {
     val reports = mutableMapOf<String, LicensesReport>()
 
     init {
-        reports.put("csv", SimpleLicenseReport("csv", task))
-        reports.put("html", CustomizableHtmlReport("html", task))
-        reports.put("json", SimpleLicenseReport("json", task))
-        reports.put("md", SimpleLicenseReport("md", task))
-        reports.put("txt", SimpleLicenseReport("txt", task))
-        reports.put("xml", SimpleLicenseReport("xml", task))
+        reports["csv"] = SimpleLicenseReport("csv", task)
+        reports["html"] = CustomizableHtmlReport("html", task)
+        reports["json"] = SimpleLicenseReport("json", task)
+        reports["md"] = SimpleLicenseReport("md", task)
+        reports["txt"] = SimpleLicenseReport("txt", task)
+        reports["xml"] = SimpleLicenseReport("xml", task)
+        reports["custom"] = CustomizableReport("custom", task)
     }
 
     override val csv: LicensesReport = checkNotNull(reports["csv"])
@@ -84,4 +99,5 @@ internal class LicensesReportsContainerImpl(task: Task) : LicensesReportsContain
     override val markdown: LicensesReport = checkNotNull(reports["md"])
     override val text: LicensesReport = checkNotNull(reports["txt"])
     override val xml: LicensesReport = checkNotNull(reports["xml"])
+    override val custom: CustomizableReport = checkNotNull(reports["custom"]) as CustomizableReport
 }
