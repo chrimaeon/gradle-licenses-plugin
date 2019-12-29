@@ -17,7 +17,109 @@
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.model.Library
+import org.gradle.api.Task
+import org.gradle.api.resources.TextResource
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputFile
+import java.io.File
 
 abstract class Report(protected val libraries: List<Library>) {
     abstract fun generate(): String
+}
+
+interface LicensesReport {
+    @get:Internal
+    val name: String
+    @get:OutputFile
+    var destination: File
+    @get:Input
+    var enabled: Boolean
+}
+
+open class SimpleLicenseReport(type: ReportType, task: Task) : LicensesReport {
+    final override var destination: File
+    final override var enabled: Boolean = false
+    final override val name = type.name
+
+    init {
+        val extension = if (type == ReportType.CUSTOM) "" else ".${type.extension}"
+        destination = File("${task.project.buildDir}/reports/licenses/${task.name}/licenses$extension")
+    }
+}
+
+class CustomizableHtmlReport(type: ReportType, task: Task) : SimpleLicenseReport(type, task) {
+    var stylesheet: TextResource? = null
+}
+
+class CustomizableReport(type: ReportType, task: Task) : SimpleLicenseReport(type, task) {
+    var action: CustomReportAction? = null
+}
+
+typealias CustomReportAction = (List<Library>) -> String
+
+interface LicensesReportsContainer {
+    @get:Internal
+    val csv: LicensesReport
+
+    @get:Internal
+    val html: CustomizableHtmlReport
+
+    @get:Internal
+    val json: LicensesReport
+
+    @get:Internal
+    val markdown: LicensesReport
+
+    @get:Internal
+    val text: LicensesReport
+
+    @get:Internal
+    val xml: LicensesReport
+
+    @get:Internal
+    val custom: CustomizableReport
+}
+
+internal class LicensesReportsContainerImpl(task: Task) : LicensesReportsContainer {
+    val reports = mutableMapOf<ReportType, LicensesReport>()
+
+    init {
+        with(reports) {
+            add(ReportType.CSV, SimpleLicenseReport::class.java, task)
+            add(ReportType.HTML, CustomizableHtmlReport::class.java, task)
+            add(ReportType.JSON, SimpleLicenseReport::class.java, task)
+            add(ReportType.MARKDOWN, SimpleLicenseReport::class.java, task)
+            add(ReportType.TEXT, SimpleLicenseReport::class.java, task)
+            add(ReportType.XML, SimpleLicenseReport::class.java, task)
+            add(ReportType.CUSTOM, CustomizableReport::class.java, task)
+        }
+    }
+
+    override val csv: LicensesReport = checkNotNull(reports[ReportType.CSV])
+    override val html: CustomizableHtmlReport = checkNotNull(reports[ReportType.HTML]) as CustomizableHtmlReport
+    override val json: LicensesReport = checkNotNull(reports[ReportType.JSON])
+    override val markdown: LicensesReport = checkNotNull(reports[ReportType.MARKDOWN])
+    override val text: LicensesReport = checkNotNull(reports[ReportType.TEXT])
+    override val xml: LicensesReport = checkNotNull(reports[ReportType.XML])
+    override val custom: CustomizableReport = checkNotNull(reports[ReportType.CUSTOM]) as CustomizableReport
+
+    private fun <T : LicensesReport> MutableMap<ReportType, LicensesReport>.add(
+        reportType: ReportType,
+        type: Class<T>,
+        task: Task
+    ) {
+        val licenseReport = type.getConstructor(ReportType::class.java, Task::class.java).newInstance(reportType, task)
+        put(reportType, licenseReport)
+    }
+}
+
+enum class ReportType(val extension: String) {
+    CSV("csv"),
+    HTML("html"),
+    JSON("json"),
+    MARKDOWN("md"),
+    TEXT("txt"),
+    XML("xml"),
+    CUSTOM("custom")
 }

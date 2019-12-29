@@ -16,7 +16,6 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.LicensesTask
 import com.cmgapps.license.helper.LibrariesHelper
 import com.cmgapps.license.util.getFileContent
 import org.hamcrest.MatcherAssert.assertThat
@@ -29,8 +28,7 @@ class HtmlReportShould {
     fun `generate HTML report`() {
         val result = HtmlReport(
             LibrariesHelper.libraries,
-            LicensesTask.DEFAULT_BODY_CSS,
-            LicensesTask.DEFAULT_PRE_CSS
+            null
         ).generate()
 
         assertThat(

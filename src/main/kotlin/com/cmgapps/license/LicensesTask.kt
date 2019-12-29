@@ -20,24 +20,31 @@ import com.android.builder.model.ProductFlavor
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import com.cmgapps.license.reporter.CsvReport
+import com.cmgapps.license.reporter.CustomReport
 import com.cmgapps.license.reporter.HtmlReport
 import com.cmgapps.license.reporter.JsonReport
+import com.cmgapps.license.reporter.LicensesReport
+import com.cmgapps.license.reporter.LicensesReportsContainer
+import com.cmgapps.license.reporter.LicensesReportsContainerImpl
 import com.cmgapps.license.reporter.MarkdownReport
 import com.cmgapps.license.reporter.Report
 import com.cmgapps.license.reporter.TextReport
 import com.cmgapps.license.reporter.XmlReport
+import groovy.lang.Closure
+import groovy.lang.DelegatesTo
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ExternalDependency
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
+import org.gradle.util.ClosureBackedAction
 import java.io.File
 import java.io.PrintStream
 import java.net.URI
@@ -46,29 +53,12 @@ import java.net.URL
 open class LicensesTask : DefaultTask() {
 
     companion object {
-        const val DEFAULT_PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
-        const val DEFAULT_BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
-
         private const val POM_CONFIGURATION = "poms"
         private const val TEMP_POM_CONFIGURATION = "tempPoms"
 
         private fun getClickableFileUrl(path: File) =
             URI("file", "", path.toURI().path, null, null).toString()
     }
-
-    @OutputFile
-    lateinit var outputFile: File
-
-    @Input
-    lateinit var outputType: OutputType
-
-    @Optional
-    @Input
-    var bodyCss: String? = null
-
-    @Optional
-    @Input
-    var preCss: String? = null
 
     @Internal
     @Input
@@ -88,28 +78,37 @@ open class LicensesTask : DefaultTask() {
         }.toSet()
     }
 
-    private var customReport: CustomReport? = null
-
-    fun customReport(report: CustomReport?) {
-        this.customReport = report
-    }
-
     @Internal
     protected fun getAllProjects(): Set<Project> {
         return _allProjects
     }
 
+    @Nested
+    val reports: LicensesReportsContainer
+
+    fun reports(
+        @DelegatesTo(
+            value = LicensesReportsContainer::class,
+            strategy = Closure.DELEGATE_FIRST
+        ) closure: Closure<LicensesReportsContainer>
+    ): LicensesReportsContainer {
+        return reports(ClosureBackedAction<LicensesReportsContainer>(closure))
+    }
+
+    fun reports(configureAction: Action<in LicensesReportsContainer>): LicensesReportsContainer {
+        configureAction.execute(reports)
+        return reports
+    }
+
     init {
         outputs.upToDateWhen { false }
+        reports = LicensesReportsContainerImpl(this)
+        reports.html.enabled = true
     }
 
     @TaskAction
     fun licensesReport() {
         pomConfiguration = project.configurations.create(POM_CONFIGURATION)
-        if (customReport != null && outputType != OutputType.CUSTOM) {
-            logger.warn("'outputType' will be ignored when setting a 'customReport'")
-            outputType = OutputType.CUSTOM
-        }
 
         collectDependencies()
         generateLibraries()
@@ -220,35 +219,33 @@ open class LicensesTask : DefaultTask() {
             return
         }
 
-        outputFile.delete()
-        outputFile.parentFile.mkdirs()
-        outputFile.createNewFile()
+        if (reports.html.enabled) reports.html.writeFileReport(
+            HtmlReport(
+                libraries,
+                reports.html.stylesheet
+            )
+        )
+        if (reports.csv.enabled) reports.csv.writeFileReport(CsvReport(libraries))
+        if (reports.json.enabled) reports.json.writeFileReport(JsonReport(libraries))
+        if (reports.markdown.enabled) reports.markdown.writeFileReport(MarkdownReport(libraries))
+        if (reports.text.enabled) reports.text.writeFileReport(TextReport(libraries))
+        if (reports.xml.enabled) reports.xml.writeFileReport(XmlReport(libraries))
+        val customReport = reports.custom.action
+        if (reports.custom.enabled && customReport != null) reports.custom.writeFileReport(
+            CustomReport(
+                libraries,
+                customReport
+            )
+        )
+    }
 
-        PrintStream(outputFile.outputStream()).use {
-            val report = when (outputType) {
-                OutputType.HTML -> {
-                    HtmlReport(libraries, bodyCss ?: DEFAULT_BODY_CSS, preCss ?: DEFAULT_PRE_CSS)
-                }
-                OutputType.XML -> XmlReport(libraries)
-                OutputType.JSON -> JsonReport(libraries)
-                OutputType.TEXT -> TextReport(libraries)
-                OutputType.MD -> MarkdownReport(libraries)
-                OutputType.CSV -> CsvReport(libraries)
-                OutputType.CUSTOM -> {
-                    val customReport = customReport
-                        ?: throw IllegalStateException("customReport is not defined but outputType is OutputType.CUSTOM")
-                    object : Report(libraries) {
-                        override fun generate(): String {
-                            return customReport(libraries)
-                        }
-                    }
-                }
-            }
-            it.print(report.generate())
-            it.flush()
-        }
-
-        logger.lifecycle("Wrote ${outputType.name} report to ${getClickableFileUrl(outputFile)}.")
+    private fun LicensesReport.writeFileReport(report: Report) {
+        @Suppress("USELESS_ELVIS")
+        (with(destination) {
+            prepare()
+            writeText(report.generate())
+            logger.lifecycle("Wrote ${this@writeFileReport.name.toUpperCase()} report to ${getClickableFileUrl(this)}.")
+        })
     }
 }
 
@@ -303,4 +300,15 @@ open class AndroidLicensesTask : LicensesTask() {
 
         addConfigurations(configurations)
     }
+}
+
+private fun File.writeText(text: String) = PrintStream(outputStream()).use {
+    it.print(text)
+    it.flush()
+}
+
+private fun File.prepare() {
+    delete()
+    parentFile.mkdirs()
+    createNewFile()
 }

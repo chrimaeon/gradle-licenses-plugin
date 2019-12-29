@@ -74,6 +74,9 @@ class LicensePluginJavaMultiProjectShould {
             }
             licenses {
                 additionalProjects ':module2'
+                reports {
+                    html.enabled = true
+                }
             }
         """.trimIndent()
 
@@ -123,6 +126,9 @@ class LicensePluginJavaMultiProjectShould {
             }
             licenses {
                 additionalProjects ':module2'
+                reports {
+                    html.enabled = true
+                }
             }
             dependencies {
                 implementation 'com.squareup.retrofit2:retrofit:2.3.0'
@@ -178,6 +184,9 @@ class LicensePluginJavaMultiProjectShould {
             }
             licenses {
                 additionalProjects ':module2'
+                reports {
+                    html.enabled = true
+                }
             }
             dependencies {
                 compile 'group:name:1.0.0'

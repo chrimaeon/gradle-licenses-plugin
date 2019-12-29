@@ -160,7 +160,9 @@ class LicensePluginAndroidShould {
             }
             
             licenses {
-                outputType OutputType.TEXT
+                reports {
+                    text.enabled = true
+                }
             }
             
             dependencies {
