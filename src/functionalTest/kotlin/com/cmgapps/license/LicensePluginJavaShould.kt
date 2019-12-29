@@ -308,7 +308,7 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote TXT report to .*$reportFolder/licenses.txt.*", Pattern.DOTALL))
+            matchesPattern(Pattern.compile(".*Wrote TEXT report to .*$reportFolder/licenses.txt.*", Pattern.DOTALL))
         )
         assertThat(
             File("$reportFolder/licenses.txt").readText().trim(),

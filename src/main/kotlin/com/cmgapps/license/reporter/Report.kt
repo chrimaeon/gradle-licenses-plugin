@@ -37,21 +37,22 @@ interface LicensesReport {
     var enabled: Boolean
 }
 
-open class SimpleLicenseReport(final override val name: String, task: Task) : LicensesReport {
+open class SimpleLicenseReport(type: ReportType, task: Task) : LicensesReport {
     final override var destination: File
-    override var enabled: Boolean = false
+    final override var enabled: Boolean = false
+    final override var name = type.name
 
     init {
-        val name = if (name == "custom") "" else ".$name"
-        destination = File("${task.project.buildDir}/reports/licenses/${task.name}/licenses$name")
+        val extension = if (type == ReportType.CUSTOM) "" else ".${type.extension}"
+        destination = File("${task.project.buildDir}/reports/licenses/${task.name}/licenses$extension")
     }
 }
 
-class CustomizableHtmlReport(name: String, task: Task) : SimpleLicenseReport(name, task) {
+class CustomizableHtmlReport(type: ReportType, task: Task) : SimpleLicenseReport(type, task) {
     var stylesheet: TextResource? = null
 }
 
-class CustomizableReport(name: String, task: Task) : SimpleLicenseReport(name, task) {
+class CustomizableReport(type: ReportType, task: Task) : SimpleLicenseReport(type, task) {
     var action: CustomReportAction? = null
 }
 
@@ -81,23 +82,44 @@ interface LicensesReportsContainer {
 }
 
 internal class LicensesReportsContainerImpl(task: Task) : LicensesReportsContainer {
-    val reports = mutableMapOf<String, LicensesReport>()
+    val reports = mutableMapOf<ReportType, LicensesReport>()
 
     init {
-        reports["csv"] = SimpleLicenseReport("csv", task)
-        reports["html"] = CustomizableHtmlReport("html", task)
-        reports["json"] = SimpleLicenseReport("json", task)
-        reports["md"] = SimpleLicenseReport("md", task)
-        reports["txt"] = SimpleLicenseReport("txt", task)
-        reports["xml"] = SimpleLicenseReport("xml", task)
-        reports["custom"] = CustomizableReport("custom", task)
+        with(reports) {
+            add(ReportType.CSV, SimpleLicenseReport::class.java, task)
+            add(ReportType.HTML, CustomizableHtmlReport::class.java, task)
+            add(ReportType.JSON, SimpleLicenseReport::class.java, task)
+            add(ReportType.MARKDOWN, SimpleLicenseReport::class.java, task)
+            add(ReportType.TEXT, SimpleLicenseReport::class.java, task)
+            add(ReportType.XML, SimpleLicenseReport::class.java, task)
+            add(ReportType.CUSTOM, CustomizableReport::class.java, task)
+        }
     }
 
-    override val csv: LicensesReport = checkNotNull(reports["csv"])
-    override val html: CustomizableHtmlReport = checkNotNull(reports["html"]) as CustomizableHtmlReport
-    override val json: LicensesReport = checkNotNull(reports["json"])
-    override val markdown: LicensesReport = checkNotNull(reports["md"])
-    override val text: LicensesReport = checkNotNull(reports["txt"])
-    override val xml: LicensesReport = checkNotNull(reports["xml"])
-    override val custom: CustomizableReport = checkNotNull(reports["custom"]) as CustomizableReport
+    override val csv: LicensesReport = checkNotNull(reports[ReportType.CSV])
+    override val html: CustomizableHtmlReport = checkNotNull(reports[ReportType.HTML]) as CustomizableHtmlReport
+    override val json: LicensesReport = checkNotNull(reports[ReportType.JSON])
+    override val markdown: LicensesReport = checkNotNull(reports[ReportType.MARKDOWN])
+    override val text: LicensesReport = checkNotNull(reports[ReportType.TEXT])
+    override val xml: LicensesReport = checkNotNull(reports[ReportType.XML])
+    override val custom: CustomizableReport = checkNotNull(reports[ReportType.CUSTOM]) as CustomizableReport
+
+    private fun <T : LicensesReport> MutableMap<ReportType, LicensesReport>.add(
+        reportType: ReportType,
+        type: Class<T>,
+        task: Task
+    ) {
+        val licenseReport = type.getConstructor(ReportType::class.java, Task::class.java).newInstance(reportType, task)
+        put(reportType, licenseReport)
+    }
+}
+
+enum class ReportType(val extension: String) {
+    CSV("csv"),
+    HTML("html"),
+    JSON("json"),
+    MARKDOWN("md"),
+    TEXT("txt"),
+    XML("xml"),
+    CUSTOM("custom")
 }
