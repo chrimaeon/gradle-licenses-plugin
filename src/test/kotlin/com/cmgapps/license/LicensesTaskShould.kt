@@ -54,13 +54,12 @@ class LicensesTaskShould {
 
         val outputFile = File(reportFolder, "licenses.html")
 
-        project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+        val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports(Action {
                 it.html.enabled = true
             })
         }
 
-        val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
         assertThat(
@@ -90,14 +89,13 @@ class LicensesTaskShould {
 
         val outputFile = File(reportFolder, "licenses.html")
 
-        project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+        val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports(Action {
                 it.html.enabled = true
                 it.html.stylesheet = project.resources.text.fromString("body{}")
             })
         }
 
-        val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
         assertThat(
@@ -127,13 +125,12 @@ class LicensesTaskShould {
 
         val outputFile = File(reportFolder, "licenses.json")
 
-        project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+        val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports(Action {
                 it.json.enabled = true
             })
         }
 
-        val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
         assertThat(
@@ -160,13 +157,12 @@ class LicensesTaskShould {
 
         val outputFile = File(reportFolder, "licenses.xml")
 
-        project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+        val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports(Action {
                 it.xml.enabled = true
             })
         }
 
-        val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
         assertThat(
@@ -202,13 +198,12 @@ class LicensesTaskShould {
     @Test
     fun `generate Markdown Report`() {
         val outputFile = File(reportFolder, "licenses.md")
-        project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+        val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports(Action {
                 it.markdown.enabled = true
             })
         }
 
-        val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
         assertThat(
@@ -225,13 +220,12 @@ class LicensesTaskShould {
     @Test
     fun `generate Plain text Report`() {
         val outputFile = File(reportFolder, "licenses.txt")
-        project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+        val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports(Action {
                 it.text.enabled = true
             })
         }
 
-        val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
         assertThat(
@@ -247,13 +241,12 @@ class LicensesTaskShould {
     @Test
     fun `generate CSV Report`() {
         val outputFile = File(reportFolder, "licenses.csv")
-        project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+        val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports(Action {
                 it.csv.enabled = true
             })
         }
 
-        val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
         assertThat(
@@ -267,16 +260,64 @@ class LicensesTaskShould {
     @Test
     fun `generate custom Report`() {
         val outputFile = File(reportFolder, "licenses")
-        project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+        val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports(Action {
                 it.custom.enabled = true
-                it.custom.action = { list -> list.joinToString { it.name } }
+                it.custom.action = { list -> list.joinToString { lib -> lib.name } }
             })
         }
 
-        val task = project.tasks.getByName("licensesReport") as LicensesTask
         task.licensesReport()
 
         assertThat(outputFile.readText(), `is`("Fake dependency name"))
+    }
+
+    @Test
+    fun `generate HTML by default`() {
+        val outputFile = File(reportFolder, "licenses.html")
+        val task = project.tasks.create("licensesReport", LicensesTask::class.java)
+
+        task.licensesReport()
+
+        assertThat(
+            outputFile.readText(), `is`(
+                "<!DOCTYPE html>" +
+                    "<html lang=\"en\">" +
+                    "<head>" +
+                    "<meta charset=\"UTF-8\">" +
+                    "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                    "<title>Open source licenses</title>" +
+                    "</head>" +
+                    "<body>" +
+                    "<h3>Notice for packages:</h3>" +
+                    "<ul><li>Fake dependency name</li></ul>" +
+                    "<div class=\"license\">" +
+                    "<p>Some license</p>" +
+                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
+                    "</div>" +
+                    "</body>" +
+                    "</html>"
+            )
+        )
+    }
+
+    @Test
+    fun `generate all reports`() {
+        val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+            task.reports(Action {
+                it.csv.enabled = true
+                it.custom.enabled = true
+                it.custom.action = { list -> list.joinToString { lib -> lib.name } }
+                it.html.enabled = true
+                it.json.enabled = true
+                it.markdown.enabled = true
+                it.text.enabled = true
+                it.xml.enabled = true
+            })
+        }
+
+        task.licensesReport()
+
+        assertThat(File(reportFolder).listFiles()?.size, `is`(7))
     }
 }

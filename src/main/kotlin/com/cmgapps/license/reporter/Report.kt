@@ -40,7 +40,7 @@ interface LicensesReport {
 open class SimpleLicenseReport(type: ReportType, task: Task) : LicensesReport {
     final override var destination: File
     final override var enabled: Boolean = false
-    final override var name = type.name
+    final override val name = type.name
 
     init {
         val extension = if (type == ReportType.CUSTOM) "" else ".${type.extension}"

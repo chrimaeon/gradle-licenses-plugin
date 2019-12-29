@@ -103,6 +103,7 @@ open class LicensesTask : DefaultTask() {
     init {
         outputs.upToDateWhen { false }
         reports = LicensesReportsContainerImpl(this)
+        reports.html.enabled = true
     }
 
     @TaskAction
