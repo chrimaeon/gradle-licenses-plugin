@@ -37,7 +37,7 @@ interface LicensesReport {
     var enabled: Boolean
 }
 
-open class SimpleLicenseReport(type: ReportType, task: Task) : LicensesReport {
+private open class LicenseReportImpl(type: ReportType, task: Task) : LicensesReport {
     final override var destination: File
     final override var enabled: Boolean = false
     final override val name = type.name
@@ -48,12 +48,21 @@ open class SimpleLicenseReport(type: ReportType, task: Task) : LicensesReport {
     }
 }
 
-class CustomizableHtmlReport(type: ReportType, task: Task) : SimpleLicenseReport(type, task) {
-    var stylesheet: TextResource? = null
+interface CustomizableHtmlReport : LicensesReport {
+    var stylesheet: TextResource?
 }
 
-class CustomizableReport(type: ReportType, task: Task) : SimpleLicenseReport(type, task) {
-    var action: CustomReportAction? = null
+private class CustomizableHtmlReportImpl(type: ReportType, task: Task) : LicenseReportImpl(type, task),
+    CustomizableHtmlReport {
+    override var stylesheet: TextResource? = null
+}
+
+interface CustomizableReport : LicensesReport {
+    var action: CustomReportAction?
+}
+
+private class CustomizableReportImpl(type: ReportType, task: Task) : LicenseReportImpl(type, task), CustomizableReport {
+    override var action: CustomReportAction? = null
 }
 
 typealias CustomReportAction = (List<Library>) -> String
@@ -82,17 +91,17 @@ interface LicensesReportsContainer {
 }
 
 internal class LicensesReportsContainerImpl(task: Task) : LicensesReportsContainer {
-    val reports = mutableMapOf<ReportType, LicensesReport>()
+    private val reports = mutableMapOf<ReportType, LicensesReport>()
 
     init {
         with(reports) {
-            add(ReportType.CSV, SimpleLicenseReport::class.java, task)
-            add(ReportType.HTML, CustomizableHtmlReport::class.java, task)
-            add(ReportType.JSON, SimpleLicenseReport::class.java, task)
-            add(ReportType.MARKDOWN, SimpleLicenseReport::class.java, task)
-            add(ReportType.TEXT, SimpleLicenseReport::class.java, task)
-            add(ReportType.XML, SimpleLicenseReport::class.java, task)
-            add(ReportType.CUSTOM, CustomizableReport::class.java, task)
+            add(ReportType.CSV, LicenseReportImpl::class.java, task)
+            add(ReportType.HTML, CustomizableHtmlReportImpl::class.java, task)
+            add(ReportType.JSON, LicenseReportImpl::class.java, task)
+            add(ReportType.MARKDOWN, LicenseReportImpl::class.java, task)
+            add(ReportType.TEXT, LicenseReportImpl::class.java, task)
+            add(ReportType.XML, LicenseReportImpl::class.java, task)
+            add(ReportType.CUSTOM, CustomizableReportImpl::class.java, task)
         }
     }
 
