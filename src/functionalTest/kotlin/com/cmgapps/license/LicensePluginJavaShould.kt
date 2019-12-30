@@ -57,6 +57,12 @@ class LicensePluginJavaShould {
                id("com.cmgapps.licenses")
             }
 
+            repositories {
+                maven {
+                    url '$mavenRepoUrl'
+                }
+            }
+
         """.trimIndent()
 
         gradleRunner = GradleRunner.create()
@@ -98,12 +104,6 @@ class LicensePluginJavaShould {
     @Test
     fun `generate report with no open source dependencies`() {
         buildFile + """
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
-            }
-            
             licenses {
                 reports {
                     html.enabled = true
@@ -140,12 +140,6 @@ class LicensePluginJavaShould {
     @Test
     fun `java library with parent pom dependency`() {
         buildFile + """
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
-            }
-            
             licenses {
                 reports {
                     html.enabled = true
@@ -189,12 +183,6 @@ class LicensePluginJavaShould {
     @Test
     fun `generate Report with custom license`() {
         buildFile + """
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
-            }
-            
             licenses {
                 reports {
                     html.enabled = true
@@ -239,12 +227,6 @@ class LicensePluginJavaShould {
     @Test
     fun `generate Report with lib with no name`() {
         buildFile + """
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
-            }
-            
             licenses {
                 reports {
                     html.enabled = true
@@ -289,16 +271,13 @@ class LicensePluginJavaShould {
     @Test
     fun `generate TXT Report`() {
         buildFile + """
+            
             licenses {
                 reports {
                     text.enabled = true
                 }
             }
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
-            }
+
             dependencies {
               compile 'group:noname:1.0.0'
             }
@@ -330,11 +309,7 @@ class LicensePluginJavaShould {
                     html.stylesheet = project.resources.text.fromString("body{}")
                 }
             }
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
-            }
+
             dependencies {
               compile 'group:name:1.0.0'
             }
@@ -378,11 +353,7 @@ class LicensePluginJavaShould {
                     custom.action = { list -> list.collect { it.name }.join(', ') }
                 }
             }
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
-            }
+
             dependencies {
               compile 'group:name:1.0.0'
             }
