@@ -79,13 +79,17 @@ idea {
     }
 }
 
-val group: String by project
-val versionName: String by project
-val projectUrl: String by project
-val pomArtifactId: String by project
-val pomName: String by project
-val pomDescription: String by project
-val scmUrl: String by project
+val pomProperties = Properties().apply {
+    load(file("$rootDir/pom.properties").inputStream())
+}
+
+val group: String by pomProperties
+val versionName: String by pomProperties
+val projectUrl: String by pomProperties
+val pomArtifactId: String by pomProperties
+val pomName: String by pomProperties
+val pomDescription: String by pomProperties
+val scmUrl: String by pomProperties
 
 project.group = group
 version = versionName
@@ -138,9 +142,9 @@ publishing {
                     }
                 }
                 scm {
-                    val connectionUrl: String by project
+                    val connectionUrl: String by pomProperties
                     connection.set(connectionUrl)
-                    val developerConnectionUrl: String by project
+                    val developerConnectionUrl: String by pomProperties
                     developerConnection.set(developerConnectionUrl)
                     url.set(scmUrl)
                 }
@@ -167,7 +171,7 @@ bintray {
         userOrg = user
         setLicenses("Apache-2.0")
         vcsUrl = projectUrl
-        val issuesTrackerUrl: String by project
+        val issuesTrackerUrl: String by pomProperties
         issueTrackerUrl = issuesTrackerUrl
         githubRepo = projectUrl
         version(closureOf<BintrayExtension.VersionConfig> {
@@ -210,6 +214,12 @@ tasks {
 
     jacocoTestReport {
         executionData(test.get(), functionalTest.get())
+        reports {
+            xml.configure(closureOf<SingleFileReport> {
+                isEnabled = true
+                destination = file("$buildDir/jacocoXml")
+            })
+        }
     }
 
     jacocoTestCoverageVerification {
