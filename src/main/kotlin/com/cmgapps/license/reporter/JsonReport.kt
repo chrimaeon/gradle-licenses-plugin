@@ -23,6 +23,7 @@ import com.squareup.moshi.Types
 internal class JsonReport(libraries: List<Library>) : Report(libraries) {
 
     private val moshi = Moshi.Builder().build()
+
     override fun generate(): String {
         val type = Types.newParameterizedType(List::class.java, Library::class.java)
         return moshi.adapter<List<Library>>(type).indent("  ").toJson(libraries)

@@ -150,7 +150,6 @@ class LicensePluginJavaShould {
               compile 'com.squareup.retrofit2:retrofit:2.3.0'
             }
         """.trimIndent()
-
         val result = gradleRunner.build()
 
         assertThat(
@@ -271,7 +270,6 @@ class LicensePluginJavaShould {
     @Test
     fun `generate TXT Report`() {
         buildFile + """
-            
             licenses {
                 reports {
                     text.enabled = true

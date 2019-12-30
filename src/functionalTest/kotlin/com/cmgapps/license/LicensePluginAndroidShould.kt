@@ -87,7 +87,6 @@ class LicensePluginAndroidShould {
 
     @Test
     fun `generate licenses buildType report`() {
-
         buildFile + """
             android {
               compileSdkVersion 28
@@ -171,7 +170,6 @@ class LicensePluginAndroidShould {
                 releaseImplementation 'com.squareup.retrofit2:retrofit:2.3.0'
             }
         """.trimIndent()
-
         gradleRunner.withArguments(":licenseDebugReport").build()
 
         assertThat(

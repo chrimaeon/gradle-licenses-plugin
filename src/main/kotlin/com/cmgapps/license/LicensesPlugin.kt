@@ -123,14 +123,14 @@ class LicensesPlugin : Plugin<Project> {
     }
 
     override fun apply(project: Project) {
-        project.extensions.create("licenses", LicensesExtension::class.java).also {
-            if (project.plugins.hasPlugin("java")) {
-                configureJavaProject(project, it)
+        project.extensions.create("licenses", LicensesExtension::class.java).also { extension ->
+            project.plugins.withId("java") {
+                configureJavaProject(project, extension)
             }
 
             ANDROID_IDS.forEach { id ->
-                if (project.plugins.hasPlugin(id)) {
-                    configureAndroidProject(project, it)
+                project.plugins.withId(id) {
+                    configureAndroidProject(project, extension)
                 }
             }
         }

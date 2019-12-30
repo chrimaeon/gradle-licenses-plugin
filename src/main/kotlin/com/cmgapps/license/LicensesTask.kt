@@ -267,7 +267,6 @@ open class AndroidLicensesTask : LicensesTask() {
         val configurations = mutableSetOf<Configuration>()
 
         getAllProjects().forEach { project ->
-
             project.configurations.find { it.name == "${buildType}Compile" }?.let {
                 configurations.add(it)
             }

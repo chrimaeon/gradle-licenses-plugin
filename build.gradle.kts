@@ -291,6 +291,8 @@ dependencies {
 
     ktlint(Deps.ktlint)
 
+    ktlint(Deps.ktlint)
+
     testImplementation(Deps.jUnit) {
         exclude(group = "org.hamcrest")
     }
