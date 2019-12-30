@@ -16,15 +16,17 @@
 
 package com.cmgapps.license
 
-import com.cmgapps.license.util.TestUtils
+import com.cmgapps.license.util.getFileContent
+import com.cmgapps.license.util.plus
+import com.cmgapps.license.util.withJaCoCo
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
-import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.matchesPattern
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -42,31 +44,51 @@ class LicensePluginJavaShould {
     private lateinit var buildFile: File
     private lateinit var reportFolder: String
     private lateinit var mavenRepoUrl: String
+    private lateinit var gradleRunner: GradleRunner
 
     @BeforeEach
     fun setUp() {
         buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
         reportFolder = "$testProjectDir/build/reports/licenses/licenseReport"
         mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
-        buildFile.writeText(
-            """
+        buildFile + """
             plugins {
                id("java")
                id("com.cmgapps.licenses")
             }
 
-        """.trimIndent()
-        )
-    }
+            repositories {
+                maven {
+                    url '$mavenRepoUrl'
+                }
+            }
 
-    @ParameterizedTest
-    @ValueSource(strings = ["3.5", "4.0", "4.1", "4.5", "4.9", "5.0", "5.1", "5.5", "5.6", "6.0"])
-    fun `apply Licenses plugin to various Gradle versions`(version: String) {
-        val result = GradleRunner.create()
-            .withGradleVersion(version)
+        """.trimIndent()
+
+        gradleRunner = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
             .withArguments(":licenseReport")
             .withPluginClasspath()
+            .withJaCoCo()
+    }
+
+    /**
+     *
+     * AGP Version   | Gradle Version
+     * ------------------------------
+     * 3.1.0+	      | 4.4+
+     * 3.2.0 - 3.2.1 |	4.6+
+     * 3.3.0 - 3.3.2 |	4.10.1+
+     * 3.4.0 - 3.4.1 |	5.1.1+
+     * 3.5.0+	      | 5.4.1-5.6.4
+     * ------------------------------
+     */
+    @DisabledIfEnvironmentVariable(named = "CIRCLECI", matches = "true")
+    @ParameterizedTest
+    @ValueSource(strings = ["3.5", "4.4", "5.1.1", "6.0.1"])
+    fun `apply Licenses plugin to various Gradle versions`(version: String) {
+        val result = gradleRunner
+            .withGradleVersion(version)
             .build()
 
         assertThat("Gradle version $version", result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
@@ -74,35 +96,25 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate report with no dependencies`() {
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
     }
 
     @Test
     fun `generate report with no open source dependencies`() {
-        buildFile.appendText(
-            """
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
+        buildFile + """
+            licenses {
+                reports {
+                    html.enabled = true
+                }
             }
             dependencies {
               compile 'com.google.firebase:firebase-core:10.0.1'
             }
         """.trimIndent()
-        )
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(
             result.output,
@@ -127,24 +139,18 @@ class LicensePluginJavaShould {
 
     @Test
     fun `java library with parent pom dependency`() {
-        buildFile.appendText(
-            """
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
+        buildFile + """
+            licenses {
+                reports {
+                    html.enabled = true
+                }
             }
+            
             dependencies {
               compile 'com.squareup.retrofit2:retrofit:2.3.0'
             }
         """.trimIndent()
-        )
-
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(
             result.output,
@@ -165,7 +171,7 @@ class LicensePluginJavaShould {
                     "<li>Retrofit</li>" +
                     "</ul>" +
                     "<pre>" +
-                    TestUtils.getFileContent("apache-2.0.txt") +
+                    getFileContent("apache-2.0.txt") +
                     "</pre>" +
                     "</body>" +
                     "</html>"
@@ -175,24 +181,19 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate Report with custom license`() {
-        buildFile.appendText(
-            """
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
+        buildFile + """
+            licenses {
+                reports {
+                    html.enabled = true
+                }
             }
+            
             dependencies {
               compile 'group:name:1.0.0'
             }
         """.trimIndent()
-        )
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(
             result.output,
@@ -224,24 +225,19 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate Report with lib with no name`() {
-        buildFile.appendText(
-            """
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
+        buildFile + """
+            licenses {
+                reports {
+                    html.enabled = true
+                }
             }
+            
             dependencies {
               compile 'group:noname:1.0.0'
             }
         """.trimIndent()
-        )
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(
             result.output,
@@ -272,29 +268,20 @@ class LicensePluginJavaShould {
     }
 
     @Test
-    fun `generate Report with different 'OutputType'`() {
-        buildFile.appendText(
-            """
-            import com.cmgapps.license.OutputType
+    fun `generate TXT Report`() {
+        buildFile + """
             licenses {
-              outputType OutputType.TEXT
+                reports {
+                    text.enabled = true
+                }
             }
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
-            }
+
             dependencies {
               compile 'group:noname:1.0.0'
             }
         """.trimIndent()
-        )
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(
             result.output,
@@ -313,29 +300,20 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate Report with different html styles`() {
-        buildFile.appendText(
-            """
-            import com.cmgapps.license.OutputType
+        buildFile + """
             licenses {
-              bodyCss 'custom body css'
-              preCss 'custom pre css'
+                reports {
+                    html.enabled = true
+                    html.stylesheet = project.resources.text.fromString("body{}")
+                }
             }
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
-            }
+
             dependencies {
               compile 'group:name:1.0.0'
             }
         """.trimIndent()
-        )
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.build()
 
         assertThat(
             result.output,
@@ -348,7 +326,7 @@ class LicensePluginJavaShould {
                     "<html lang=\"en\">" +
                     "<head>" +
                     "<meta charset=\"UTF-8\">" +
-                    "<style>custom body csscustom pre css</style>" +
+                    "<style>body{}</style>" +
                     "<title>Open source licenses</title>" +
                     "</head>" +
                     "<body>" +
@@ -366,61 +344,25 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate custom report`() {
-        buildFile.appendText(
-            """
+        buildFile + """
             licenses {
-              customReport { list -> list.collect { it.name }.join(', ') }
+                reports {
+                    custom.enabled = true
+                    custom.action = { list -> list.collect { it.name }.join(', ') }
+                }
             }
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
-            }
+
             dependencies {
               compile 'group:name:1.0.0'
             }
         """.trimIndent()
-        )
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
+        val result = gradleRunner.withDebug(true).build()
 
         assertThat(
             result.output,
             matchesPattern(Pattern.compile(".*Wrote CUSTOM report to .*$reportFolder/licenses.*", Pattern.DOTALL))
         )
         assertThat(File("$reportFolder/licenses").readText().trim(), `is`("Fake dependency name"))
-    }
-
-    @Test
-    fun `show warning if outputtype is not CUSTOM`() {
-        buildFile.appendText(
-            """
-            import com.cmgapps.license.OutputType
-            licenses {
-              outputType = OutputType.JSON
-              customReport { list -> list.collect { it.name }.join(', ') }
-            }
-            repositories {
-              maven {
-                url '$mavenRepoUrl'
-              }
-            }
-            dependencies {
-              compile 'group:name:1.0.0'
-            }
-        """.trimIndent()
-        )
-
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport")
-            .withPluginClasspath()
-            .build()
-
-        assertThat(result.output, containsString("'outputType' will be ignored when setting a 'customReport'"))
     }
 }

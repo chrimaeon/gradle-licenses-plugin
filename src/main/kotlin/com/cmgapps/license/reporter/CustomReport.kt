@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
-package com.cmgapps.license.util
+package com.cmgapps.license.reporter
 
-fun Any.getFileContent(fileName: String) = javaClass.getResource("/licenses/$fileName").readText()
+import com.cmgapps.license.model.Library
+
+class CustomReport(libraries: List<Library>, private val action: CustomReportAction) : Report(libraries) {
+    override fun generate(): String {
+        return action(libraries)
+    }
+}

@@ -19,14 +19,17 @@ package com.cmgapps.license.reporter
 import com.cmgapps.license.helper.LicensesHelper
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import org.gradle.api.resources.TextResource
 
 internal class HtmlReport(
     libraries: List<Library>,
-    private val bodyCss: String,
-    private val preCss: String
+    val css: TextResource?
 ) : Report(libraries) {
 
     companion object {
+        private const val DEFAULT_PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
+        private const val DEFAULT_BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
+        private const val DEFAULT_CSS = "$DEFAULT_BODY_CSS$DEFAULT_PRE_CSS"
         private const val OPEN_SOURCE_LIBRARIES = "Open source licenses"
 
         private const val NOTICE_LIBRARIES = "Notice for packages:"
@@ -53,7 +56,7 @@ internal class HtmlReport(
             head {
                 meta(mapOf("charset" to "UTF-8"))
                 style {
-                    +"$bodyCss$preCss"
+                    +(css?.asString() ?: DEFAULT_CSS)
                 }
                 title {
                     +OPEN_SOURCE_LIBRARIES

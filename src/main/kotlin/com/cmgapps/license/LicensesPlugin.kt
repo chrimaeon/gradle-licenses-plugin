@@ -37,20 +37,19 @@ class LicensesPlugin : Plugin<Project> {
         private const val TASK_DESC = "Collect licenses from project"
         private const val TASK_GROUP = "Reporting"
 
-        private const val APP_PLUGIN_ID = "com.android.application"
-        private const val LIBRARY_PLUGIN_ID = "com.android.library"
-        private const val FEATURE_PLUGIN_ID = "com.android.feature"
-        private const val DYNAMIC_FEATURE_PLUGIN_ID = "com.android.dynamic-feature"
-        private val ANDROID_IDS = listOf(APP_PLUGIN_ID, LIBRARY_PLUGIN_ID, FEATURE_PLUGIN_ID, DYNAMIC_FEATURE_PLUGIN_ID)
+        private val ANDROID_IDS = listOf(
+            "com.android.application",
+            "com.android.library",
+            "com.android.feature",
+            "com.android.dynamic-feature"
+        )
 
         @JvmStatic
         private fun configureJavaProject(project: Project, extension: LicensesExtension) {
             val taskName = "licenseReport"
 
             val configuration = Action<LicensesTask> { task ->
-                val path = "${project.buildDir}/reports/licenses/$taskName/"
-
-                addBasicConfiguration(project, task, extension, path)
+                task.addBasicConfiguration(extension)
             }
 
             registerTask(project, LicensesTask::class.java, taskName, configuration)
@@ -62,9 +61,7 @@ class LicensesPlugin : Plugin<Project> {
                 val taskName = "license${androidVariant.name.capitalize()}Report"
 
                 val configuration = Action<AndroidLicensesTask> { task ->
-                    val path = "${project.buildDir}/reports/licenses/$taskName/"
-
-                    addBasicConfiguration(project, task, extension, path)
+                    task.addBasicConfiguration(extension)
                     task.variant = androidVariant.name
                     task.buildType = androidVariant.buildType.name
                     task.productFlavors = androidVariant.productFlavors
@@ -75,28 +72,11 @@ class LicensesPlugin : Plugin<Project> {
         }
 
         @JvmStatic
-        private fun addBasicConfiguration(
-            project: Project,
-            task: LicensesTask,
-            extension: LicensesExtension,
-            path: String
-        ) {
-
-            val customReport = extension.customReport
-            if (customReport != null && extension.outputType != OutputType.CUSTOM) {
-                project.logger.warn("'outputType' will be ignored when setting a 'customReport'")
-                extension.outputType = OutputType.CUSTOM
-            }
-
-            task.additionalProjects = extension.additionalProjects
-            task.outputType = extension.outputType
-            task.outputFile = project.file(path + getFileName(extension.outputType))
-            task.bodyCss = extension.bodyCss
-            task.preCss = extension.preCss
-            task.description = TASK_DESC
-            task.group = TASK_GROUP
-            task.customReport(customReport)
-            task.outputs.upToDateWhen { false }
+        private fun LicensesTask.addBasicConfiguration(extension: LicensesExtension) {
+            additionalProjects = extension.additionalProjects
+            description = TASK_DESC
+            group = TASK_GROUP
+            reports(extension.reports)
         }
 
         @JvmStatic
@@ -114,20 +94,18 @@ class LicensesPlugin : Plugin<Project> {
         }
 
         @JvmStatic
-        private fun getAndroidVariants(project: Project): DomainObjectSet<out BaseVariant>? {
-            return when {
-                project.plugins.hasPlugin(AppPlugin::class.java)
-                    || project.plugins.hasPlugin(DynamicFeaturePlugin::class.java) ->
-                    project.extensions.getByType(AppExtension::class.java).applicationVariants
+        private fun getAndroidVariants(project: Project): DomainObjectSet<out BaseVariant>? = when {
+            project.plugins.hasPlugin(AppPlugin::class.java)
+                || project.plugins.hasPlugin(DynamicFeaturePlugin::class.java) ->
+                project.extensions.getByType(AppExtension::class.java).applicationVariants
 
-                project.plugins.hasPlugin(FeaturePlugin::class.java) ->
-                    project.extensions.getByType(FeatureExtension::class.java).featureVariants
+            project.plugins.hasPlugin(FeaturePlugin::class.java) ->
+                project.extensions.getByType(FeatureExtension::class.java).featureVariants
 
-                project.plugins.hasPlugin(LibraryPlugin::class.java) ->
-                    project.extensions.getByType(LibraryExtension::class.java).libraryVariants
+            project.plugins.hasPlugin(LibraryPlugin::class.java) ->
+                project.extensions.getByType(LibraryExtension::class.java).libraryVariants
 
-                else -> null
-            }
+            else -> null
         }
 
         @JvmStatic
@@ -145,16 +123,15 @@ class LicensesPlugin : Plugin<Project> {
     }
 
     override fun apply(project: Project) {
+        project.extensions.create("licenses", LicensesExtension::class.java).also {
+            if (project.plugins.hasPlugin("java")) {
+                configureJavaProject(project, it)
+            }
 
-        val extension = project.extensions.create("licenses", LicensesExtension::class.java)
-
-        project.plugins.withId("java") {
-            configureJavaProject(project, extension)
-        }
-
-        ANDROID_IDS.forEach { id ->
-            project.plugins.withId(id) {
-                configureAndroidProject(project, extension)
+            ANDROID_IDS.forEach { id ->
+                if (project.plugins.hasPlugin(id)) {
+                    configureAndroidProject(project, it)
+                }
             }
         }
     }
