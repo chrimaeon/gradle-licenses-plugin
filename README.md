@@ -4,7 +4,7 @@
 [![Bintray](https://www.cmgapps.com/badge/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin/badge.svg)](https://bintray.com/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin)
 [![gradlePluginPortal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/cmgapps/licenses/com.cmgapps.licenses.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin%20Portal&style=for-the-badge)](https://plugins.gradle.org/plugin/com.cmgapps.licenses)
 
-This Gradle plugin provides tasks to generate a HTML / XML / Json file with the licenses used from the libraries.
+This Gradle plugin provides tasks to generate a file with the licenses used from the project's dependencies.
 
 ## Usage
 
@@ -34,48 +34,55 @@ apply(plugin: "com.cmgapps.licenses")
 
 Applying the plugin will create tasks to generate the license report
 
-For `"java"` and `"java-library`
+For `"java"` and `"java-library"`
 *  `licenseReport`
 
-For `"com.android.application"`, `"com.android.library"` and `"com.android.feature"`
+For `"com.android.application"`, `"com.android.library"`, `"com.android.feature"` and `"com.android.dynamic-feature"`
 * `license<variant>Report`
 
 ### Configuration
 
 #### Output Format
 
+Example:
+```groovy
+licenses {
+    reports {
+        html.enabled = false // html is enabled by default
+        xml.enabled = true
+        xml.destination = file("$buildDir/reports/licenses.xml")
+    }
+}
+```
+
 The plugin can output different formats.
 
-* `OutputType.HTML`
+* `HTML`
     generates a formatted HTML website
     * Styling
     
-       For a HTML report you can define custom `body`and `pre` styles using:
+       For a HTML report you can define custom stylesheet using a [TextResource]:
        ```groovy
         licenses {
-          bodyCss = "body {font-family: sans-serif; background-color: #eee}"
-          preCss = "pre, .license {background-color: #ddd; padding:1em} pre {white-space: pre-wrap}"
+            reports {
+                html.stylesheet = resources.text.fromString("body {background: #FAFAFA}")
+            }     
         }
         ```
-        additionally to the `pre` tag, you'll have to provide a styling for 
-        the `.license` class which is applied to URL licenses.
-
-* `OutputType.JSON`
+* `JSON`
     generates a Json file
-* `OutputType.XML`
+* `XML`
     generates a valid XML version 1.0 file
-* `OutputType.TEXT`
+* `Text`
     generates a plain text report file
-* `OutputType.MD`
+* `Mardown`
     generates a Markdown file
-* `OutputType.CUSTOM`
+* `Custom`
     add your own reporter as a lambda function
     ```groovy
-    import com.cmgapps.license.OutputType
-
     licenses {
-      outputType = OutputType.CUSTOM
-      customReport { list -> list.collect { it.name }.join(', ') }
+      custom.enabled = true
+      custom.action = { list -> list.collect { it.name }.join(', ') }
     }
     ```
 
@@ -108,3 +115,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ```
 
+[TextResource]: https://docs.gradle.org/current/dsl/org.gradle.api.resources.TextResource.html
