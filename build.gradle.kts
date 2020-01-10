@@ -212,18 +212,14 @@ tasks {
         dependsOn(ktlint)
     }
 
+    val jacocoExecData = fileTree("$buildDir/jacoco").include("*.exec")
+
     jacocoTestReport {
-        executionData(test.get(), functionalTest.get())
-        reports {
-            xml.configure(closureOf<SingleFileReport> {
-                isEnabled = true
-                destination = file("$buildDir/jacocoXml")
-            })
-        }
+        executionData(jacocoExecData)
     }
 
     jacocoTestCoverageVerification {
-        executionData(test.get(), functionalTest.get())
+        executionData(jacocoExecData)
         violationRules {
             rule {
                 limit {
