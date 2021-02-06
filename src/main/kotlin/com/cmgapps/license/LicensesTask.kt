@@ -224,7 +224,8 @@ open class LicensesTask : DefaultTask() {
         if (reports.html.enabled) reports.html.writeFileReport(
             HtmlReport(
                 libraries,
-                reports.html.stylesheet
+                reports.html.stylesheet,
+                logger
             )
         )
         if (reports.csv.enabled) reports.csv.writeFileReport(CsvReport(libraries))
