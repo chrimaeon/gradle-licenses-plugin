@@ -15,8 +15,6 @@
  */
 
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import com.jfrog.bintray.gradle.BintrayExtension
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
 import java.util.Properties
@@ -25,14 +23,13 @@ plugins {
     idea
     `java-gradle-plugin`
     `maven-publish`
+    signing
     jacoco
     id("com.github.ben-manes.versions") version Deps.Plugins.versionsVersion
     kotlin("jvm") version Deps.kotlinVersion
     kotlin("kapt") version Deps.kotlinVersion
-    id("com.jfrog.bintray") version Deps.Plugins.bintrayVersion
     id("com.gradle.plugin-publish") version Deps.Plugins.pluginPublishVersion
     id("org.jetbrains.dokka") version Deps.Plugins.dokkaVersion
-//    id("com.cmgapps.licenses") version "1.4.0"
 }
 
 repositories {
@@ -86,7 +83,6 @@ val pomProperties = Properties().apply {
 val group: String by pomProperties
 val versionName: String by pomProperties
 val projectUrl: String by pomProperties
-val pomArtifactId: String by pomProperties
 val pomName: String by pomProperties
 val pomDescription: String by pomProperties
 val scmUrl: String by pomProperties
@@ -120,21 +116,30 @@ val sourcesJar by tasks.registering(Jar::class) {
 
 val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
-    from(tasks["dokka"])
+    from(tasks.dokkaJavadoc)
 }
 
 publishing {
     publications {
         register<MavenPublication>("pluginMaven") {
-
+            // component registered by gradle-plugin plugin
             artifact(sourcesJar.get())
             artifact(javadocJar.get())
+
+            val pomArtifactId: String by pomProperties
+
 
             artifactId = pomArtifactId
 
             pom {
                 name.set(pomName)
                 description.set(pomDescription)
+                url.set(projectUrl)
+                issueManagement {
+                    val issuesTrackerUrl: String by pomProperties
+                    system.set("github")
+                    url.set(issuesTrackerUrl)
+                }
                 developers {
                     developer {
                         id.set("cgrach")
@@ -148,38 +153,39 @@ publishing {
                     developerConnection.set(developerConnectionUrl)
                     url.set(scmUrl)
                 }
+                licenses {
+                    license {
+                        name.set("Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "sonatype"
+            val releaseUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+            val snapshotUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+            url = if (versionName.endsWith("SNAPSHOT")) snapshotUrl else releaseUrl
+
+            val credentials = Properties().apply {
+                val credFile = file("./credentials.properties")
+                if (credFile.exists()) {
+                    load(credFile.inputStream())
+                }
+            }
+            credentials {
+                username = credentials.getProperty("sonaUsername")
+                password = credentials.getProperty("sonaPassword")
             }
         }
     }
 }
 
-bintray {
-    val credentialProps = Properties()
-    val propsFile = file("${project.rootDir}/credentials.properties")
-
-    if (propsFile.exists()) {
-        credentialProps.load(propsFile.inputStream())
-        user = credentialProps.getProperty("user")
-        key = credentialProps.getProperty("key")
-    }
-
-    setPublications("pluginMaven")
-
-    pkg(closureOf<BintrayExtension.PackageConfig> {
-        repo = "maven"
-        name = "${project.group}:$pomArtifactId"
-        userOrg = user
-        setLicenses("Apache-2.0")
-        vcsUrl = projectUrl
-        val issuesTrackerUrl: String by pomProperties
-        issueTrackerUrl = issuesTrackerUrl
-        githubRepo = projectUrl
-        version(closureOf<BintrayExtension.VersionConfig> {
-            name = versionName
-            vcsTag = versionName
-            released = Date().toString()
-        })
-    })
+signing {
+    sign(publishing.publications["pluginMaven"])
 }
 
 tasks {
@@ -212,18 +218,14 @@ tasks {
         dependsOn(ktlint)
     }
 
+    val jacocoExecData = fileTree("$buildDir/jacoco").include("*.exec")
+
     jacocoTestReport {
-        executionData(test.get(), functionalTest.get())
-        reports {
-            xml.configure(closureOf<SingleFileReport> {
-                isEnabled = true
-                destination = file("$buildDir/jacocoXml")
-            })
-        }
+        executionData(jacocoExecData)
     }
 
     jacocoTestCoverageVerification {
-        executionData(test.get(), functionalTest.get())
+        executionData(jacocoExecData)
         violationRules {
             rule {
                 limit {
@@ -271,25 +273,27 @@ tasks {
         kotlinOptions.jvmTarget = "1.8"
     }
 
-    withType<DokkaTask> {
-        outputFormat = "javadoc"
-        outputDirectory = "$buildDir/javadoc"
+    dokkaJavadoc {
+        outputDirectory.set(buildDir.resolve("javadoc"))
     }
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "6.0.1"
+        gradleVersion = "6.8.2"
     }
 }
 
 dependencies {
     compileOnly(Deps.androidGradlePlugin)
+
+    val kotlinReflect = kotlin("reflect", Deps.kotlinVersion)
+    // Necessary to bump a transitive dependency.
+    compileOnly(kotlinReflect)
+
     implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
     implementation(Deps.mavenModel)
     implementation(Deps.moshi)
     kapt(Deps.moshiCodegen)
-
-    ktlint(Deps.ktlint)
 
     ktlint(Deps.ktlint)
 
@@ -298,9 +302,11 @@ dependencies {
     }
     testImplementation(Deps.androidGradlePlugin)
     testImplementation(Deps.hamcrest)
+    testImplementation(kotlinReflect)
 
     "functionalTestImplementation"(Deps.androidGradlePlugin)
     "functionalTestImplementation"(gradleTestKit())
+    "functionalTestImplementation"(kotlinReflect)
 
     "jacocoRuntime"("org.jacoco:org.jacoco.agent:${jacoco.toolVersion}:runtime")
 }

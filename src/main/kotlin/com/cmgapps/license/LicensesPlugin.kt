@@ -19,8 +19,6 @@ package com.cmgapps.license
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.DynamicFeaturePlugin
-import com.android.build.gradle.FeatureExtension
-import com.android.build.gradle.FeaturePlugin
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.BaseVariant
@@ -99,26 +97,10 @@ class LicensesPlugin : Plugin<Project> {
                 || project.plugins.hasPlugin(DynamicFeaturePlugin::class.java) ->
                 project.extensions.getByType(AppExtension::class.java).applicationVariants
 
-            project.plugins.hasPlugin(FeaturePlugin::class.java) ->
-                project.extensions.getByType(FeatureExtension::class.java).featureVariants
-
             project.plugins.hasPlugin(LibraryPlugin::class.java) ->
                 project.extensions.getByType(LibraryExtension::class.java).libraryVariants
 
             else -> null
-        }
-
-        @JvmStatic
-        private fun getFileName(type: OutputType) = when (type) {
-            OutputType.HTML -> ".html"
-            OutputType.XML -> ".xml"
-            OutputType.JSON -> ".json"
-            OutputType.TEXT -> ".txt"
-            OutputType.MD -> ".md"
-            OutputType.CSV -> ".csv"
-            else -> ""
-        }.let {
-            "licenses$it"
         }
     }
 

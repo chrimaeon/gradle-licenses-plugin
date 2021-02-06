@@ -19,11 +19,13 @@ package com.cmgapps.license.reporter
 import com.cmgapps.license.helper.LicensesHelper
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import org.gradle.api.logging.Logger
 import org.gradle.api.resources.TextResource
 
 internal class HtmlReport(
     libraries: List<Library>,
-    val css: TextResource?
+    private val css: TextResource?,
+    private val logger: Logger
 ) : Report(libraries) {
 
     companion object {
@@ -80,19 +82,30 @@ internal class HtmlReport(
                         }
                     }
 
+                    val licenseUrl = entry.key.url
+                    val licenseName = entry.key.name
+
                     when {
-                        LicensesHelper.LICENSE_MAP.containsKey(entry.key.url) -> pre {
-                            +(getLicenseText(LicensesHelper.LICENSE_MAP[entry.key.url]) ?: "")
+                        LicensesHelper.LICENSE_MAP.containsKey(licenseUrl) -> pre {
+                            +(getLicenseText(LicensesHelper.LICENSE_MAP[licenseUrl]) ?: "")
                         }
-                        LicensesHelper.LICENSE_MAP.containsKey(entry.key.name) -> pre {
-                            +(getLicenseText(LicensesHelper.LICENSE_MAP[entry.key.name]) ?: "")
+                        LicensesHelper.LICENSE_MAP.containsKey(licenseName) -> pre {
+                            +(getLicenseText(LicensesHelper.LICENSE_MAP[licenseName]) ?: "")
                         }
-                        else -> div("license") {
-                            p {
-                                +entry.key.name
-                            }
-                            a(entry.key.url) {
-                                +entry.key.url
+                        else -> {
+                            logger.warn(
+                                """
+                                    |No mapping found for License $licenseName at $licenseUrl
+                                    |If it is a valid Open Source Licesnse, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
+                                """.trimMargin()
+                            )
+                            div("license") {
+                                p {
+                                    +licenseName
+                                }
+                                a(licenseUrl) {
+                                    +licenseUrl
+                                }
                             }
                         }
                     }
@@ -105,7 +118,7 @@ internal class HtmlReport(
         javaClass.getResource("/licenses/$fileName")?.readText()
 }
 
-class HTML : TagWithText("html") {
+internal class HTML : TagWithText("html") {
 
     init {
         attributes["lang"] = "en"
@@ -124,7 +137,7 @@ class HTML : TagWithText("html") {
     }
 }
 
-class Head : TagWithText("head") {
+internal class Head : TagWithText("head") {
     fun title(init: Title.() -> Unit) = initTag(Title(), init)
     fun meta(attrs: Map<String, String>) {
         val meta = initTag(Meta()) {}
@@ -134,8 +147,8 @@ class Head : TagWithText("head") {
     fun style(init: Style.() -> Unit) = initTag(Style(), init)
 }
 
-class Title : TagWithText("title")
-class Meta : Tag("meta") {
+internal class Title : TagWithText("title")
+internal class Meta : Tag("meta") {
 
     override fun render(builder: StringBuilder, intent: String, format: Boolean) {
         if (format) {
@@ -153,9 +166,9 @@ class Meta : Tag("meta") {
     }
 }
 
-class Style : TagWithText("style")
+internal class Style : TagWithText("style")
 
-abstract class BodyTag(name: String) : TagWithText(name) {
+internal abstract class BodyTag(name: String) : TagWithText(name) {
     fun pre(init: Pre.() -> Unit) = initTag(Pre(), init)
     fun h3(init: H3.() -> Unit) = initTag(H3(), init)
     fun ul(init: Ul.() -> Unit) = initTag(Ul(), init)
@@ -173,12 +186,12 @@ abstract class BodyTag(name: String) : TagWithText(name) {
     fun p(init: P.() -> Unit) = initTag(P(), init)
 }
 
-class Body : BodyTag("body")
-class Pre : BodyTag("pre")
-class H3 : BodyTag("h3")
-class Ul : BodyTag("ul")
-class Li : BodyTag("li")
-class A : BodyTag("a") {
+internal class Body : BodyTag("body")
+internal class Pre : BodyTag("pre")
+internal class H3 : BodyTag("h3")
+internal class Ul : BodyTag("ul")
+internal class Li : BodyTag("li")
+internal class A : BodyTag("a") {
     var href: String
         get() = attributes["href"]!!
         set(value) {
@@ -186,7 +199,7 @@ class A : BodyTag("a") {
         }
 }
 
-class Div : BodyTag("div") {
+internal class Div : BodyTag("div") {
     var `class`: String
         get() = attributes["class"]!!
         set(value) {
@@ -194,9 +207,9 @@ class Div : BodyTag("div") {
         }
 }
 
-class P : BodyTag("p")
+internal class P : BodyTag("p")
 
-fun html(init: HTML.() -> Unit): HTML {
+internal fun html(init: HTML.() -> Unit): HTML {
     val html = HTML()
     html.init()
     return html

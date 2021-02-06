@@ -60,7 +60,6 @@ open class LicensesTask : DefaultTask() {
             URI("file", "", path.toURI().path, null, null).toString()
     }
 
-    @Internal
     @Input
     var additionalProjects: Set<String> = emptySet()
 
@@ -161,7 +160,10 @@ open class LicensesTask : DefaultTask() {
                 libraries.add(
                     Library(
                         model.name
-                            ?: "${model.groupId}:${model.artifactId}", model.version, model.description, licenses
+                            ?: "${model.groupId}:${model.artifactId}",
+                        model.version,
+                        model.description,
+                        licenses
                     )
                 )
             }
@@ -222,7 +224,8 @@ open class LicensesTask : DefaultTask() {
         if (reports.html.enabled) reports.html.writeFileReport(
             HtmlReport(
                 libraries,
-                reports.html.stylesheet
+                reports.html.stylesheet,
+                logger
             )
         )
         if (reports.csv.enabled) reports.csv.writeFileReport(CsvReport(libraries))
@@ -240,12 +243,11 @@ open class LicensesTask : DefaultTask() {
     }
 
     private fun LicensesReport.writeFileReport(report: Report) {
-        @Suppress("USELESS_ELVIS")
-        (with(destination) {
+        with(destination) {
             prepare()
             writeText(report.generate())
             logger.lifecycle("Wrote ${this@writeFileReport.name.toUpperCase()} report to ${getClickableFileUrl(this)}.")
-        })
+        }
     }
 }
 

@@ -51,7 +51,7 @@ internal class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : R
     }
 }
 
-class Libraries : Tag("libraries") {
+internal class Libraries : Tag("libraries") {
 
     fun library(init: Library.() -> Unit) = initTag(Library(), init)
 
@@ -64,28 +64,28 @@ class Libraries : Tag("libraries") {
     }
 }
 
-class Library : Tag("library") {
+internal class Library : Tag("library") {
     fun name(init: Name.() -> Unit) = initTag(Name(), init)
     fun version(init: Version.() -> Unit) = initTag(Version(), init)
     fun description(init: Description.() -> Unit) = initTag(Description(), init)
     fun licenses(init: Licenses.() -> Unit) = initTag(Licenses(), init)
 }
 
-class Name : TagWithText("name")
-class Version : TagWithText("version")
-class Description : TagWithText("description")
-class Licenses : Tag("licenses") {
+internal class Name : TagWithText("name")
+internal class Version : TagWithText("version")
+internal class Description : TagWithText("description")
+internal class Licenses : Tag("licenses") {
     fun license(init: License.() -> Unit) = initTag(License(), init)
 }
 
-class License : Tag("license") {
+internal class License : Tag("license") {
     fun name(init: Name.() -> Unit) = initTag(Name(), init)
     fun url(init: Url.() -> Unit) = initTag(Url(), init)
 }
 
-class Url : TagWithText("url")
+internal class Url : TagWithText("url")
 
-fun libraries(init: Libraries.() -> Unit): Libraries {
+internal fun libraries(init: Libraries.() -> Unit): Libraries {
     val libraries = Libraries()
     libraries.init()
     return libraries

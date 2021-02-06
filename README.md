@@ -1,7 +1,7 @@
 # Gradle Licenses Plugin [![CircleCI](https://circleci.com/gh/chrimaeon/gradle-licenses-plugin.svg?style=svg)](https://circleci.com/gh/chrimaeon/gradle-licenses-plugin)
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg?style=for-the-badge)](http://www.apache.org/licenses/LICENSE-2.0)
-[![Bintray](https://www.cmgapps.com/badge/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin/badge.svg)](https://bintray.com/chrimaeon/maven/com.cmgapps:gradle-licenses-plugin)
+[![MavenCentral](https://img.shields.io/maven-central/v/com.cmgapps/gradle-licenses-plugin?style=for-the-badge)](https://repo1.maven.org/maven2/com/cmgapps/gradle-licenses-plugin/)
 [![gradlePluginPortal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/cmgapps/licenses/com.cmgapps.licenses.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin%20Portal&style=for-the-badge)](https://plugins.gradle.org/plugin/com.cmgapps.licenses)
 
 This Gradle plugin provides tasks to generate a file with the licenses used from the project's dependencies.
@@ -19,9 +19,9 @@ plugins {
 Using legacy plugin application 
 ```groovy
 buildscript {
-  repositories {
-    jcenter()
-  }
+    repositories {
+        mavenCentral()
+    }
 
   dependencies {
     classpath("com.cmgapps:gradle-licenses-plugin:<version>")

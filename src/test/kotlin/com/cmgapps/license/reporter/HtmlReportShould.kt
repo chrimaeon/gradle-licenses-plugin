@@ -18,6 +18,8 @@ package com.cmgapps.license.reporter
 
 import com.cmgapps.license.helper.LibrariesHelper
 import com.cmgapps.license.util.getFileContent
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
@@ -26,13 +28,17 @@ class HtmlReportShould {
 
     @Test
     fun `generate HTML report`() {
+        val logger: Logger = Logging.getLogger("TestLogger")
+
         val result = HtmlReport(
             LibrariesHelper.libraries,
-            null
+            null,
+            logger
         ).generate()
 
         assertThat(
-            result, `is`(
+            result,
+            `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +

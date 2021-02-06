@@ -16,7 +16,6 @@
 
 package com.cmgapps.license
 
-import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
@@ -42,9 +41,11 @@ class LicensesTaskShould {
             .withProjectDir(testProjectDir.toFile())
             .build()
         val mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
-        project.repositories.add(project.repositories.maven {
-            it.setUrl(mavenRepoUrl)
-        })
+        project.repositories.add(
+            project.repositories.maven {
+                it.setUrl(mavenRepoUrl)
+            }
+        )
         project.configurations.create("compile")
         project.dependencies.add("compile", "group:name:1.0.0")
     }
@@ -55,15 +56,16 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.html")
 
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
-            task.reports(Action {
+            task.reports {
                 it.html.enabled = true
-            })
+            }
         }
 
         task.licensesReport()
 
         assertThat(
-            outputFile.readText(), `is`(
+            outputFile.readText(),
+            `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +
@@ -90,16 +92,17 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.html")
 
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
-            task.reports(Action {
+            task.reports {
                 it.html.enabled = true
                 it.html.stylesheet = project.resources.text.fromString("body{}")
-            })
+            }
         }
 
         task.licensesReport()
 
         assertThat(
-            outputFile.readText(), `is`(
+            outputFile.readText(),
+            `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +
@@ -126,15 +129,16 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.json")
 
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
-            task.reports(Action {
+            task.reports {
                 it.json.enabled = true
-            })
+            }
         }
 
         task.licensesReport()
 
         assertThat(
-            outputFile.readText(), `is`(
+            outputFile.readText(),
+            `is`(
                 "[\n" +
                     "  {\n" +
                     "    \"name\": \"Fake dependency name\",\n" +
@@ -158,15 +162,16 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.xml")
 
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
-            task.reports(Action {
+            task.reports {
                 it.xml.enabled = true
-            })
+            }
         }
 
         task.licensesReport()
 
         assertThat(
-            outputFile.readText(), `is`(
+            outputFile.readText(),
+            `is`(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
                     "<libraries>\n" +
                     "  <library>\n" +
@@ -199,15 +204,16 @@ class LicensesTaskShould {
     fun `generate Markdown Report`() {
         val outputFile = File(reportFolder, "licenses.md")
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
-            task.reports(Action {
+            task.reports {
                 it.markdown.enabled = true
-            })
+            }
         }
 
         task.licensesReport()
 
         assertThat(
-            outputFile.readText(), `is`(
+            outputFile.readText(),
+            `is`(
                 "# Open source licenses\n" +
                     "### Notice for packages:\n" +
                     "Fake dependency name _1.0.0_:\n" +
@@ -221,15 +227,16 @@ class LicensesTaskShould {
     fun `generate Plain text Report`() {
         val outputFile = File(reportFolder, "licenses.txt")
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
-            task.reports(Action {
+            task.reports {
                 it.text.enabled = true
-            })
+            }
         }
 
         task.licensesReport()
 
         assertThat(
-            outputFile.readText(), `is`(
+            outputFile.readText(),
+            `is`(
                 "Licenses\n" +
                     "└─ Fake dependency name:1.0.0\n" +
                     "   ├─ License: Some license\n" +
@@ -242,15 +249,16 @@ class LicensesTaskShould {
     fun `generate CSV Report`() {
         val outputFile = File(reportFolder, "licenses.csv")
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
-            task.reports(Action {
+            task.reports {
                 it.csv.enabled = true
-            })
+            }
         }
 
         task.licensesReport()
 
         assertThat(
-            outputFile.readText(), `is`(
+            outputFile.readText(),
+            `is`(
                 "name,version,description,license name,license url\r\n" +
                     "Fake dependency name,1.0.0,Fake dependency description,Some license,http://website.tld/\r\n"
             )
@@ -261,10 +269,10 @@ class LicensesTaskShould {
     fun `generate custom Report`() {
         val outputFile = File(reportFolder, "licenses")
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
-            task.reports(Action {
+            task.reports {
                 it.custom.enabled = true
                 it.custom.action = { list -> list.joinToString { lib -> lib.name } }
-            })
+            }
         }
 
         task.licensesReport()
@@ -280,7 +288,8 @@ class LicensesTaskShould {
         task.licensesReport()
 
         assertThat(
-            outputFile.readText(), `is`(
+            outputFile.readText(),
+            `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +
@@ -304,7 +313,7 @@ class LicensesTaskShould {
     @Test
     fun `generate all reports`() {
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
-            task.reports(Action {
+            task.reports {
                 it.csv.enabled = true
                 it.custom.enabled = true
                 it.custom.action = { list -> list.joinToString { lib -> lib.name } }
@@ -313,7 +322,7 @@ class LicensesTaskShould {
                 it.markdown.enabled = true
                 it.text.enabled = true
                 it.xml.enabled = true
-            })
+            }
         }
 
         task.licensesReport()

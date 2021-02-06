@@ -121,7 +121,8 @@ class LicensePluginJavaShould {
             matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL))
         )
         assertThat(
-            File("$reportFolder/licenses.html").readText().trim(), `is`(
+            File("$reportFolder/licenses.html").readText().trim(),
+            `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +
@@ -157,7 +158,8 @@ class LicensePluginJavaShould {
             matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL))
         )
         assertThat(
-            File("$reportFolder/licenses.html").readText().trim(), `is`(
+            File("$reportFolder/licenses.html").readText().trim(),
+            `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +
@@ -200,7 +202,8 @@ class LicensePluginJavaShould {
             matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL))
         )
         assertThat(
-            File("$reportFolder/licenses.html").readText().trim(), `is`(
+            File("$reportFolder/licenses.html").readText().trim(),
+            `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +
@@ -244,7 +247,8 @@ class LicensePluginJavaShould {
             matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL))
         )
         assertThat(
-            File("$reportFolder/licenses.html").readText().trim(), `is`(
+            File("$reportFolder/licenses.html").readText().trim(),
+            `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +

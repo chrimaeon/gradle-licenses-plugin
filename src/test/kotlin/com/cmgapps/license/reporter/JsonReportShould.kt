@@ -27,7 +27,8 @@ class JsonReportShould {
     fun generateReport() {
         val report = JsonReport(LibrariesHelper.libraries).generate()
         assertThat(
-            report, `is`(
+            report,
+            `is`(
                 "[\n" +
                     "  {\n" +
                     "    \"name\": \"Test lib 1\",\n" +

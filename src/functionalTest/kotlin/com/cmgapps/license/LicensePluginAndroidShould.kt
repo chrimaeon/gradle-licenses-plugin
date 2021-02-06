@@ -94,7 +94,8 @@ class LicensePluginAndroidShould {
                 applicationId 'com.example'
               }
             }
-            """.trimIndent()
+            """
+            .trimIndent()
 
         for (taskName in listOf("licenseDebugReport", "licenseReleaseReport")) {
 
@@ -126,15 +127,16 @@ class LicensePluginAndroidShould {
                 }
               }
             }
-            """.trimIndent()
+        """.trimIndent()
 
-        for (taskName in listOf(
+        val tasks = listOf(
             "licenseDemoDebugReport",
             "licenseFullDebugReport",
             "licenseDemoReleaseReport",
             "licenseFullReleaseReport"
-        )) {
+        )
 
+        for (taskName in tasks) {
             val result = gradleRunner.withArguments(":$taskName")
                 .build()
 
@@ -206,7 +208,7 @@ class LicensePluginAndroidShould {
             android {
               compileSdkVersion 28
             }
-        """.trimIndent()
+            """.trimIndent()
         )
 
         val taskName = ":licenseDebugReport"
@@ -235,41 +237,11 @@ class LicensePluginAndroidShould {
             android {
               compileSdkVersion 28
             }
-        """.trimIndent()
+            """.trimIndent()
         )
 
         val taskName = ":licenseDebugReport"
         val result = gradleRunner.withArguments(taskName).build()
-
-        assertThat(result.task(taskName)?.outcome, `is`(TaskOutcome.SUCCESS))
-    }
-
-    @Test
-    fun `should work for FeaturePlugin`() {
-        buildFile.write(
-            """
-            buildscript {
-              repositories {
-                jcenter()
-                google()
-              }
-              dependencies {
-                classpath "$AGP"
-                classpath files($pluginClasspath)
-              }
-            }
-            apply plugin: 'com.android.feature'
-            apply plugin: 'com.cmgapps.licenses'
-
-            android {
-              compileSdkVersion 28
-            }
-        """.trimIndent()
-        )
-
-        val taskName = ":licenseDebugFeatureReport"
-        val result = gradleRunner.withArguments(taskName)
-            .build()
 
         assertThat(result.task(taskName)?.outcome, `is`(TaskOutcome.SUCCESS))
     }
