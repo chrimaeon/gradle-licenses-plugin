@@ -15,7 +15,6 @@
  */
 
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import com.jfrog.bintray.gradle.BintrayExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
@@ -25,11 +24,11 @@ plugins {
     idea
     `java-gradle-plugin`
     `maven-publish`
+    signing
     jacoco
     id("com.github.ben-manes.versions") version Deps.Plugins.versionsVersion
     kotlin("jvm") version Deps.kotlinVersion
     kotlin("kapt") version Deps.kotlinVersion
-    id("com.jfrog.bintray") version Deps.Plugins.bintrayVersion
     id("com.gradle.plugin-publish") version Deps.Plugins.pluginPublishVersion
     id("org.jetbrains.dokka") version Deps.Plugins.dokkaVersion
 }
@@ -150,35 +149,30 @@ publishing {
             }
         }
     }
+
+    repositories {
+        maven {
+            name = "sonatype"
+            val releaseUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+            val snapshotUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+            url = if (versionName.endsWith("SNAPSHOT")) snapshotUrl else releaseUrl
+
+            val credentials = Properties().apply {
+                val credFile = file("./credentials.properties")
+                if (credFile.exists()) {
+                    load(credFile.inputStream())
+                }
+            }
+            credentials {
+                username = credentials.getProperty("sonaUsername")
+                password = credentials.getProperty("sonaPassword")
+            }
+        }
+    }
 }
 
-bintray {
-    val credentialProps = Properties()
-    val propsFile = file("${project.rootDir}/credentials.properties")
-
-    if (propsFile.exists()) {
-        credentialProps.load(propsFile.inputStream())
-        user = credentialProps.getProperty("user")
-        key = credentialProps.getProperty("key")
-    }
-
-    setPublications("pluginMaven")
-
-    pkg(closureOf<BintrayExtension.PackageConfig> {
-        repo = "maven"
-        name = "${project.group}:$pomArtifactId"
-        userOrg = user
-        setLicenses("Apache-2.0")
-        vcsUrl = projectUrl
-        val issuesTrackerUrl: String by pomProperties
-        issueTrackerUrl = issuesTrackerUrl
-        githubRepo = projectUrl
-        version(closureOf<BintrayExtension.VersionConfig> {
-            name = versionName
-            vcsTag = versionName
-            released = Date().toString()
-        })
-    })
+signing {
+    sign(publishing.publications["pluginMaven"])
 }
 
 tasks {
