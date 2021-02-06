@@ -123,7 +123,7 @@ val javadocJar by tasks.registering(Jar::class) {
 publishing {
     publications {
         register<MavenPublication>("pluginMaven") {
-
+            // component registered by gradle-plugin plugin
             artifact(sourcesJar.get())
             artifact(javadocJar.get())
 
