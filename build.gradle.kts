@@ -15,7 +15,6 @@
  */
 
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
 import java.util.Properties
@@ -118,7 +117,7 @@ val sourcesJar by tasks.registering(Jar::class) {
 
 val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
-    from(tasks["dokka"])
+    from(tasks.dokkaJavadoc)
 }
 
 publishing {
@@ -260,9 +259,8 @@ tasks {
         kotlinOptions.jvmTarget = "1.8"
     }
 
-    withType<DokkaTask> {
-        outputFormat = "javadoc"
-        outputDirectory = "$buildDir/javadoc"
+    dokkaJavadoc {
+        outputDirectory.set(buildDir.resolve("javadoc"))
     }
 
     wrapper {

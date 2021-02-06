@@ -16,11 +16,11 @@
 
 package com.cmgapps.license.reporter
 
-interface Element {
+internal interface Element {
     fun render(builder: StringBuilder, intent: String, format: Boolean)
 }
 
-class TextElement(private val text: String) : Element {
+internal class TextElement(private val text: String) : Element {
     override fun render(builder: StringBuilder, intent: String, format: Boolean) {
         if (format) {
             builder.append(intent)
@@ -33,10 +33,10 @@ class TextElement(private val text: String) : Element {
 }
 
 @DslMarker
-annotation class HtmlTagMarker
+internal annotation class HtmlTagMarker
 
 @HtmlTagMarker
-abstract class Tag(protected val name: String) : Element {
+internal abstract class Tag(protected val name: String) : Element {
     val children = arrayListOf<Element>()
     val attributes = hashMapOf<String, String>()
 
@@ -94,7 +94,7 @@ abstract class Tag(protected val name: String) : Element {
     override fun toString(): String = toString(true)
 }
 
-abstract class TagWithText(name: String) : Tag(name) {
+internal abstract class TagWithText(name: String) : Tag(name) {
     operator fun String.unaryPlus() {
         children.add(TextElement(this))
     }

@@ -19,9 +19,8 @@ object Deps {
 
     object Plugins {
         const val versionsVersion = "0.36.0"
-        const val bintrayVersion = "1.8.4"
         const val pluginPublishVersion = "0.12.0"
-        const val dokkaVersion = "0.10.0"
+        const val dokkaVersion = "1.4.20"
     }
 
     const val androidGradlePlugin = "com.android.tools.build:gradle:4.1.2"
