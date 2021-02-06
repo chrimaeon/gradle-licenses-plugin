@@ -44,6 +44,7 @@ internal object LicensesHelper {
         "Apache 2.0" to APACHE_2_FILE_NAME,
         "Apache v2" to APACHE_2_FILE_NAME,
         "Apache License 2.0" to APACHE_2_FILE_NAME,
+        "Apache License, Version 2.0" to APACHE_2_FILE_NAME,
         "The Apache Software License" to APACHE_2_FILE_NAME,
         "The Apache Software License, Version 2.0" to APACHE_2_FILE_NAME,
         "http://www.apache.org/licenses/LICENSE-2.0.txt" to APACHE_2_FILE_NAME,

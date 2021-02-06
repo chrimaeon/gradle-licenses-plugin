@@ -83,7 +83,6 @@ val pomProperties = Properties().apply {
 val group: String by pomProperties
 val versionName: String by pomProperties
 val projectUrl: String by pomProperties
-val pomArtifactId: String by pomProperties
 val pomName: String by pomProperties
 val pomDescription: String by pomProperties
 val scmUrl: String by pomProperties
@@ -127,11 +126,20 @@ publishing {
             artifact(sourcesJar.get())
             artifact(javadocJar.get())
 
+            val pomArtifactId: String by pomProperties
+
+
             artifactId = pomArtifactId
 
             pom {
                 name.set(pomName)
                 description.set(pomDescription)
+                url.set(projectUrl)
+                issueManagement {
+                    val issuesTrackerUrl: String by pomProperties
+                    system.set("github")
+                    url.set(issuesTrackerUrl)
+                }
                 developers {
                     developer {
                         id.set("cgrach")
@@ -144,6 +152,12 @@ publishing {
                     val developerConnectionUrl: String by pomProperties
                     developerConnection.set(developerConnectionUrl)
                     url.set(scmUrl)
+                }
+                licenses {
+                    license {
+                        name.set("Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
                 }
             }
         }

@@ -19,9 +19,9 @@ plugins {
 Using legacy plugin application 
 ```groovy
 buildscript {
-  repositories {
-    jcenter()
-  }
+    repositories {
+        mavenCentral()
+    }
 
   dependencies {
     classpath("com.cmgapps:gradle-licenses-plugin:<version>")

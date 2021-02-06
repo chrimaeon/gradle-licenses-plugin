@@ -19,11 +19,13 @@ package com.cmgapps.license.reporter
 import com.cmgapps.license.helper.LicensesHelper
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import org.gradle.api.logging.Logger
 import org.gradle.api.resources.TextResource
 
 internal class HtmlReport(
     libraries: List<Library>,
-    private val css: TextResource?
+    private val css: TextResource?,
+    private val logger: Logger
 ) : Report(libraries) {
 
     companion object {
@@ -80,19 +82,30 @@ internal class HtmlReport(
                         }
                     }
 
+                    val licenseUrl = entry.key.url
+                    val licenseName = entry.key.name
+
                     when {
-                        LicensesHelper.LICENSE_MAP.containsKey(entry.key.url) -> pre {
-                            +(getLicenseText(LicensesHelper.LICENSE_MAP[entry.key.url]) ?: "")
+                        LicensesHelper.LICENSE_MAP.containsKey(licenseUrl) -> pre {
+                            +(getLicenseText(LicensesHelper.LICENSE_MAP[licenseUrl]) ?: "")
                         }
-                        LicensesHelper.LICENSE_MAP.containsKey(entry.key.name) -> pre {
-                            +(getLicenseText(LicensesHelper.LICENSE_MAP[entry.key.name]) ?: "")
+                        LicensesHelper.LICENSE_MAP.containsKey(licenseName) -> pre {
+                            +(getLicenseText(LicensesHelper.LICENSE_MAP[licenseName]) ?: "")
                         }
-                        else -> div("license") {
-                            p {
-                                +entry.key.name
-                            }
-                            a(entry.key.url) {
-                                +entry.key.url
+                        else -> {
+                            logger.warn(
+                                """
+                                    |No mapping found for License $licenseName at $licenseUrl
+                                    |If it is a valid Open Source Licesnse, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
+                                """.trimMargin()
+                            )
+                            div("license") {
+                                p {
+                                    +licenseName
+                                }
+                                a(licenseUrl) {
+                                    +licenseUrl
+                                }
                             }
                         }
                     }
