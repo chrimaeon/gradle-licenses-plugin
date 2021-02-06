@@ -52,8 +52,8 @@ interface CustomizableHtmlReport : LicensesReport {
     var stylesheet: TextResource?
 }
 
-private class CustomizableHtmlReportImpl(type: ReportType, task: Task) : LicenseReportImpl(type, task),
-    CustomizableHtmlReport {
+private class CustomizableHtmlReportImpl(type: ReportType, task: Task) :
+    LicenseReportImpl(type, task), CustomizableHtmlReport {
     override var stylesheet: TextResource? = null
 }
 

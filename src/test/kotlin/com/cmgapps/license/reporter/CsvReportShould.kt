@@ -29,7 +29,8 @@ class CsvReportShould {
     fun `generate report`() {
         val result = CsvReport(LibrariesHelper.libraries).generate()
         assertThat(
-            result, `is`(
+            result,
+            `is`(
                 "name,version,description,license name,license url\r\n" +
                     "Test lib 1,1.0,proper description,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt\r\n"
             )
@@ -44,7 +45,8 @@ class CsvReportShould {
         val result = CsvReport(listOf(library)).generate()
 
         assertThat(
-            result, `is`(
+            result,
+            `is`(
                 "name,version,description,license name,license url\r\n" +
                     "\"Name with a , in it\",\"version with a \n in it\",\"description with \r in it\",\"License name with a \"\" in it\",just a plain url\r\n"
             )

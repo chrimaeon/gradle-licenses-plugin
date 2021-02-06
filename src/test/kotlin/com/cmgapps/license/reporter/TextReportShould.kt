@@ -27,7 +27,8 @@ class TextReportShould {
     fun `generate Text report`() {
         val report = TextReport(LibrariesHelper.libraries).generate()
         assertThat(
-            report, `is`(
+            report,
+            `is`(
                 "Licenses\n" +
                     "└─ Test lib 1:1.0\n" +
                     "   ├─ License: Apache 2.0\n" +

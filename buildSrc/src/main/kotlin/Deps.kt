@@ -15,20 +15,20 @@
  */
 
 object Deps {
-    const val kotlinVersion = "1.3.61"
+    const val kotlinVersion = "1.4.30"
 
     object Plugins {
-        const val versionsVersion = "0.27.0"
+        const val versionsVersion = "0.36.0"
         const val bintrayVersion = "1.8.4"
-        const val pluginPublishVersion = "0.10.1"
+        const val pluginPublishVersion = "0.12.0"
         const val dokkaVersion = "0.10.0"
     }
 
-    const val androidGradlePlugin = "com.android.tools.build:gradle:3.5.3"
+    const val androidGradlePlugin = "com.android.tools.build:gradle:4.1.2"
     const val mavenModel = "org.apache.maven:maven-model:3.6.3"
-    const val moshi = "com.squareup.moshi:moshi:1.9.2"
-    const val moshiCodegen = "com.squareup.moshi:moshi-kotlin-codegen:1.9.2"
-    const val jUnit = "org.junit.jupiter:junit-jupiter:5.5.2"
+    const val moshi = "com.squareup.moshi:moshi:1.11.0"
+    const val moshiCodegen = "com.squareup.moshi:moshi-kotlin-codegen:1.11.0"
+    const val jUnit = "org.junit.jupiter:junit-jupiter:5.7.1"
     const val hamcrest = "org.hamcrest:hamcrest:2.2"
-    const val ktlint = "com.pinterest:ktlint:0.36.0"
+    const val ktlint = "com.pinterest:ktlint:0.40.0"
 }

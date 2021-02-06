@@ -1,5 +1,7 @@
 .gradle
-.idea
+.idea/*
+!.idea/codeStyles
+!.idea/copyright
 *.iml
 build/
 out/

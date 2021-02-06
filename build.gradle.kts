@@ -32,7 +32,6 @@ plugins {
     id("com.jfrog.bintray") version Deps.Plugins.bintrayVersion
     id("com.gradle.plugin-publish") version Deps.Plugins.pluginPublishVersion
     id("org.jetbrains.dokka") version Deps.Plugins.dokkaVersion
-//    id("com.cmgapps.licenses") version "1.4.0"
 }
 
 repositories {
@@ -274,18 +273,21 @@ tasks {
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "6.0.1"
+        gradleVersion = "6.8.2"
     }
 }
 
 dependencies {
     compileOnly(Deps.androidGradlePlugin)
+
+    val kotlinReflect = kotlin("reflect", Deps.kotlinVersion)
+    // Necessary to bump a transitive dependency.
+    compileOnly(kotlinReflect)
+
     implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
     implementation(Deps.mavenModel)
     implementation(Deps.moshi)
     kapt(Deps.moshiCodegen)
-
-    ktlint(Deps.ktlint)
 
     ktlint(Deps.ktlint)
 
@@ -294,9 +296,11 @@ dependencies {
     }
     testImplementation(Deps.androidGradlePlugin)
     testImplementation(Deps.hamcrest)
+    testImplementation(kotlinReflect)
 
     "functionalTestImplementation"(Deps.androidGradlePlugin)
     "functionalTestImplementation"(gradleTestKit())
+    "functionalTestImplementation"(kotlinReflect)
 
     "jacocoRuntime"("org.jacoco:org.jacoco.agent:${jacoco.toolVersion}:runtime")
 }

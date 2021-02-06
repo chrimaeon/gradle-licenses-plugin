@@ -32,7 +32,8 @@ class HtmlReportShould {
         ).generate()
 
         assertThat(
-            result, `is`(
+            result,
+            `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +

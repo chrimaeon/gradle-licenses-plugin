@@ -26,12 +26,17 @@ class MarkdownReportShould {
     @Test
     fun `generate Markdown report`() {
         val result = MarkdownReport(LibrariesHelper.libraries).generate()
-        assertThat(result, `is`("""# Open source licenses
-                                  |### Notice for packages:
-                                  |Test lib 1 _1.0_:
-                                  |* Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)
-                                  |* MIT License (http://opensource.org/licenses/MIT)
-                                  |
-                                  |""".trimMargin()))
+        assertThat(
+            result,
+            `is`(
+                """# Open source licenses
+                  |### Notice for packages:
+                  |Test lib 1 _1.0_:
+                  |* Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)
+                  |* MIT License (http://opensource.org/licenses/MIT)
+                  |
+                  |""".trimMargin()
+            )
+        )
     }
 }
