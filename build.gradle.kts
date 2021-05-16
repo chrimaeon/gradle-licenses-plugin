@@ -30,6 +30,7 @@ plugins {
     id("com.gradle.plugin-publish") version Deps.Plugins.pluginPublishVersion
     id("org.jetbrains.dokka") version Deps.Plugins.dokkaVersion
     kotlin("plugin.serialization") version Deps.kotlinVersion
+    id("org.jetbrains.changelog") version Deps.Plugins.changelogPluginVersion
 }
 
 repositories {
@@ -176,6 +177,10 @@ publishing {
 
 signing {
     sign(publishing.publications["pluginMaven"])
+}
+
+changelog {
+    version = versionName
 }
 
 tasks {

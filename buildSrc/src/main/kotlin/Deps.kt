@@ -19,9 +19,10 @@ object Deps {
     const val jacocoAgentVersion = "0.8.7"
 
     object Plugins {
-        const val versionsVersion = "0.38.0"
-        const val pluginPublishVersion = "0.14.0"
         const val dokkaVersion = "1.4.32"
+        const val changelogPluginVersion = "1.1.2"
+        const val pluginPublishVersion = "0.14.0"
+        const val versionsVersion = "0.38.0"
     }
 
     const val androidGradlePlugin = "com.android.tools.build:gradle:4.2.1"
