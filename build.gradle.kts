@@ -38,21 +38,14 @@ repositories {
     jcenter()
 }
 
-val functionalTestName = "functionalTest"
-
-sourceSets {
-    create(functionalTestName) {
-        java {
-            srcDir("src/$functionalTestName/kotlin")
-        }
-        resources {
-            srcDir("src/$functionalTestName/resources")
-            outputDir = file("$buildDir/resources/$functionalTestName")
-        }
-
-        compileClasspath += sourceSets.main.get().output + configurations.testRuntimeClasspath.get()
-        runtimeClasspath += output + compileClasspath
+val functionalTestSourceSet = sourceSets.create("functionalTest") {
+    val sourceSetName = name
+    java {
+        srcDir("src/$sourceSetName/kotlin")
     }
+
+    compileClasspath += sourceSets.main.get().output + configurations.testRuntimeClasspath.get()
+    runtimeClasspath += output + compileClasspath
 }
 
 val ktlint: Configuration by configurations.creating
@@ -71,13 +64,15 @@ configurations {
 
 idea {
     module {
-        testSourceDirs = testSourceDirs + sourceSets[functionalTestName].allJava.srcDirs
-        testResourceDirs = testResourceDirs + sourceSets[functionalTestName].resources.srcDirs
+        testSourceDirs = testSourceDirs + functionalTestSourceSet.allJava.srcDirs
+        testResourceDirs = testResourceDirs + functionalTestSourceSet.resources.srcDirs
     }
 }
 
 val pomProperties = Properties().apply {
-    load(file("$rootDir/pom.properties").inputStream())
+    rootDir.resolve("pom.properties").inputStream().use {
+        load(it)
+    }
 }
 
 val group: String by pomProperties
@@ -106,7 +101,7 @@ gradlePlugin {
         }
     }
 
-    testSourceSets(sourceSets[functionalTestName])
+    testSourceSets(functionalTestSourceSet)
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
@@ -191,17 +186,17 @@ signing {
 tasks {
     val setupJacocoRuntime by registering(WriteProperties::class) {
         outputFile =
-            file("${sourceSets.getByName(functionalTestName).resources.outputDir.path}/testkit/testkit-gradle.properties")
+            functionalTestSourceSet.output.resourcesDir!!.resolve("testkit/testkit-gradle.properties")
         property(
             "org.gradle.jvmargs",
-            "-javaagent:${configurations["jacocoRuntime"].asPath}=destfile=$buildDir/jacoco/$functionalTestName.exec"
+            "-javaagent:${configurations["jacocoRuntime"].asPath}=destfile=$buildDir/jacoco/functionalTest.exec"
         )
     }
 
     val functionalTest by registering(Test::class) {
         group = "verification"
-        testClassesDirs = sourceSets[functionalTestName].output.classesDirs
-        classpath = sourceSets[functionalTestName].runtimeClasspath
+        testClassesDirs = functionalTestSourceSet.output.classesDirs
+        classpath = functionalTestSourceSet.runtimeClasspath
         dependsOn(setupJacocoRuntime)
     }
 
@@ -216,6 +211,10 @@ tasks {
     check {
         dependsOn(functionalTest)
         dependsOn(ktlint)
+    }
+
+    jacoco {
+        toolVersion = "0.8.6"
     }
 
     val jacocoExecData = fileTree("$buildDir/jacoco").include("*.exec")
@@ -270,7 +269,10 @@ tasks {
     }
 
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions {
+            freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
+            jvmTarget = "1.8"
+        }
     }
 
     dokkaJavadoc {

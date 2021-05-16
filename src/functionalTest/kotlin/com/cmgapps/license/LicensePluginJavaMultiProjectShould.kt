@@ -75,7 +75,7 @@ class LicensePluginJavaMultiProjectShould {
             licenses {
                 additionalProjects ':module2'
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
         """.trimIndent()
@@ -88,7 +88,7 @@ class LicensePluginJavaMultiProjectShould {
                 maven { url '$mavenRepoUrl' }
             }
             dependencies {
-                compile 'group:name:1.0.0'
+                implementation 'group:name:1.0.0'
             }
         """.trimIndent()
 
@@ -127,7 +127,7 @@ class LicensePluginJavaMultiProjectShould {
             licenses {
                 additionalProjects ':module2'
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
             dependencies {
@@ -185,11 +185,11 @@ class LicensePluginJavaMultiProjectShould {
             licenses {
                 additionalProjects ':module2'
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
             dependencies {
-                compile 'group:name:1.0.0'
+                implementation 'group:name:1.0.0'
             }
         """.trimIndent()
 
@@ -201,7 +201,7 @@ class LicensePluginJavaMultiProjectShould {
                 maven { url '$mavenRepoUrl' }
             }
             dependencies {
-                compile 'group:name:1.0.0'
+                implementation 'group:name:1.0.0'
             }
         """.trimIndent()
 

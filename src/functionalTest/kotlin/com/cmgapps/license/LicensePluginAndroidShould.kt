@@ -162,7 +162,7 @@ class LicensePluginAndroidShould {
             
             licenses {
                 reports {
-                    text.enabled = true
+                    text.enabled.set(true)
                 }
             }
             
