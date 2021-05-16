@@ -48,9 +48,9 @@ Example:
 ```groovy
 licenses {
     reports {
-        html.enabled = false // html is enabled by default
-        xml.enabled = true
-        xml.destination = file("$buildDir/reports/licenses.xml")
+        html.enabled.set(false) // html is enabled by default
+        xml.enabled.set(true)
+        xml.destination.set(file("$buildDir/reports/licenses.xml"))
     }
 }
 ```
@@ -81,7 +81,7 @@ The plugin can output different formats.
     add your own reporter as a lambda function
     ```groovy
     licenses {
-      custom.enabled = true
+      custom.enabled.set(true)
       custom.action = { list -> list.collect { it.name }.join(', ') }
     }
     ```
