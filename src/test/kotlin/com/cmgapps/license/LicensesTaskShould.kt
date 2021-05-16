@@ -139,19 +139,21 @@ class LicensesTaskShould {
         assertThat(
             outputFile.readText(),
             `is`(
-                "[\n" +
-                    "  {\n" +
-                    "    \"name\": \"Fake dependency name\",\n" +
-                    "    \"version\": \"1.0.0\",\n" +
-                    "    \"description\": \"Fake dependency description\",\n" +
-                    "    \"licenses\": [\n" +
-                    "      {\n" +
-                    "        \"name\": \"Some license\",\n" +
-                    "        \"url\": \"http://website.tld/\"\n" +
-                    "      }\n" +
-                    "    ]\n" +
-                    "  }\n" +
-                    "]"
+                """
+                [
+                    {
+                        "name": "Fake dependency name",
+                        "version": "1.0.0",
+                        "description": "Fake dependency description",
+                        "licenses": [
+                            {
+                                "name": "Some license",
+                                "url": "http://website.tld/"
+                            }
+                        ]
+                    }
+                ]
+                """.trimIndent()
             )
         )
     }

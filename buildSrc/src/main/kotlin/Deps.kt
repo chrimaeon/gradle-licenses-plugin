@@ -25,7 +25,7 @@ object Deps {
     }
 
     const val androidGradlePlugin = "com.android.tools.build:gradle:4.2.1"
-    const val mavenModel = "org.apache.maven:maven-model:3.6.3"
+    const val mavenModel = "org.apache.maven:maven-model:3.8.1"
     const val jUnit = "org.junit.jupiter:junit-jupiter:5.7.2"
     const val hamcrest = "org.hamcrest:hamcrest:2.2"
     const val ktlint = "com.pinterest:ktlint:0.41.0"

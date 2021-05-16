@@ -63,8 +63,6 @@ open class LicensesTask : DefaultTask() {
     @Input
     var additionalProjects: Set<String> = emptySet()
 
-    private val libraries = mutableListOf<Library>()
-
     private lateinit var pomConfiguration: Configuration
 
     private val _allProjects: Set<Project> by lazy {
@@ -110,8 +108,8 @@ open class LicensesTask : DefaultTask() {
         pomConfiguration = project.configurations.create(POM_CONFIGURATION)
 
         collectDependencies()
-        generateLibraries()
-        createReport()
+        val libraries = generateLibraries()
+        createReport(libraries)
         project.configurations.remove(pomConfiguration)
     }
 
@@ -147,26 +145,24 @@ open class LicensesTask : DefaultTask() {
         }
     }
 
-    private fun generateLibraries() {
-        pomConfiguration.resolvedConfiguration.lenientConfiguration.artifacts.forEach {
+    private fun generateLibraries(): List<Library> {
+        return pomConfiguration.resolvedConfiguration.lenientConfiguration.artifacts.map {
 
-            getPomModel(it.file).let { model ->
-                val licenses = findLicenses(model)
+            val model = getPomModel(it.file)
+            val licenses = findLicenses(model)
+            val version = findVersion(model)
+            val description = findDescription(model)
 
-                if (licenses.isEmpty()) {
-                    logger.warn("${model.name} dependency does not have a license.")
-                }
-
-                libraries.add(
-                    Library(
-                        model.name
-                            ?: "${model.groupId}:${model.artifactId}",
-                        model.version,
-                        model.description,
-                        licenses
-                    )
-                )
+            if (licenses.isEmpty()) {
+                logger.warn("${model.name} dependency does not have a license.")
             }
+            Library(
+                model.name
+                    ?: "${model.groupId}:${model.artifactId}",
+                version,
+                description,
+                licenses
+            )
         }
     }
 
@@ -216,7 +212,28 @@ open class LicensesTask : DefaultTask() {
         return getPomModel(pomFile)
     }
 
-    private fun createReport() {
+    private fun findVersion(model: Model): String? {
+        return when {
+            model.version != null -> model.version
+            model.parent != null ->
+                if (model.parent.version != null) {
+                    model.parent.version
+                } else {
+                    findVersion(getParentPomFile(model.parent))
+                }
+            else -> null
+        }
+    }
+
+    private fun findDescription(model: Model): String? {
+        return when {
+            model.description != null -> model.description
+            model.parent != null -> findDescription(getParentPomFile(model.parent))
+            else -> null
+        }
+    }
+
+    private fun createReport(libraries: List<Library>) {
         if (libraries.isEmpty()) {
             return
         }
