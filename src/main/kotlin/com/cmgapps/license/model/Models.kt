@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018. Christian Grach <christian.grach@cmgapps.com>
+ * Copyright (c) 2021. Christian Grach <christian.grach@cmgapps.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package com.cmgapps.license.model
 
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.Serializable
 
-@JsonClass(generateAdapter = true)
+@Serializable
+data class License(val name: String, val url: String)
+
+@Serializable
 data class Library(val name: String, val version: String?, val description: String?, val licenses: List<License>)

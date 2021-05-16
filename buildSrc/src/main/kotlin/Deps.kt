@@ -26,9 +26,8 @@ object Deps {
 
     const val androidGradlePlugin = "com.android.tools.build:gradle:4.2.1"
     const val mavenModel = "org.apache.maven:maven-model:3.6.3"
-    const val moshi = "com.squareup.moshi:moshi:1.12.0"
-    const val moshiCodegen = "com.squareup.moshi:moshi-kotlin-codegen:1.11.0"
     const val jUnit = "org.junit.jupiter:junit-jupiter:5.7.2"
     const val hamcrest = "org.hamcrest:hamcrest:2.2"
     const val ktlint = "com.pinterest:ktlint:0.41.0"
+    const val kotlinSerialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1"
 }

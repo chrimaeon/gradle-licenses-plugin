@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-import com.cmgapps.license.OutputType
-
 plugins {
     java
-    id("com.cmgapps.licenses") version "1.3.0"
+    id("com.cmgapps.licenses") version "3.1.0-SNAPSHOT"
+}
+
+repositories {
+    mavenCentral()
 }
 
 licenses {
-    outputType = OutputType.TEXT
+    reports {
+        html.enabled.set(true)
+        json.enabled.set(true)
+    }
+}
+
+
+
+dependencies {
+    implementation("org.apache.maven:maven-model:3.6.3")
 }
