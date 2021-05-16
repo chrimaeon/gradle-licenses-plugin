@@ -37,7 +37,7 @@ open class LicensesReport(type: ReportType, task: Task) {
     val name: String = type.name
 
     @get:OutputFile
-    internal val destination: RegularFileProperty = task.project.objects.fileProperty()
+    val destination: RegularFileProperty = task.project.objects.fileProperty()
 
     @get:Input
     val enabled: Property<Boolean> = task.project.objects.property(Boolean::class.java).convention(false)
