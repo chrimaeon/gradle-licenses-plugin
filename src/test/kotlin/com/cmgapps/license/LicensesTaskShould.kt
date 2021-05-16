@@ -57,7 +57,7 @@ class LicensesTaskShould {
 
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports {
-                it.html.enabled = true
+                it.html.enabled.set(true)
             }
         }
 
@@ -93,7 +93,7 @@ class LicensesTaskShould {
 
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports {
-                it.html.enabled = true
+                it.html.enabled.set(true)
                 it.html.stylesheet = project.resources.text.fromString("body{}")
             }
         }
@@ -130,7 +130,7 @@ class LicensesTaskShould {
 
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports {
-                it.json.enabled = true
+                it.json.enabled.set(true)
             }
         }
 
@@ -163,7 +163,7 @@ class LicensesTaskShould {
 
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports {
-                it.xml.enabled = true
+                it.xml.enabled.set(true)
             }
         }
 
@@ -205,7 +205,7 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.md")
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports {
-                it.markdown.enabled = true
+                it.markdown.enabled.set(true)
             }
         }
 
@@ -228,7 +228,7 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.txt")
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports {
-                it.text.enabled = true
+                it.text.enabled.set(true)
             }
         }
 
@@ -250,7 +250,7 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.csv")
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports {
-                it.csv.enabled = true
+                it.csv.enabled.set(true)
             }
         }
 
@@ -270,7 +270,7 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses")
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports {
-                it.custom.enabled = true
+                it.custom.enabled.set(true)
                 it.custom.action = { list -> list.joinToString { lib -> lib.name } }
             }
         }
@@ -314,14 +314,14 @@ class LicensesTaskShould {
     fun `generate all reports`() {
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports {
-                it.csv.enabled = true
-                it.custom.enabled = true
+                it.csv.enabled.set(true)
+                it.custom.enabled.set(true)
                 it.custom.action = { list -> list.joinToString { lib -> lib.name } }
-                it.html.enabled = true
-                it.json.enabled = true
-                it.markdown.enabled = true
-                it.text.enabled = true
-                it.xml.enabled = true
+                it.html.enabled.set(true)
+                it.json.enabled.set(true)
+                it.markdown.enabled.set(true)
+                it.text.enabled.set(true)
+                it.xml.enabled.set(true)
             }
         }
 

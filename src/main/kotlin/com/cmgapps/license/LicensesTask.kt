@@ -91,7 +91,7 @@ open class LicensesTask : DefaultTask() {
             strategy = Closure.DELEGATE_FIRST
         ) closure: Closure<LicensesReportsContainer>
     ): LicensesReportsContainer {
-        return reports(ClosureBackedAction<LicensesReportsContainer>(closure))
+        return reports(ClosureBackedAction(closure))
     }
 
     fun reports(configureAction: Action<in LicensesReportsContainer>): LicensesReportsContainer {
@@ -102,7 +102,7 @@ open class LicensesTask : DefaultTask() {
     init {
         outputs.upToDateWhen { false }
         reports = LicensesReportsContainerImpl(this)
-        reports.html.enabled = true
+        reports.html.enabled.set(true)
     }
 
     @TaskAction
@@ -221,20 +221,20 @@ open class LicensesTask : DefaultTask() {
             return
         }
 
-        if (reports.html.enabled) reports.html.writeFileReport(
+        if (reports.html.enabled.get()) reports.html.writeFileReport(
             HtmlReport(
                 libraries,
                 reports.html.stylesheet,
                 logger
             )
         )
-        if (reports.csv.enabled) reports.csv.writeFileReport(CsvReport(libraries))
-        if (reports.json.enabled) reports.json.writeFileReport(JsonReport(libraries))
-        if (reports.markdown.enabled) reports.markdown.writeFileReport(MarkdownReport(libraries))
-        if (reports.text.enabled) reports.text.writeFileReport(TextReport(libraries))
-        if (reports.xml.enabled) reports.xml.writeFileReport(XmlReport(libraries))
+        if (reports.csv.enabled.get()) reports.csv.writeFileReport(CsvReport(libraries))
+        if (reports.json.enabled.get()) reports.json.writeFileReport(JsonReport(libraries))
+        if (reports.markdown.enabled.get()) reports.markdown.writeFileReport(MarkdownReport(libraries))
+        if (reports.text.enabled.get()) reports.text.writeFileReport(TextReport(libraries))
+        if (reports.xml.enabled.get()) reports.xml.writeFileReport(XmlReport(libraries))
         val customReport = reports.custom.action
-        if (reports.custom.enabled && customReport != null) reports.custom.writeFileReport(
+        if (reports.custom.enabled.get() && customReport != null) reports.custom.writeFileReport(
             CustomReport(
                 libraries,
                 customReport
@@ -243,7 +243,7 @@ open class LicensesTask : DefaultTask() {
     }
 
     private fun LicensesReport.writeFileReport(report: Report) {
-        with(destination) {
+        with(destination.get().asFile) {
             prepare()
             writeText(report.generate())
             logger.lifecycle("Wrote ${this@writeFileReport.name.toUpperCase()} report to ${getClickableFileUrl(this)}.")

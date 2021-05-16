@@ -50,7 +50,7 @@ class LicensePluginJavaShould {
     fun setUp() {
         buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
         reportFolder = "$testProjectDir/build/reports/licenses/licenseReport"
-        mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
+        mavenRepoUrl = javaClass.getResource("/maven")!!.toURI().toString()
         buildFile + """
             plugins {
                id("java")
@@ -72,20 +72,9 @@ class LicensePluginJavaShould {
             .withJaCoCo()
     }
 
-    /**
-     *
-     * AGP Version   | Gradle Version
-     * ------------------------------
-     * 3.1.0+	      | 4.4+
-     * 3.2.0 - 3.2.1 |	4.6+
-     * 3.3.0 - 3.3.2 |	4.10.1+
-     * 3.4.0 - 3.4.1 |	5.1.1+
-     * 3.5.0+	      | 5.4.1-5.6.4
-     * ------------------------------
-     */
     @DisabledIfEnvironmentVariable(named = "CIRCLECI", matches = "true")
     @ParameterizedTest
-    @ValueSource(strings = ["3.5", "4.4", "5.1.1", "6.0.1"])
+    @ValueSource(strings = ["7.0.1"])
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
         val result = gradleRunner
             .withGradleVersion(version)
@@ -106,11 +95,11 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
             dependencies {
-              compile 'com.google.firebase:firebase-core:10.0.1'
+              implementation 'com.google.firebase:firebase-core:10.0.1'
             }
         """.trimIndent()
 
@@ -143,12 +132,12 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
             
             dependencies {
-              compile 'com.squareup.retrofit2:retrofit:2.3.0'
+              implementation 'com.squareup.retrofit2:retrofit:2.3.0'
             }
         """.trimIndent()
         val result = gradleRunner.build()
@@ -186,12 +175,12 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
             
             dependencies {
-              compile 'group:name:1.0.0'
+              implementation 'group:name:1.0.0'
             }
         """.trimIndent()
 
@@ -231,12 +220,12 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
             
             dependencies {
-              compile 'group:noname:1.0.0'
+              implementation 'group:noname:1.0.0'
             }
         """.trimIndent()
 
@@ -276,12 +265,12 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    text.enabled = true
+                    text.enabled.set(true)
                 }
             }
 
             dependencies {
-              compile 'group:noname:1.0.0'
+              implementation 'group:noname:1.0.0'
             }
         """.trimIndent()
 
@@ -307,13 +296,13 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                     html.stylesheet = project.resources.text.fromString("body{}")
                 }
             }
 
             dependencies {
-              compile 'group:name:1.0.0'
+              implementation 'group:name:1.0.0'
             }
         """.trimIndent()
 
@@ -351,13 +340,13 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    custom.enabled = true
+                    custom.enabled.set(true)
                     custom.action = { list -> list.collect { it.name }.join(', ') }
                 }
             }
 
             dependencies {
-              compile 'group:name:1.0.0'
+              implementation 'group:name:1.0.0'
             }
         """.trimIndent()
 

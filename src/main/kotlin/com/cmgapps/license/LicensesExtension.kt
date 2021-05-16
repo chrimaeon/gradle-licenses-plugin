@@ -26,7 +26,7 @@ open class LicensesExtension() {
         private set
 
     fun reports(closure: Closure<LicensesReportsContainer>) {
-        reports(ClosureBackedAction<LicensesReportsContainer>(closure))
+        reports(ClosureBackedAction(closure))
     }
 
     fun reports(configureAction: Action<in LicensesReportsContainer>) {
@@ -48,6 +48,7 @@ open class LicensesExtension() {
     }
 }
 
+@Suppress("unused")
 enum class OutputType {
     HTML,
     XML,

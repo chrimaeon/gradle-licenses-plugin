@@ -3,7 +3,10 @@ version: 2.1
 executors:
   android-executor:
     docker:
-      - image: circleci/android:api-29
+      - image: circleci/android:api-30
+        auth:
+          username: chrimaeon
+          password: $DOCKERHUB_PASSWORD
     environment:
       JAVA_TOOL_OPTIONS: "-Xmx3g"
       GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=2 -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false"
@@ -35,19 +38,7 @@ commands:
           key: v1-gradle-cache-{{ checksum "buildSrc/src/main/kotlin/Deps.kt" }}-{{ checksum "build.gradle.kts" }}
 
 jobs:
-  build:
-    executor: android-executor
-    steps:
-      - checkout
-      - restore_gradle_wrapper
-      - restore_gradle_cache
-      - run:
-          name: Run build task
-          command: ./gradlew build
-      - save_gradle_wrapper
-      - save_gradle_cache
-
-  check:
+  test:
     executor: android-executor
     steps:
       - checkout
@@ -55,7 +46,10 @@ jobs:
       - restore_gradle_cache
       - run:
           name: Run check task
-          command: ./gradlew check jacocoTestReport jacocoTestCoverageVerification
+          command: ./gradlew check
+      - run:
+          name: Generate and verify code coverage and
+          command: ./gradlew jacocoTestReport jacocoTestCoverageVerification
       - save_gradle_wrapper
       - save_gradle_cache
       - store_test_results:
@@ -64,11 +58,11 @@ jobs:
           path: build/test-results/functionalTest
       - store_artifacts:
           path: build/reports
-          when: always
 
 workflows:
   version: 2
   workflow:
     jobs:
-      - build
-      - check
+      - test:
+          context:
+            - DockerHub

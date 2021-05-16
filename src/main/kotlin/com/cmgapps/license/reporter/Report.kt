@@ -18,51 +18,44 @@ package com.cmgapps.license.reporter
 
 import com.cmgapps.license.model.Library
 import org.gradle.api.Task
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.resources.TextResource
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
-import java.io.File
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
+import kotlin.reflect.javaType
 
 abstract class Report(protected val libraries: List<Library>) {
     abstract fun generate(): String
 }
 
-interface LicensesReport {
+open class LicensesReport(type: ReportType, task: Task) {
     @get:Internal
-    val name: String
-    @get:OutputFile
-    var destination: File
-    @get:Input
-    var enabled: Boolean
-}
+    val name: String = type.name
 
-private open class LicenseReportImpl(type: ReportType, task: Task) : LicensesReport {
-    final override var destination: File
-    final override var enabled: Boolean = false
-    final override val name = type.name
+    @get:OutputFile
+    val destination: RegularFileProperty = task.project.objects.fileProperty()
+
+    @get:Input
+    val enabled: Property<Boolean> = task.project.objects.property(Boolean::class.java).convention(false)
 
     init {
         val extension = if (type == ReportType.CUSTOM) "" else ".${type.extension}"
-        destination = File("${task.project.buildDir}/reports/licenses/${task.name}/licenses$extension")
+        destination.set(
+            task.project.buildDir.resolve("reports/licenses").resolve(task.name).resolve("licenses$extension")
+        )
     }
 }
 
-interface CustomizableHtmlReport : LicensesReport {
-    var stylesheet: TextResource?
+class CustomizableHtmlReport(type: ReportType, task: Task) : LicensesReport(type, task) {
+    var stylesheet: TextResource? = null
 }
 
-private class CustomizableHtmlReportImpl(type: ReportType, task: Task) :
-    LicenseReportImpl(type, task), CustomizableHtmlReport {
-    override var stylesheet: TextResource? = null
-}
-
-interface CustomizableReport : LicensesReport {
-    var action: CustomReportAction?
-}
-
-private class CustomizableReportImpl(type: ReportType, task: Task) : LicenseReportImpl(type, task), CustomizableReport {
-    override var action: CustomReportAction? = null
+class CustomizableReport(type: ReportType, task: Task) : LicensesReport(type, task) {
+    var action: CustomReportAction? = null
 }
 
 typealias CustomReportAction = (List<Library>) -> String
@@ -90,36 +83,33 @@ interface LicensesReportsContainer {
     val custom: CustomizableReport
 }
 
-internal class LicensesReportsContainerImpl(task: Task) : LicensesReportsContainer {
-    private val reports = mutableMapOf<ReportType, LicensesReport>()
+internal class LicensesReportsContainerImpl(private val task: Task) : LicensesReportsContainer {
+    override val csv: LicensesReport by LicenseReportDelegate(ReportType.CSV)
+    override val html: CustomizableHtmlReport by LicenseReportDelegate(ReportType.HTML)
+    override val json: LicensesReport by LicenseReportDelegate(ReportType.JSON)
+    override val markdown: LicensesReport by LicenseReportDelegate(ReportType.MARKDOWN)
+    override val text: LicensesReport by LicenseReportDelegate(ReportType.TEXT)
+    override val xml: LicensesReport by LicenseReportDelegate(ReportType.XML)
+    override val custom: CustomizableReport by LicenseReportDelegate(ReportType.CUSTOM)
 
-    init {
-        with(reports) {
-            add(ReportType.CSV, LicenseReportImpl::class.java, task)
-            add(ReportType.HTML, CustomizableHtmlReportImpl::class.java, task)
-            add(ReportType.JSON, LicenseReportImpl::class.java, task)
-            add(ReportType.MARKDOWN, LicenseReportImpl::class.java, task)
-            add(ReportType.TEXT, LicenseReportImpl::class.java, task)
-            add(ReportType.XML, LicenseReportImpl::class.java, task)
-            add(ReportType.CUSTOM, CustomizableReportImpl::class.java, task)
+    private inner class LicenseReportDelegate<T : LicensesReport>(private val reportType: ReportType) :
+        ReadOnlyProperty<Any?, T> {
+
+        private lateinit var value: T
+
+        @Suppress("UNCHECKED_CAST")
+        @OptIn(ExperimentalStdlibApi::class)
+        override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+            return if (::value.isInitialized) {
+                value
+            } else {
+                (
+                    Class.forName(property.returnType.javaType.typeName)
+                        .getConstructor(ReportType::class.java, Task::class.java)
+                        .newInstance(reportType, task) as T
+                    ).also { value = it }
+            }
         }
-    }
-
-    override val csv: LicensesReport = checkNotNull(reports[ReportType.CSV])
-    override val html: CustomizableHtmlReport = checkNotNull(reports[ReportType.HTML]) as CustomizableHtmlReport
-    override val json: LicensesReport = checkNotNull(reports[ReportType.JSON])
-    override val markdown: LicensesReport = checkNotNull(reports[ReportType.MARKDOWN])
-    override val text: LicensesReport = checkNotNull(reports[ReportType.TEXT])
-    override val xml: LicensesReport = checkNotNull(reports[ReportType.XML])
-    override val custom: CustomizableReport = checkNotNull(reports[ReportType.CUSTOM]) as CustomizableReport
-
-    private fun <T : LicensesReport> MutableMap<ReportType, LicensesReport>.add(
-        reportType: ReportType,
-        type: Class<T>,
-        task: Task
-    ) {
-        val licenseReport = type.getConstructor(ReportType::class.java, Task::class.java).newInstance(reportType, task)
-        put(reportType, licenseReport)
     }
 }
 
