@@ -297,7 +297,7 @@ class LicensePluginJavaShould {
             licenses {
                 reports {
                     html.enabled.set(true)
-                    html.stylesheet = project.resources.text.fromString("body{}")
+                    html.stylesheet.set(project.resources.text.fromString("body{}"))
                 }
             }
 
@@ -341,7 +341,7 @@ class LicensePluginJavaShould {
             licenses {
                 reports {
                     custom.enabled.set(true)
-                    custom.action = { list -> list.collect { it.name }.join(', ') }
+                    custom.generate { list -> list.collect { it.name }.join(', ') }
                 }
             }
 

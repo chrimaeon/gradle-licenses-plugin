@@ -119,16 +119,16 @@ open class LicensesTask : DefaultTask() {
         val configurations = mutableSetOf<Configuration>()
 
         _allProjects.forEach { project ->
-            project.configurations.find { it.name == "compile" }?.let {
-                configurations.add(project.configurations.getByName("compile"))
+            project.configurations.findByName("compile")?.let {
+                configurations.add(project.configurations.getByName(it.name))
             }
 
-            project.configurations.find { it.name == "api" }?.let {
-                configurations.add(project.configurations.getByName("api"))
+            project.configurations.findByName("api")?.let {
+                configurations.add(project.configurations.getByName(it.name))
             }
 
-            project.configurations.find { it.name == "implementation" }?.let {
-                configurations.add(project.configurations.getByName("implementation"))
+            project.configurations.findByName("implementation")?.let {
+                configurations.add(project.configurations.getByName(it.name))
             }
         }
 
@@ -171,22 +171,22 @@ open class LicensesTask : DefaultTask() {
     }
 
     private fun getPomModel(file: File): Model = MavenXpp3Reader().run {
-        read(file.inputStream())
+        file.inputStream().use {
+            read(it)
+        }
     }
 
     private fun findLicenses(pom: Model): List<License> {
-
         if (pom.licenses.isNotEmpty()) {
-            val licenses = mutableListOf<License>()
-            pom.licenses.forEach { license ->
+            return pom.licenses.mapNotNull { license ->
                 try {
                     URL(license.url)
-                    licenses.add(License(license.name.trim().capitalize(), license.url))
-                } catch (ignore: java.lang.Exception) {
+                    License(license.name.trim().capitalize(), license.url)
+                } catch (ignore: Exception) {
                     logger.warn("$name dependency has an invalid license URL; skipping license")
+                    null
                 }
             }
-            return licenses
         }
 
         logger.info("Project $name has no license in POM file.")
@@ -224,7 +224,7 @@ open class LicensesTask : DefaultTask() {
         if (reports.html.enabled.get()) reports.html.writeFileReport(
             HtmlReport(
                 libraries,
-                reports.html.stylesheet,
+                reports.html.stylesheet.orNull,
                 logger
             )
         )

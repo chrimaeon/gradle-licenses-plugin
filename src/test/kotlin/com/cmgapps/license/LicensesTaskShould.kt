@@ -40,7 +40,7 @@ class LicensesTaskShould {
         project = ProjectBuilder.builder()
             .withProjectDir(testProjectDir.toFile())
             .build()
-        val mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
+        val mavenRepoUrl = javaClass.getResource("/maven")!!.toURI().toString()
         project.repositories.add(
             project.repositories.maven {
                 it.setUrl(mavenRepoUrl)
@@ -94,7 +94,7 @@ class LicensesTaskShould {
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports {
                 it.html.enabled.set(true)
-                it.html.stylesheet = project.resources.text.fromString("body{}")
+                it.html.stylesheet.set(project.resources.text.fromString("body{}"))
             }
         }
 
@@ -271,7 +271,7 @@ class LicensesTaskShould {
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports {
                 it.custom.enabled.set(true)
-                it.custom.action = { list -> list.joinToString { lib -> lib.name } }
+                it.custom.generate { list -> list.joinToString { lib -> lib.name } }
             }
         }
 
@@ -316,7 +316,7 @@ class LicensesTaskShould {
             task.reports {
                 it.csv.enabled.set(true)
                 it.custom.enabled.set(true)
-                it.custom.action = { list -> list.joinToString { lib -> lib.name } }
+                it.custom.generate { list -> list.joinToString { lib -> lib.name } }
                 it.html.enabled.set(true)
                 it.json.enabled.set(true)
                 it.markdown.enabled.set(true)
