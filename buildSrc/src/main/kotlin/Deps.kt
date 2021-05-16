@@ -15,7 +15,7 @@
  */
 
 object Deps {
-    const val kotlinVersion = "1.4.32"
+    const val kotlinVersion = "1.5.0"
     const val jacocoAgentVersion = "0.8.7"
 
     object Plugins {

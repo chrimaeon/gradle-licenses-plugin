@@ -16,7 +16,7 @@
 
 plugins {
     java
-    id("com.cmgapps.licenses") version "3.1.0-SNAPSHOT"
+    id("com.cmgapps.licenses") version "1.0.0"
 }
 
 repositories {
