@@ -46,7 +46,10 @@ jobs:
       - restore_gradle_cache
       - run:
           name: Run check task
-          command: ./gradlew check jacocoTestReport jacocoTestCoverageVerification
+          command: ./gradlew check
+      - run:
+          name: Generate and verify code coverage and
+          command: ./gradlew jacocoTestReport jacocoTestCoverageVerification
       - save_gradle_wrapper
       - save_gradle_cache
       - store_test_results:

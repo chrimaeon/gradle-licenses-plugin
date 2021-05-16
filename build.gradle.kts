@@ -35,10 +35,9 @@ plugins {
 repositories {
     mavenCentral()
     google()
-    jcenter()
 }
 
-val functionalTestSourceSet = sourceSets.create("functionalTest") {
+val functionalTestSourceSet: SourceSet = sourceSets.create("functionalTest") {
     val sourceSetName = name
     java {
         srcDir("src/$sourceSetName/kotlin")
@@ -53,10 +52,6 @@ val ktlint: Configuration by configurations.creating
 configurations {
     named("functionalTestImplementation") {
         extendsFrom(testImplementation.get())
-    }
-
-    named("functionalTestRuntime") {
-        extendsFrom(testRuntime.get())
     }
 
     register("jacocoRuntime")
@@ -214,13 +209,14 @@ tasks {
     }
 
     jacoco {
-        toolVersion = "0.8.6"
+        toolVersion = Deps.jacocoAgentVersion
     }
 
     val jacocoExecData = fileTree("$buildDir/jacoco").include("*.exec")
 
     jacocoTestReport {
         executionData(jacocoExecData)
+        dependsOn(test, functionalTest)
     }
 
     jacocoTestCoverageVerification {
@@ -281,7 +277,7 @@ tasks {
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "7.0.1"
+        gradleVersion = "7.0.2"
     }
 }
 

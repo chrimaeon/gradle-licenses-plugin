@@ -4,6 +4,6 @@ root = true
 insert_final_newline = true
 indent_style = space
 
-[*.{kt, kts}]
+[*.{kt,kts}]
 indent_size = 4
-disabled_rules = import-ordering
+ij_kotlin_imports_layout = *,java.**,javax.**,kotlin.**,^

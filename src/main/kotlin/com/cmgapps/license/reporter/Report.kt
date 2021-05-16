@@ -24,7 +24,6 @@ import org.gradle.api.resources.TextResource
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
-import java.io.File
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlin.reflect.javaType
@@ -38,14 +37,16 @@ open class LicensesReport(type: ReportType, task: Task) {
     val name: String = type.name
 
     @get:OutputFile
-    val destination: RegularFileProperty = task.project.objects.fileProperty()
+    internal val destination: RegularFileProperty = task.project.objects.fileProperty()
 
     @get:Input
     val enabled: Property<Boolean> = task.project.objects.property(Boolean::class.java).convention(false)
 
     init {
         val extension = if (type == ReportType.CUSTOM) "" else ".${type.extension}"
-        destination.set(File("${task.project.buildDir}/reports/licenses/${task.name}/licenses$extension"))
+        destination.set(
+            task.project.buildDir.resolve("reports/licenses").resolve(task.name).resolve("licenses$extension")
+        )
     }
 }
 
@@ -94,15 +95,20 @@ internal class LicensesReportsContainerImpl(private val task: Task) : LicensesRe
     private inner class LicenseReportDelegate<T : LicensesReport>(private val reportType: ReportType) :
         ReadOnlyProperty<Any?, T> {
 
-        private var value: T? = null
+        private lateinit var value: T
 
         @Suppress("UNCHECKED_CAST")
         @OptIn(ExperimentalStdlibApi::class)
         override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-            return value ?: (
-                Class.forName(property.returnType.javaType.typeName)
-                    .getConstructor(ReportType::class.java, Task::class.java).newInstance(reportType, task) as T
-                ).also { value = it }
+            return if (::value.isInitialized) {
+                value
+            } else {
+                (
+                    Class.forName(property.returnType.javaType.typeName)
+                        .getConstructor(ReportType::class.java, Task::class.java)
+                        .newInstance(reportType, task) as T
+                    ).also { value = it }
+            }
         }
     }
 }
