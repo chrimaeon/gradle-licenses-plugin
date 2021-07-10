@@ -15,20 +15,20 @@
  */
 
 object Deps {
-    const val kotlinVersion = "1.5.0"
+    const val kotlinVersion = "1.5.20"
     const val jacocoAgentVersion = "0.8.7"
 
     object Plugins {
-        const val dokkaVersion = "1.4.32"
-        const val changelogPluginVersion = "1.1.2"
-        const val pluginPublishVersion = "0.14.0"
-        const val versionsVersion = "0.38.0"
+        const val dokkaVersion = "1.5.0"
+        const val changelogPluginVersion = "1.2.0"
+        const val pluginPublishVersion = "0.15.0"
+        const val versionsVersion = "0.39.0"
     }
 
-    const val androidGradlePlugin = "com.android.tools.build:gradle:4.2.1"
+    const val androidGradlePlugin = "com.android.tools.build:gradle:4.2.2"
     const val mavenModel = "org.apache.maven:maven-model:3.8.1"
     const val jUnit = "org.junit.jupiter:junit-jupiter:5.7.2"
     const val hamcrest = "org.hamcrest:hamcrest:2.2"
     const val ktlint = "com.pinterest:ktlint:0.41.0"
-    const val kotlinSerialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1"
+    const val kotlinSerialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
 }

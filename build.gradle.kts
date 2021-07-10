@@ -180,7 +180,7 @@ signing {
 }
 
 changelog {
-    version = versionName
+    version.set(versionName)
 }
 
 tasks {
@@ -203,7 +203,7 @@ tasks {
     val ktlint by registering(JavaExec::class) {
         group = "Verification"
         description = "Check Kotlin code style."
-        main = "com.pinterest.ktlint.Main"
+        mainClass.set("com.pinterest.ktlint.Main")
         classpath = ktlint
         args = listOf("src/**/*.kt", "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/reports/ktlint.xml")
     }
@@ -282,7 +282,7 @@ tasks {
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "7.0.2"
+        gradleVersion = "7.1.1"
     }
 }
 
