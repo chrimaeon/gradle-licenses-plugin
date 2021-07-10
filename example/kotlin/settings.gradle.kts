@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
+pluginManagement {
+    includeBuild("../../")
+}
+
 rootProject.name = "gradle-licenses-plugin-sample-kotlin"

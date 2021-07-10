@@ -27,9 +27,10 @@ plugins {
     jacoco
     id("com.github.ben-manes.versions") version Deps.Plugins.versionsVersion
     kotlin("jvm") version Deps.kotlinVersion
-    kotlin("kapt") version Deps.kotlinVersion
     id("com.gradle.plugin-publish") version Deps.Plugins.pluginPublishVersion
     id("org.jetbrains.dokka") version Deps.Plugins.dokkaVersion
+    kotlin("plugin.serialization") version Deps.kotlinVersion
+    id("org.jetbrains.changelog") version Deps.Plugins.changelogPluginVersion
 }
 
 repositories {
@@ -178,6 +179,10 @@ signing {
     sign(publishing.publications["pluginMaven"])
 }
 
+changelog {
+    version = versionName
+}
+
 tasks {
     val setupJacocoRuntime by registering(WriteProperties::class) {
         outputFile =
@@ -290,8 +295,7 @@ dependencies {
 
     implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
     implementation(Deps.mavenModel)
-    implementation(Deps.moshi)
-    kapt(Deps.moshiCodegen)
+    implementation(Deps.kotlinSerialization)
 
     ktlint(Deps.ktlint)
 

@@ -63,8 +63,6 @@ open class LicensesTask : DefaultTask() {
     @Input
     var additionalProjects: Set<String> = emptySet()
 
-    private val libraries = mutableListOf<Library>()
-
     private lateinit var pomConfiguration: Configuration
 
     private val _allProjects: Set<Project> by lazy {
@@ -110,8 +108,8 @@ open class LicensesTask : DefaultTask() {
         pomConfiguration = project.configurations.create(POM_CONFIGURATION)
 
         collectDependencies()
-        generateLibraries()
-        createReport()
+        val libraries = generateLibraries()
+        createReport(libraries)
         project.configurations.remove(pomConfiguration)
     }
 
@@ -119,16 +117,16 @@ open class LicensesTask : DefaultTask() {
         val configurations = mutableSetOf<Configuration>()
 
         _allProjects.forEach { project ->
-            project.configurations.find { it.name == "compile" }?.let {
-                configurations.add(project.configurations.getByName("compile"))
+            project.configurations.findByName("compile")?.let {
+                configurations.add(project.configurations.getByName(it.name))
             }
 
-            project.configurations.find { it.name == "api" }?.let {
-                configurations.add(project.configurations.getByName("api"))
+            project.configurations.findByName("api")?.let {
+                configurations.add(project.configurations.getByName(it.name))
             }
 
-            project.configurations.find { it.name == "implementation" }?.let {
-                configurations.add(project.configurations.getByName("implementation"))
+            project.configurations.findByName("implementation")?.let {
+                configurations.add(project.configurations.getByName(it.name))
             }
         }
 
@@ -147,46 +145,44 @@ open class LicensesTask : DefaultTask() {
         }
     }
 
-    private fun generateLibraries() {
-        pomConfiguration.resolvedConfiguration.lenientConfiguration.artifacts.forEach {
+    private fun generateLibraries(): List<Library> {
+        return pomConfiguration.resolvedConfiguration.lenientConfiguration.artifacts.map {
 
-            getPomModel(it.file).let { model ->
-                val licenses = findLicenses(model)
+            val model = getPomModel(it.file)
+            val licenses = findLicenses(model)
+            val version = findVersion(model)
+            val description = findDescription(model)
 
-                if (licenses.isEmpty()) {
-                    logger.warn("${model.name} dependency does not have a license.")
-                }
-
-                libraries.add(
-                    Library(
-                        model.name
-                            ?: "${model.groupId}:${model.artifactId}",
-                        model.version,
-                        model.description,
-                        licenses
-                    )
-                )
+            if (licenses.isEmpty()) {
+                logger.warn("${model.name} dependency does not have a license.")
             }
+            Library(
+                model.name
+                    ?: "${model.groupId}:${model.artifactId}",
+                version,
+                description,
+                licenses
+            )
         }
     }
 
     private fun getPomModel(file: File): Model = MavenXpp3Reader().run {
-        read(file.inputStream())
+        file.inputStream().use {
+            read(it)
+        }
     }
 
     private fun findLicenses(pom: Model): List<License> {
-
         if (pom.licenses.isNotEmpty()) {
-            val licenses = mutableListOf<License>()
-            pom.licenses.forEach { license ->
+            return pom.licenses.mapNotNull { license ->
                 try {
                     URL(license.url)
-                    licenses.add(License(license.name.trim().capitalize(), license.url))
-                } catch (ignore: java.lang.Exception) {
+                    License(license.name.trim().capitalize(), license.url)
+                } catch (ignore: Exception) {
                     logger.warn("$name dependency has an invalid license URL; skipping license")
+                    null
                 }
             }
-            return licenses
         }
 
         logger.info("Project $name has no license in POM file.")
@@ -216,7 +212,28 @@ open class LicensesTask : DefaultTask() {
         return getPomModel(pomFile)
     }
 
-    private fun createReport() {
+    private fun findVersion(model: Model): String? {
+        return when {
+            model.version != null -> model.version
+            model.parent != null ->
+                if (model.parent.version != null) {
+                    model.parent.version
+                } else {
+                    findVersion(getParentPomFile(model.parent))
+                }
+            else -> null
+        }
+    }
+
+    private fun findDescription(model: Model): String? {
+        return when {
+            model.description != null -> model.description
+            model.parent != null -> findDescription(getParentPomFile(model.parent))
+            else -> null
+        }
+    }
+
+    private fun createReport(libraries: List<Library>) {
         if (libraries.isEmpty()) {
             return
         }
@@ -224,7 +241,7 @@ open class LicensesTask : DefaultTask() {
         if (reports.html.enabled.get()) reports.html.writeFileReport(
             HtmlReport(
                 libraries,
-                reports.html.stylesheet,
+                reports.html.stylesheet.orNull,
                 logger
             )
         )

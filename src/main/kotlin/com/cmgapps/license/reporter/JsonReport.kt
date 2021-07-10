@@ -17,15 +17,16 @@
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.model.Library
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 internal class JsonReport(libraries: List<Library>) : Report(libraries) {
 
-    private val moshi = Moshi.Builder().build()
+    private val json = Json {
+        prettyPrint = true
+    }
 
     override fun generate(): String {
-        val type = Types.newParameterizedType(List::class.java, Library::class.java)
-        return moshi.adapter<List<Library>>(type).indent("  ").toJson(libraries)
+        return json.encodeToString(libraries)
     }
 }

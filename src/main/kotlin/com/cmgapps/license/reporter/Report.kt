@@ -34,7 +34,7 @@ abstract class Report(protected val libraries: List<Library>) {
 
 open class LicensesReport(type: ReportType, task: Task) {
     @get:Internal
-    val name: String = type.name
+    internal val name: String = type.name
 
     @get:OutputFile
     val destination: RegularFileProperty = task.project.objects.fileProperty()
@@ -43,7 +43,7 @@ open class LicensesReport(type: ReportType, task: Task) {
     val enabled: Property<Boolean> = task.project.objects.property(Boolean::class.java).convention(false)
 
     init {
-        val extension = if (type == ReportType.CUSTOM) "" else ".${type.extension}"
+        val extension = if (type.extension.isBlank()) "" else ".${type.extension}"
         destination.set(
             task.project.buildDir.resolve("reports/licenses").resolve(task.name).resolve("licenses$extension")
         )
@@ -51,11 +51,18 @@ open class LicensesReport(type: ReportType, task: Task) {
 }
 
 class CustomizableHtmlReport(type: ReportType, task: Task) : LicensesReport(type, task) {
-    var stylesheet: TextResource? = null
+    @get:Input
+    var stylesheet: Property<TextResource?> = task.project.objects.property(TextResource::class.java)
 }
 
 class CustomizableReport(type: ReportType, task: Task) : LicensesReport(type, task) {
-    var action: CustomReportAction? = null
+    @get:Internal
+    internal var action: CustomReportAction? = null
+        private set
+
+    fun generate(block: CustomReportAction? = null) {
+        action = block
+    }
 }
 
 typealias CustomReportAction = (List<Library>) -> String
@@ -120,5 +127,5 @@ enum class ReportType(val extension: String) {
     MARKDOWN("md"),
     TEXT("txt"),
     XML("xml"),
-    CUSTOM("custom")
+    CUSTOM("")
 }
