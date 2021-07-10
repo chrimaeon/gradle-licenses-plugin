@@ -82,7 +82,7 @@ The plugin can output different formats.
     ```groovy
     licenses {
       custom.enabled.set(true)
-      custom.action = { list -> list.collect { it.name }.join(', ') }
+      custom.generate = { list -> list.collect { it.name }.join(', ') }
     }
     ```
 

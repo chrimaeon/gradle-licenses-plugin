@@ -28,10 +28,9 @@ import com.cmgapps.license.reporter.LicensesReportsContainer
 import com.cmgapps.license.reporter.LicensesReportsContainerImpl
 import com.cmgapps.license.reporter.MarkdownReport
 import com.cmgapps.license.reporter.Report
+import com.cmgapps.license.reporter.ReportType
 import com.cmgapps.license.reporter.TextReport
 import com.cmgapps.license.reporter.XmlReport
-import groovy.lang.Closure
-import groovy.lang.DelegatesTo
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
@@ -44,13 +43,12 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
-import org.gradle.util.ClosureBackedAction
 import java.io.File
 import java.io.PrintStream
 import java.net.URI
 import java.net.URL
 
-open class LicensesTask : DefaultTask() {
+abstract class LicensesTask : DefaultTask() {
 
     companion object {
         private const val POM_CONFIGURATION = "poms"
@@ -83,24 +81,17 @@ open class LicensesTask : DefaultTask() {
     @Nested
     val reports: LicensesReportsContainer
 
-    fun reports(
-        @DelegatesTo(
-            value = LicensesReportsContainer::class,
-            strategy = Closure.DELEGATE_FIRST
-        ) closure: Closure<LicensesReportsContainer>
-    ): LicensesReportsContainer {
-        return reports(ClosureBackedAction(closure))
-    }
-
     fun reports(configureAction: Action<in LicensesReportsContainer>): LicensesReportsContainer {
         configureAction.execute(reports)
         return reports
     }
 
     init {
-        outputs.upToDateWhen { false }
         reports = LicensesReportsContainerImpl(this)
         reports.html.enabled.set(true)
+        reports.getAll().forEach {
+            outputs.file(it.destination)
+        }
     }
 
     @TaskAction
@@ -238,25 +229,33 @@ open class LicensesTask : DefaultTask() {
             return
         }
 
-        if (reports.html.enabled.get()) reports.html.writeFileReport(
-            HtmlReport(
-                libraries,
-                reports.html.stylesheet.orNull,
-                logger
-            )
-        )
-        if (reports.csv.enabled.get()) reports.csv.writeFileReport(CsvReport(libraries))
-        if (reports.json.enabled.get()) reports.json.writeFileReport(JsonReport(libraries))
-        if (reports.markdown.enabled.get()) reports.markdown.writeFileReport(MarkdownReport(libraries))
-        if (reports.text.enabled.get()) reports.text.writeFileReport(TextReport(libraries))
-        if (reports.xml.enabled.get()) reports.xml.writeFileReport(XmlReport(libraries))
-        val customReport = reports.custom.action
-        if (reports.custom.enabled.get() && customReport != null) reports.custom.writeFileReport(
-            CustomReport(
-                libraries,
-                customReport
-            )
-        )
+        reports.getAll().forEach { licenseReport ->
+            if (licenseReport.enabled.get()) {
+                val report = when (licenseReport.type) {
+                    ReportType.CSV -> CsvReport(libraries)
+                    ReportType.CUSTOM -> {
+                        val customReport = reports.custom.action
+                        if (customReport != null)
+                            CustomReport(
+                                libraries,
+                                customReport
+                            )
+                        else null
+                    }
+                    ReportType.HTML -> HtmlReport(
+                        libraries,
+                        reports.html.stylesheet.orNull,
+                        logger
+                    )
+                    ReportType.JSON -> JsonReport(libraries)
+                    ReportType.MARKDOWN -> MarkdownReport(libraries)
+                    ReportType.TEXT -> TextReport(libraries)
+                    ReportType.XML -> XmlReport(libraries)
+                }
+
+                report?.let { licenseReport.writeFileReport(it) }
+            }
+        }
     }
 
     private fun LicensesReport.writeFileReport(report: Report) {

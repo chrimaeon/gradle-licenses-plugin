@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Added
+- set task outputs to report files
+- add DSL to configure reports
 
 ### Changed
 
