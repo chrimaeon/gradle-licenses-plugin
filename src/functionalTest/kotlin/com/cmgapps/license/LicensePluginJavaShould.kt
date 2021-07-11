@@ -358,4 +358,46 @@ class LicensePluginJavaShould {
         )
         assertThat(File("$reportFolder/licenses").readText().trim(), `is`("Fake dependency name"))
     }
+
+    @Test
+    fun `handle DSL`() {
+        buildFile + """
+            licenses {
+                reports {
+                    csv {
+                        enabled.set(true)
+                    }
+                    custom {
+                        enabled.set(true)
+                        generate {}
+                    }
+                    html {
+                        enabled.set(true)
+                        stylesheet.set(resources.text.fromString("body {background: #FAFAFA}"))
+                    }
+                    json {
+                        enabled.set(true)
+                    }
+                    markdown {
+                        enabled.set(true)
+                    }
+                    text {
+                        enabled.set(true)
+                    }
+                    xml {
+                        enabled.set(true)
+                    }
+                }
+            }
+
+            dependencies {
+              implementation 'group:name:1.0.0'
+            }
+        """.trimIndent()
+
+        val result = gradleRunner.withDebug(true).build()
+
+        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
+
+    }
 }

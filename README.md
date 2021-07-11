@@ -12,7 +12,7 @@ Using the plugins DSL
 
 ```groovy
 plugins {
-  id "com.cmgapps.licenses" version "<version>"
+    id "com.cmgapps.licenses" version "3.2.0"
 }
 ```
 
@@ -24,7 +24,7 @@ buildscript {
     }
 
   dependencies {
-    classpath("com.cmgapps:gradle-licenses-plugin:<version>")
+    classpath("com.cmgapps:gradle-licenses-plugin:3.2.0")
   }
 }
 
@@ -49,8 +49,10 @@ Example:
 licenses {
     reports {
         html.enabled.set(false) // html is enabled by default
-        xml.enabled.set(true)
-        xml.destination.set(file("$buildDir/reports/licenses.xml"))
+        xml {
+            enabled.set(true)
+            destination.set(file("$buildDir/reports/licenses.xml"))
+        }
     }
 }
 ```
@@ -60,8 +62,8 @@ The plugin can output different formats.
 * `HTML`
     generates a formatted HTML website
     * Styling
-    
-       For a HTML report you can define custom stylesheet using a [TextResource]:
+
+      For an HTML report you can define custom stylesheet using a [TextResource]:
        ```groovy
         licenses {
             reports {
@@ -81,15 +83,16 @@ The plugin can output different formats.
     add your own reporter as a lambda function
     ```groovy
     licenses {
-      custom.enabled.set(true)
-      custom.action = { list -> list.collect { it.name }.join(', ') }
+        custom {
+            enabled.set(true)
+            generate = { list -> list.collect { it.name }.join(', ') }
+        }
     }
     ```
 
 #### Multi-project Builds
 
-If you have a multi-project build you can add projects you want to collect license information
-from in the main project.
+For multi-project build, you can add projects you want to collect license information from in the main project.
 
 ```groovy
 licenses {

@@ -43,7 +43,7 @@ internal class HtmlReport(
 
         libraries.forEach { library ->
 
-            if (!library.licenses.isNullOrEmpty()) {
+            if (library.licenses.isNotEmpty()) {
                 val key = library.licenses[0]
 
                 if (!licenseListMap.contains(key)) {

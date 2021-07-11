@@ -25,12 +25,23 @@ repositories {
 
 licenses {
     reports {
-        html.enabled.set(true)
+        csv {
+            enabled.set(true)
+            destination.set(buildDir.resolve("csv-report").resolve("customdir.csv"))
+        }
         json.enabled.set(true)
+
+        custom {
+            enabled.set(true)
+            generate { list -> list.map { it.name }.joinToString() }
+        }
     }
 }
 
-
+tasks.register<Copy>("copyLicense") {
+    from(tasks.named("licenseReport"))
+    into(rootProject.projectDir)
+}
 
 dependencies {
     implementation("org.apache.maven:maven-model:3.6.3")

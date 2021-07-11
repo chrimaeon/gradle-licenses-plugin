@@ -25,7 +25,16 @@ repositories {
 
 licenses {
     reports {
-        html.enabled.set(true)
+        csv {
+            enabled.set(true)
+            destination.set(layout.buildDirectory.file("html-report/customdir.html"))
+        }
+        json.enabled.set(true)
+
+        custom {
+            enabled.set(true)
+            generate { list -> list.collect { it.name }.join(', ') }
+        }
     }
 }
 

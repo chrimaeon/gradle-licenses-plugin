@@ -180,7 +180,7 @@ signing {
 }
 
 changelog {
-    version = versionName
+    version.set(versionName)
 }
 
 tasks {
@@ -203,14 +203,13 @@ tasks {
     val ktlint by registering(JavaExec::class) {
         group = "Verification"
         description = "Check Kotlin code style."
-        main = "com.pinterest.ktlint.Main"
+        mainClass.set("com.pinterest.ktlint.Main")
         classpath = ktlint
         args = listOf("src/**/*.kt", "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/reports/ktlint.xml")
     }
 
     check {
-        dependsOn(functionalTest)
-        dependsOn(ktlint)
+        dependsOn(functionalTest, ktlint)
     }
 
     jacoco {
@@ -282,7 +281,31 @@ tasks {
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "7.0.2"
+        gradleVersion = "7.1.1"
+    }
+
+    val updateReadme by registering {
+        val readmeFile = rootDir.resolve("README.md")
+        val version: String by project
+
+        inputs.property("libVersion", version)
+        outputs.file(readmeFile)
+
+        doLast {
+            val content = readmeFile.readText()
+            val oldVersion = """id "com.cmgapps.licenses" version "(.*)"""".toRegex().find(content)?.let {
+                it.groupValues[1]
+            } ?: error("Cannot find oldVersion")
+
+            logger.info("Updating README.md version $oldVersion to $version")
+
+            val newContent = content.replace(oldVersion, version)
+            readmeFile.writeText(newContent)
+        }
+    }
+
+    patchChangelog {
+        dependsOn(updateReadme)
     }
 }
 
@@ -296,6 +319,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
     implementation(Deps.mavenModel)
     implementation(Deps.kotlinSerialization)
+    implementation(Deps.apacheCommonsCsv)
 
     ktlint(Deps.ktlint)
 
