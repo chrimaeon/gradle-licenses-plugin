@@ -261,7 +261,7 @@ class LicensesTaskShould {
         assertThat(
             outputFile.readText(),
             `is`(
-                "name,version,description,license name,license url\r\n" +
+                "Name,Version,Description,License Name,License Url\r\n" +
                     "Fake dependency name,1.0.0,Fake dependency description,Some license,http://website.tld/\r\n"
             )
         )

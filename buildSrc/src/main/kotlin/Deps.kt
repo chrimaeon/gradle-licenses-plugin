@@ -26,6 +26,7 @@ object Deps {
     }
 
     const val androidGradlePlugin = "com.android.tools.build:gradle:4.2.2"
+    const val apacheCommonsCsv = "org.apache.commons:commons-csv:1.8"
     const val mavenModel = "org.apache.maven:maven-model:3.8.1"
     const val jUnit = "org.junit.jupiter:junit-jupiter:5.7.2"
     const val hamcrest = "org.hamcrest:hamcrest:2.2"

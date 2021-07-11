@@ -17,26 +17,31 @@
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.model.Library
+import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVPrinter
+import java.io.StringWriter
 
 internal class CsvReport(libraries: List<Library>) : Report(libraries) {
 
-    override fun generate(): String {
-        return StringBuilder("name,version,description,license name,license url$LINE_SEPERATOR").apply {
+    override fun generate(): String = StringWriter().use { writer ->
+        CSVPrinter(writer, CSVFormat.RFC4180.withHeader(*HEADER)).use { printer ->
             libraries.forEach { library ->
-                append(library.name.escape()).append(',')
-                append(library.version?.escape()).append(',')
-                append(library.description?.escape()).append(',')
-                append(library.licenses[0].name.escape()).append(',')
-                append(library.licenses[0].url.escape())
-                append(LINE_SEPERATOR)
+                val license = library.licenses.firstOrNull()
+                printer.printRecord(
+                    library.name,
+                    library.version,
+                    library.description,
+                    license?.name,
+                    license?.url
+                )
             }
-        }.toString()
+            printer.flush()
+        }
+        writer.toString()
     }
 
     companion object {
-        const val LINE_SEPERATOR = "\r\n"
+        @JvmStatic
+        private val HEADER = arrayOf("Name", "Version", "Description", "License Name", "License Url")
     }
 }
-
-private fun String.escape() =
-    if (this.findAnyOf(listOf(",", "\r", "\n", "\"")) != null) "\"${this.replace("\"", "\"\"")}\"" else this

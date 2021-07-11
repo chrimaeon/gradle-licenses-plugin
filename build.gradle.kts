@@ -209,8 +209,7 @@ tasks {
     }
 
     check {
-        dependsOn(functionalTest)
-        dependsOn(ktlint)
+        dependsOn(functionalTest, ktlint)
     }
 
     jacoco {
@@ -296,6 +295,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
     implementation(Deps.mavenModel)
     implementation(Deps.kotlinSerialization)
+    implementation(Deps.apacheCommonsCsv)
 
     ktlint(Deps.ktlint)
 
