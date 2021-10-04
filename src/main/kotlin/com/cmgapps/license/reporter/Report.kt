@@ -26,10 +26,6 @@ import org.gradle.api.resources.TextResource
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
-import org.gradle.util.internal.ConfigureUtil
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
-import kotlin.reflect.javaType
 
 abstract class Report(protected val libraries: List<Library>) {
     abstract fun generate(): String
@@ -141,102 +137,6 @@ interface LicensesReportsContainer {
 
     @Internal
     fun getAll(): List<LicensesReport>
-}
-
-internal class LicensesReportsContainerImpl(private val task: Task) : LicensesReportsContainer {
-    override val csv: LicensesReport by LicenseReportDelegate(ReportType.CSV)
-    override fun csv(config: Action<LicensesReport>) {
-        csv.configure(config)
-    }
-
-    override fun csv(config: Closure<LicensesReport>) {
-        ConfigureUtil.configure(config, csv)
-    }
-
-    override val html: CustomizableHtmlReport by LicenseReportDelegate(ReportType.HTML)
-
-    override fun html(config: Action<CustomizableHtmlReport>) {
-        html.configure(configHtml = config)
-    }
-
-    override fun html(config: Closure<CustomizableHtmlReport>) {
-        ConfigureUtil.configure(config, html)
-    }
-
-    override val json: LicensesReport by LicenseReportDelegate(ReportType.JSON)
-    override fun json(config: Action<LicensesReport>) {
-        json.configure(config)
-    }
-
-    override fun json(config: Closure<LicensesReport>) {
-        ConfigureUtil.configure(config, json)
-    }
-
-    override val markdown: LicensesReport by LicenseReportDelegate(ReportType.MARKDOWN)
-    override fun markdown(config: Action<LicensesReport>) {
-        markdown.configure(config)
-    }
-
-    override fun markdown(config: Closure<LicensesReport>) {
-        ConfigureUtil.configure(config, markdown)
-    }
-
-    override val text: LicensesReport by LicenseReportDelegate(ReportType.TEXT)
-    override fun text(config: Action<LicensesReport>) {
-        text.configure(config)
-    }
-
-    override fun text(config: Closure<LicensesReport>) {
-        ConfigureUtil.configure(config, text)
-    }
-
-    override val xml: LicensesReport by LicenseReportDelegate(ReportType.XML)
-    override fun xml(config: Action<LicensesReport>) {
-        xml.configure(config)
-    }
-
-    override fun xml(config: Closure<LicensesReport>) {
-        ConfigureUtil.configure(config, xml)
-    }
-
-    override val custom: CustomizableReport by LicenseReportDelegate(ReportType.CUSTOM)
-    override fun custom(config: Action<CustomizableReport>) {
-        custom.configure(configCustom = config)
-    }
-
-    override fun custom(config: Closure<CustomizableReport>) {
-        ConfigureUtil.configure(config, custom)
-    }
-
-    override fun getAll(): List<LicensesReport> = listOf(
-        csv,
-        html,
-        json,
-        markdown,
-        text,
-        xml,
-        custom
-    )
-
-    private inner class LicenseReportDelegate<T : LicensesReport>(private val reportType: ReportType) :
-        ReadOnlyProperty<Any?, T> {
-
-        private lateinit var value: T
-
-        @Suppress("UNCHECKED_CAST")
-        @OptIn(ExperimentalStdlibApi::class)
-        override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-            return if (::value.isInitialized) {
-                value
-            } else {
-                (
-                    Class.forName(property.returnType.javaType.typeName)
-                        .getConstructor(ReportType::class.java, Task::class.java)
-                        .newInstance(reportType, task) as T
-                    ).also { value = it }
-            }
-        }
-    }
 }
 
 enum class ReportType(val extension: String) {

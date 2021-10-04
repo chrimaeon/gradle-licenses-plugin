@@ -65,6 +65,11 @@ idea {
     }
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 val pomProperties = Properties().apply {
     rootDir.resolve("pom.properties").inputStream().use {
         load(it)
@@ -281,7 +286,7 @@ tasks {
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "7.1.1"
+        gradleVersion = "7.2"
     }
 
     val updateReadme by registering {

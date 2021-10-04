@@ -398,6 +398,5 @@ class LicensePluginJavaShould {
         val result = gradleRunner.withDebug(true).build()
 
         assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
-
     }
 }

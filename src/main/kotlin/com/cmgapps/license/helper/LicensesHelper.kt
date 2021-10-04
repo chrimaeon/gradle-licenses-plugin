@@ -51,6 +51,8 @@ internal object LicensesHelper {
         "https://www.apache.org/licenses/LICENSE-2.0.txt" to APACHE_2_FILE_NAME,
         "http://opensource.org/licenses/Apache-2.0" to APACHE_2_FILE_NAME,
         "https://opensource.org/licenses/Apache-2.0" to APACHE_2_FILE_NAME,
+        "http://www.apache.org/licenses/LICENSE-2.0" to APACHE_2_FILE_NAME,
+        "https://www.apache.org/licenses/LICENSE-2.0" to APACHE_2_FILE_NAME,
 
         // BSD 2-Clause "Simplified" License
         // https://github.com/github/choosealicense.com/blob/gh-pages/_licenses/bsd-2-clause.txt

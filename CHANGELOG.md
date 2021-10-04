@@ -5,6 +5,8 @@
 ### Added
 
 ### Changed
+* update dependencies
+* Update Android Gradle plugin to version 7+
 
 ### Deprecated
 

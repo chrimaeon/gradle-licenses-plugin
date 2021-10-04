@@ -21,32 +21,40 @@ import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import com.cmgapps.license.reporter.CsvReport
 import com.cmgapps.license.reporter.CustomReport
+import com.cmgapps.license.reporter.CustomizableHtmlReport
+import com.cmgapps.license.reporter.CustomizableReport
 import com.cmgapps.license.reporter.HtmlReport
 import com.cmgapps.license.reporter.JsonReport
 import com.cmgapps.license.reporter.LicensesReport
 import com.cmgapps.license.reporter.LicensesReportsContainer
-import com.cmgapps.license.reporter.LicensesReportsContainerImpl
 import com.cmgapps.license.reporter.MarkdownReport
 import com.cmgapps.license.reporter.Report
 import com.cmgapps.license.reporter.ReportType
 import com.cmgapps.license.reporter.TextReport
 import com.cmgapps.license.reporter.XmlReport
+import groovy.lang.Closure
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ExternalDependency
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
+import org.gradle.util.internal.ConfigureUtil
 import java.io.File
 import java.io.PrintStream
 import java.net.URI
 import java.net.URL
+import java.util.Locale
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
+import kotlin.reflect.javaType
 
 abstract class LicensesTask : DefaultTask() {
 
@@ -87,7 +95,7 @@ abstract class LicensesTask : DefaultTask() {
     }
 
     init {
-        reports = LicensesReportsContainerImpl(this)
+        reports = LicensesReportsContainerImpl()
         reports.html.enabled.set(true)
         reports.getAll().forEach {
             outputs.file(it.destination)
@@ -168,7 +176,10 @@ abstract class LicensesTask : DefaultTask() {
             return pom.licenses.mapNotNull { license ->
                 try {
                     URL(license.url)
-                    License(license.name.trim().capitalize(), license.url)
+                    License(
+                        license.name.trim().capitalize(),
+                        license.url
+                    )
                 } catch (ignore: Exception) {
                     logger.warn("$name dependency has an invalid license URL; skipping license")
                     null
@@ -262,7 +273,105 @@ abstract class LicensesTask : DefaultTask() {
         with(destination.get().asFile) {
             prepare()
             writeText(report.generate())
-            logger.lifecycle("Wrote ${this@writeFileReport.name.toUpperCase()} report to ${getClickableFileUrl(this)}.")
+            logger.lifecycle(
+                "Wrote ${this@writeFileReport.name.uppercase(Locale.US)} report to ${getClickableFileUrl(this)}."
+            )
+        }
+    }
+
+    private inner class LicensesReportsContainerImpl() : LicensesReportsContainer {
+        override val csv: LicensesReport by LicenseReportDelegate(ReportType.CSV)
+        override fun csv(config: Action<LicensesReport>) {
+            csv.configure(config)
+        }
+
+        override fun csv(config: Closure<LicensesReport>) {
+            ConfigureUtil.configure(config, csv)
+        }
+
+        override val html: CustomizableHtmlReport by LicenseReportDelegate(ReportType.HTML)
+
+        override fun html(config: Action<CustomizableHtmlReport>) {
+            html.configure(configHtml = config)
+        }
+
+        override fun html(config: Closure<CustomizableHtmlReport>) {
+            ConfigureUtil.configure(config, html)
+        }
+
+        override val json: LicensesReport by LicenseReportDelegate(ReportType.JSON)
+        override fun json(config: Action<LicensesReport>) {
+            json.configure(config)
+        }
+
+        override fun json(config: Closure<LicensesReport>) {
+            ConfigureUtil.configure(config, json)
+        }
+
+        override val markdown: LicensesReport by LicenseReportDelegate(ReportType.MARKDOWN)
+        override fun markdown(config: Action<LicensesReport>) {
+            markdown.configure(config)
+        }
+
+        override fun markdown(config: Closure<LicensesReport>) {
+            ConfigureUtil.configure(config, markdown)
+        }
+
+        override val text: LicensesReport by LicenseReportDelegate(ReportType.TEXT)
+        override fun text(config: Action<LicensesReport>) {
+            text.configure(config)
+        }
+
+        override fun text(config: Closure<LicensesReport>) {
+            ConfigureUtil.configure(config, text)
+        }
+
+        override val xml: LicensesReport by LicenseReportDelegate(ReportType.XML)
+        override fun xml(config: Action<LicensesReport>) {
+            xml.configure(config)
+        }
+
+        override fun xml(config: Closure<LicensesReport>) {
+            ConfigureUtil.configure(config, xml)
+        }
+
+        override val custom: CustomizableReport by LicenseReportDelegate(ReportType.CUSTOM)
+        override fun custom(config: Action<CustomizableReport>) {
+            custom.configure(configCustom = config)
+        }
+
+        override fun custom(config: Closure<CustomizableReport>) {
+            ConfigureUtil.configure(config, custom)
+        }
+
+        override fun getAll(): List<LicensesReport> = listOf(
+            csv,
+            html,
+            json,
+            markdown,
+            text,
+            xml,
+            custom
+        )
+
+        private inner class LicenseReportDelegate<T : LicensesReport>(private val reportType: ReportType) :
+            ReadOnlyProperty<Any?, T> {
+
+            private lateinit var value: T
+
+            @Suppress("UNCHECKED_CAST")
+            @OptIn(ExperimentalStdlibApi::class)
+            override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+                return if (::value.isInitialized) {
+                    value
+                } else {
+                    (
+                        Class.forName(property.returnType.javaType.typeName)
+                            .getConstructor(ReportType::class.java, Task::class.java)
+                            .newInstance(reportType, this@LicensesTask) as T
+                        ).also { value = it }
+                }
+            }
         }
     }
 }
@@ -328,4 +437,8 @@ private fun File.prepare() {
     delete()
     parentFile.mkdirs()
     createNewFile()
+}
+
+private fun String.capitalize() = replaceFirstChar {
+    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
 }
