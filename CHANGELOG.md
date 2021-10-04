@@ -7,6 +7,7 @@
 ### Changed
 * update dependencies
 * Update Android Gradle plugin to version 7+
+* Warning when license has no mapping for html reports
 
 ### Deprecated
 

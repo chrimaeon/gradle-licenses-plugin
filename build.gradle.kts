@@ -124,7 +124,6 @@ publishing {
 
             val pomArtifactId: String by pomProperties
 
-
             artifactId = pomArtifactId
 
             pom {
@@ -210,7 +209,7 @@ tasks {
         description = "Check Kotlin code style."
         mainClass.set("com.pinterest.ktlint.Main")
         classpath = ktlint
-        args = listOf("src/**/*.kt", "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/reports/ktlint.xml")
+        args = listOf("src/**/*.kt", "--reporter=plain", "--reporter=checkstyle,output=$buildDir/reports/ktlint.xml")
     }
 
     check {
@@ -334,6 +333,7 @@ dependencies {
     testImplementation(Deps.androidGradlePlugin)
     testImplementation(Deps.hamcrest)
     testImplementation(kotlinReflect)
+    testImplementation(Deps.mockitoKotlin)
 
     "functionalTestImplementation"(Deps.androidGradlePlugin)
     "functionalTestImplementation"(gradleTestKit())

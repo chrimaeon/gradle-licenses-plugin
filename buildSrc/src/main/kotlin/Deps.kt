@@ -32,4 +32,5 @@ object Deps {
     const val hamcrest = "org.hamcrest:hamcrest:2.2"
     const val ktlint = "com.pinterest:ktlint:0.42.1"
     const val kotlinSerialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0"
+    const val mockitoKotlin = "org.mockito.kotlin:mockito-kotlin:3.2.0"
 }
