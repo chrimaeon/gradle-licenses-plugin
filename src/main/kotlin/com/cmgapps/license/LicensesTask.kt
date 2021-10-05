@@ -46,7 +46,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
-import org.gradle.util.internal.ConfigureUtil
 import java.io.File
 import java.io.PrintStream
 import java.net.URI
@@ -286,7 +285,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         override fun csv(config: Closure<LicensesReport>) {
-            ConfigureUtil.configure(config, csv)
+            project.configure(csv, config)
         }
 
         override val html: CustomizableHtmlReport by LicenseReportDelegate(ReportType.HTML)
@@ -296,7 +295,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         override fun html(config: Closure<CustomizableHtmlReport>) {
-            ConfigureUtil.configure(config, html)
+            project.configure(html, config)
         }
 
         override val json: LicensesReport by LicenseReportDelegate(ReportType.JSON)
@@ -305,7 +304,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         override fun json(config: Closure<LicensesReport>) {
-            ConfigureUtil.configure(config, json)
+            project.configure(json, config)
         }
 
         override val markdown: LicensesReport by LicenseReportDelegate(ReportType.MARKDOWN)
@@ -314,7 +313,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         override fun markdown(config: Closure<LicensesReport>) {
-            ConfigureUtil.configure(config, markdown)
+            project.configure(markdown, config)
         }
 
         override val text: LicensesReport by LicenseReportDelegate(ReportType.TEXT)
@@ -323,7 +322,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         override fun text(config: Closure<LicensesReport>) {
-            ConfigureUtil.configure(config, text)
+            project.configure(text, config)
         }
 
         override val xml: LicensesReport by LicenseReportDelegate(ReportType.XML)
@@ -332,7 +331,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         override fun xml(config: Closure<LicensesReport>) {
-            ConfigureUtil.configure(config, xml)
+            project.configure(xml, config)
         }
 
         override val custom: CustomizableReport by LicenseReportDelegate(ReportType.CUSTOM)
@@ -341,7 +340,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         override fun custom(config: Closure<CustomizableReport>) {
-            ConfigureUtil.configure(config, custom)
+            project.configure(custom, config)
         }
 
         override fun getAll(): List<LicensesReport> = listOf(
@@ -376,7 +375,7 @@ abstract class LicensesTask : DefaultTask() {
     }
 }
 
-open class AndroidLicensesTask : LicensesTask() {
+abstract class AndroidLicensesTask : LicensesTask() {
 
     @Input
     lateinit var variant: String
