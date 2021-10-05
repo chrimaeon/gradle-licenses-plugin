@@ -27,9 +27,24 @@ import org.gradle.api.DomainObjectSet
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.util.GradleVersion
+import java.util.Locale
 
 @Suppress("unused")
 class LicensesPlugin : Plugin<Project> {
+
+    override fun apply(project: Project) {
+        project.extensions.create("licenses", LicensesExtension::class.java, project).also { extension ->
+            project.plugins.withId("java") {
+                configureJavaProject(project, extension)
+            }
+
+            ANDROID_IDS.forEach { id ->
+                project.plugins.withId(id) {
+                    configureAndroidProject(project, extension)
+                }
+            }
+        }
+    }
 
     companion object {
         private const val TASK_DESC = "Collect licenses from project"
@@ -56,7 +71,9 @@ class LicensesPlugin : Plugin<Project> {
         @JvmStatic
         private fun configureAndroidProject(project: Project, extension: LicensesExtension) {
             getAndroidVariants(project)?.all { androidVariant ->
-                val taskName = "license${androidVariant.name.capitalize()}Report"
+                val taskName = "license" + androidVariant.name.replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+                } + "Report"
 
                 val configuration = Action<AndroidLicensesTask> { task ->
                     task.addBasicConfiguration(extension)
@@ -91,30 +108,17 @@ class LicensesPlugin : Plugin<Project> {
             }
         }
 
+        @Suppress("DEPRECATION")
         @JvmStatic
         private fun getAndroidVariants(project: Project): DomainObjectSet<out BaseVariant>? = when {
-            project.plugins.hasPlugin(AppPlugin::class.java)
-                || project.plugins.hasPlugin(DynamicFeaturePlugin::class.java) ->
+            project.plugins.hasPlugin(AppPlugin::class.java) ||
+                project.plugins.hasPlugin(DynamicFeaturePlugin::class.java) ->
                 project.extensions.getByType(AppExtension::class.java).applicationVariants
 
             project.plugins.hasPlugin(LibraryPlugin::class.java) ->
                 project.extensions.getByType(LibraryExtension::class.java).libraryVariants
 
             else -> null
-        }
-    }
-
-    override fun apply(project: Project) {
-        project.extensions.create("licenses", LicensesExtension::class.java).also { extension ->
-            project.plugins.withId("java") {
-                configureJavaProject(project, extension)
-            }
-
-            ANDROID_IDS.forEach { id ->
-                project.plugins.withId(id) {
-                    configureAndroidProject(project, extension)
-                }
-            }
         }
     }
 }

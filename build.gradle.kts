@@ -65,6 +65,11 @@ idea {
     }
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 val pomProperties = Properties().apply {
     rootDir.resolve("pom.properties").inputStream().use {
         load(it)
@@ -118,7 +123,6 @@ publishing {
             artifact(javadocJar.get())
 
             val pomArtifactId: String by pomProperties
-
 
             artifactId = pomArtifactId
 
@@ -205,7 +209,7 @@ tasks {
         description = "Check Kotlin code style."
         mainClass.set("com.pinterest.ktlint.Main")
         classpath = ktlint
-        args = listOf("src/**/*.kt", "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/reports/ktlint.xml")
+        args = listOf("src/**/*.kt", "--reporter=plain", "--reporter=checkstyle,output=$buildDir/reports/ktlint.xml")
     }
 
     check {
@@ -281,7 +285,7 @@ tasks {
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "7.1.1"
+        gradleVersion = "7.2"
     }
 
     val updateReadme by registering {
@@ -329,6 +333,7 @@ dependencies {
     testImplementation(Deps.androidGradlePlugin)
     testImplementation(Deps.hamcrest)
     testImplementation(kotlinReflect)
+    testImplementation(Deps.mockitoKotlin)
 
     "functionalTestImplementation"(Deps.androidGradlePlugin)
     "functionalTestImplementation"(gradleTestKit())

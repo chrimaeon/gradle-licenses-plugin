@@ -19,14 +19,17 @@ package com.cmgapps.license
 import com.cmgapps.license.reporter.LicensesReportsContainer
 import groovy.lang.Closure
 import org.gradle.api.Action
-import org.gradle.util.ConfigureUtil
+import org.gradle.api.Project
 
-abstract class LicensesExtension {
+@Suppress("unused")
+abstract class LicensesExtension(private val project: Project) {
     var reports: Action<in LicensesReportsContainer> = Action { }
         private set
 
     fun reports(closure: Closure<LicensesReportsContainer>) {
-        reports = ConfigureUtil.configureUsing(closure)
+        reports = Action {
+            project.configure(it, closure)
+        }
     }
 
     fun reports(action: Action<in LicensesReportsContainer>) {

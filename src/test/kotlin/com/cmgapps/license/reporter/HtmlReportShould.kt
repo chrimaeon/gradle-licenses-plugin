@@ -17,12 +17,16 @@
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.helper.LibrariesHelper
+import com.cmgapps.license.model.License
 import com.cmgapps.license.util.getFileContent
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import com.cmgapps.license.model.Library as LibraryModel
 
 class HtmlReportShould {
 
@@ -57,6 +61,35 @@ class HtmlReportShould {
                     "</body>" +
                     "</html>"
             )
+        )
+    }
+
+    @Test
+    fun `report library without matching license`() {
+        val logger = mock<Logger>()
+
+        HtmlReport(
+            listOf(
+                LibraryModel(
+                    name = "Lib with invalid license",
+                    version = "1.0.0",
+                    licenses = listOf(
+                        License(name = "foo", url = "http://www.license.foo")
+                    ),
+                    description = null,
+                )
+            ),
+            null,
+            logger
+        ).generate()
+
+        verify(logger).warn(
+            """
+               |No mapping found for license: 'foo' with url 'http://www.license.foo'
+               |used by 'Lib with invalid license'
+               |
+               |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
+            """.trimMargin()
         )
     }
 }

@@ -70,20 +70,17 @@ internal class HtmlReport(
                     +NOTICE_LIBRARIES
                 }
 
-                licenseListMap.entries.forEach { entry ->
+                licenseListMap.entries.forEach { (license, libraries) ->
                     ul {
-                        with(entry.value) {
-                            sortBy { it.name }
-                            forEach { library ->
-                                li {
-                                    +library.name
-                                }
+                        libraries.asSequence().sortedBy { it.name }.forEach { library ->
+                            li {
+                                +library.name
                             }
                         }
                     }
 
-                    val licenseUrl = entry.key.url
-                    val licenseName = entry.key.name
+                    val licenseUrl = license.url
+                    val licenseName = license.name
 
                     when {
                         LicensesHelper.LICENSE_MAP.containsKey(licenseUrl) -> pre {
@@ -95,9 +92,11 @@ internal class HtmlReport(
                         else -> {
                             logger.warn(
                                 """
-                                    |No mapping found for License $licenseName at $licenseUrl
-                                    |If it is a valid Open Source Licesnse, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
-                                """.trimMargin()
+                                    |No mapping found for license: '$licenseName' with url '$licenseUrl'
+                                    |used by ${libraries.joinToString { "'${it.name}'" }}
+                                    |
+                                    |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
+                                    """.trimMargin()
                             )
                             div("license") {
                                 p {

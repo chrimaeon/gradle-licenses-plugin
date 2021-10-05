@@ -12,7 +12,7 @@ Using the plugins DSL
 
 ```groovy
 plugins {
-    id "com.cmgapps.licenses" version "3.2.0"
+    id "com.cmgapps.licenses" version "3.3.0"
 }
 ```
 
@@ -23,9 +23,9 @@ buildscript {
         mavenCentral()
     }
 
-  dependencies {
-    classpath("com.cmgapps:gradle-licenses-plugin:3.2.0")
-  }
+    dependencies {
+        classpath("com.cmgapps:gradle-licenses-plugin:3.3.0")
+    }
 }
 
 apply(plugin: "com.cmgapps.licenses")

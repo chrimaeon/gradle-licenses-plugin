@@ -24,7 +24,7 @@ import java.io.StringWriter
 internal class CsvReport(libraries: List<Library>) : Report(libraries) {
 
     override fun generate(): String = StringWriter().use { writer ->
-        CSVPrinter(writer, CSVFormat.RFC4180.withHeader(*HEADER)).use { printer ->
+        CSVPrinter(writer, CSVFormat.RFC4180.builder().setHeader(*HEADER).build()).use { printer ->
             libraries.forEach { library ->
                 val license = library.licenses.firstOrNull()
                 printer.printRecord(
