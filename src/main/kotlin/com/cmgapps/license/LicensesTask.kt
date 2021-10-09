@@ -95,7 +95,7 @@ abstract class LicensesTask : DefaultTask() {
 
     init {
         reports = LicensesReportsContainerImpl()
-        reports.html.enabled.set(true)
+        reports.html.enabled = true
         reports.getAll().forEach {
             outputs.file(it.destination)
         }
@@ -240,7 +240,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         reports.getAll().forEach { licenseReport ->
-            if (licenseReport.enabled.get()) {
+            if (licenseReport.enabled) {
                 val report = when (licenseReport.type) {
                     ReportType.CSV -> CsvReport(libraries)
                     ReportType.CUSTOM -> {
@@ -254,7 +254,7 @@ abstract class LicensesTask : DefaultTask() {
                     }
                     ReportType.HTML -> HtmlReport(
                         libraries,
-                        reports.html.stylesheet.orNull,
+                        reports.html._stylesheet.orNull,
                         logger
                     )
                     ReportType.JSON -> JsonReport(libraries)
@@ -269,7 +269,7 @@ abstract class LicensesTask : DefaultTask() {
     }
 
     private fun LicensesReport.writeFileReport(report: Report) {
-        with(destination.get().asFile) {
+        with(destination) {
             prepare()
             writeText(report.generate())
             logger.lifecycle(
@@ -366,8 +366,8 @@ abstract class LicensesTask : DefaultTask() {
                 } else {
                     (
                         Class.forName(property.returnType.javaType.typeName)
-                            .getConstructor(ReportType::class.java, Task::class.java)
-                            .newInstance(reportType, this@LicensesTask) as T
+                            .getConstructor(ReportType::class.java, Task::class.java, Project::class.java)
+                            .newInstance(reportType, this@LicensesTask, project) as T
                         ).also { value = it }
                 }
             }

@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- Extension property to set `enabled` and `destination`
 
 ### Deprecated
 

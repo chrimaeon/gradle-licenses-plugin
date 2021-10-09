@@ -26,13 +26,14 @@ repositories {
 licenses {
     reports {
         csv {
-            enabled.set(true)
-            destination.set(buildDir.resolve("csv-report").resolve("customdir.csv"))
+            enabled = true
+            destination = buildDir.resolve("csv-report").resolve("customdir.csv")
         }
-        json.enabled.set(true)
+        json.enabled = true
 
         custom {
-            enabled.set(true)
+            enabled = true
+            destination = buildDir.resolve("reports").resolve("licenses.txt")
             generate { list -> list.map { it.name }.joinToString() }
         }
     }

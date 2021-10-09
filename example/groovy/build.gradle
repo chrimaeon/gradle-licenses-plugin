@@ -26,13 +26,14 @@ repositories {
 licenses {
     reports {
         csv {
-            enabled.set(true)
-            destination.set(layout.buildDirectory.file("html-report/customdir.html"))
+            enabled = true
+            destination = file("$buildDir/csv-report/customdir.csv")
         }
-        json.enabled.set(true)
+        json.enabled = true
 
         custom {
-            enabled.set(true)
+            enabled = true
+            destination = file("$buildDir/reports/licenses/licenses.txt")
             generate { list -> list.collect { it.name }.join(', ') }
         }
     }

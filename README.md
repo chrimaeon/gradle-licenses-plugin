@@ -6,6 +6,8 @@
 
 This Gradle plugin provides tasks to generate a file with the licenses used from the project's dependencies.
 
+Min. Gradle version: `6.8`
+
 ## Usage
 
 Using the plugins DSL

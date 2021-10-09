@@ -19,6 +19,7 @@ package com.cmgapps.license.reporter
 import com.cmgapps.license.model.Library
 import groovy.lang.Closure
 import org.gradle.api.Action
+import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -26,26 +27,34 @@ import org.gradle.api.resources.TextResource
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
+import java.io.File
 
 abstract class Report(protected val libraries: List<Library>) {
     abstract fun generate(): String
 }
 
-open class LicensesReport(internal val type: ReportType, task: Task) {
+open class LicensesReport(internal val type: ReportType, task: Task, internal val project: Project) {
     @get:Internal
     internal val name: String = type.name
 
+    private val _destination: RegularFileProperty = task.project.objects.fileProperty()
+
     @get:OutputFile
-    val destination: RegularFileProperty = task.project.objects.fileProperty()
+    var destination: File
+        get() = _destination.get().asFile
+        set(value) = _destination.set(value)
+
+    private val _enabled: Property<Boolean> = task.project.objects.property(Boolean::class.java).convention(false)
 
     @get:Input
-    val enabled: Property<Boolean> = task.project.objects.property(Boolean::class.java).convention(false)
+    var enabled: Boolean
+        get() = _enabled.get()
+        set(value) = _enabled.set(value)
 
     init {
         val extension = if (type.extension.isBlank()) "" else ".${type.extension}"
-        destination.set(
+        destination =
             task.project.buildDir.resolve("reports/licenses").resolve(task.name).resolve("licenses$extension")
-        )
     }
 
     internal open fun configure(
@@ -55,11 +64,25 @@ open class LicensesReport(internal val type: ReportType, task: Task) {
     ) {
         config?.execute(this)
     }
+
+    override fun toString(): String {
+        return "LicenseReport{name:$name,enabled:$enabled,destination:$destination}}"
+    }
 }
 
-class CustomizableHtmlReport(type: ReportType, task: Task) : LicensesReport(type, task) {
-    @get:Input
-    var stylesheet: Property<TextResource?> = task.project.objects.property(TextResource::class.java)
+class CustomizableHtmlReport(type: ReportType, task: Task, project: Project) : LicensesReport(type, task, project) {
+
+    internal var _stylesheet: Property<TextResource?> = task.project.objects.property(TextResource::class.java)
+
+    @Input
+    fun stylesheet(css: String) {
+        _stylesheet.set(project.resources.text.fromString(css))
+    }
+
+    @Input
+    fun stylesheet(css: File) {
+        _stylesheet.set(project.resources.text.fromFile(css))
+    }
 
     override fun configure(
         config: (Action<in LicensesReport>)?,
@@ -71,7 +94,7 @@ class CustomizableHtmlReport(type: ReportType, task: Task) : LicensesReport(type
     }
 }
 
-class CustomizableReport(type: ReportType, task: Task) : LicensesReport(type, task) {
+class CustomizableReport(type: ReportType, task: Task, project: Project) : LicensesReport(type, task, project) {
     @get:Internal
     internal var action: CustomReportAction? = null
         private set

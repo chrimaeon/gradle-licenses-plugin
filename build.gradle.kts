@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import com.cmgapps.gradle.logResults
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
@@ -267,9 +268,7 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
-        testLogging {
-            events("passed", "skipped", "failed")
-        }
+        afterTest(KotlinClosure2(logger::logResults))
     }
 
     withType<KotlinCompile> {

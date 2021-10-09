@@ -73,8 +73,8 @@ class LicensePluginJavaShould {
     }
 
     @DisabledIfEnvironmentVariable(named = "CIRCLECI", matches = "true")
-    @ParameterizedTest
-    @ValueSource(strings = ["7.0.1"])
+    @ParameterizedTest(name = "{displayName} - Gradle Version={0}")
+    @ValueSource(strings = ["6.8", "6.9", "7.0", "7.1", "7.2"])
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
         val result = gradleRunner
             .withGradleVersion(version)
@@ -95,7 +95,7 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    html.enabled.set(true)
+                    html.enabled = true
                 }
             }
             dependencies {
@@ -132,7 +132,7 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    html.enabled.set(true)
+                    html.enabled = true
                 }
             }
             
@@ -175,7 +175,7 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    html.enabled.set(true)
+                    html.enabled = true
                 }
             }
             
@@ -220,7 +220,7 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    html.enabled.set(true)
+                    html.enabled = true
                 }
             }
             
@@ -265,7 +265,7 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    text.enabled.set(true)
+                    text.enabled = true
                 }
             }
 
@@ -296,8 +296,8 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    html.enabled.set(true)
-                    html.stylesheet.set(project.resources.text.fromString("body{}"))
+                    html.enabled = true
+                    html.stylesheet("body{}")
                 }
             }
 
@@ -340,7 +340,7 @@ class LicensePluginJavaShould {
         buildFile + """
             licenses {
                 reports {
-                    custom.enabled.set(true)
+                    custom.enabled = true
                     custom.generate { list -> list.collect { it.name }.join(', ') }
                 }
             }
@@ -365,27 +365,27 @@ class LicensePluginJavaShould {
             licenses {
                 reports {
                     csv {
-                        enabled.set(true)
+                        enabled = true
                     }
                     custom {
-                        enabled.set(true)
+                        enabled = true
                         generate {}
                     }
                     html {
-                        enabled.set(true)
-                        stylesheet.set(resources.text.fromString("body {background: #FAFAFA}"))
+                        enabled = true
+                        stylesheet("body {background: #FAFAFA}")
                     }
                     json {
-                        enabled.set(true)
+                        enabled = true
                     }
                     markdown {
-                        enabled.set(true)
+                        enabled = true
                     }
                     text {
-                        enabled.set(true)
+                        enabled = true
                     }
                     xml {
-                        enabled.set(true)
+                        enabled = true
                     }
                 }
             }

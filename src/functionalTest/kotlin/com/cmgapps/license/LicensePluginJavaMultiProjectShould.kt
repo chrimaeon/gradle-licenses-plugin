@@ -54,7 +54,8 @@ class LicensePluginJavaMultiProjectShould {
             Files.createFile(Paths.get(this.absolutePath, "build.gradle")).toFile()
         }
 
-        mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
+        mavenRepoUrl =
+            javaClass.getResource("/maven")?.toURI()?.toString() ?: error("""resource folder "\maven" not found!""")
         gradleRunner = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
             .withArguments(":module1:licenseReport")
@@ -75,7 +76,7 @@ class LicensePluginJavaMultiProjectShould {
             licenses {
                 additionalProjects ':module2'
                 reports {
-                    html.enabled.set(true)
+                    html.enabled = true
                 }
             }
         """.trimIndent()
@@ -127,7 +128,7 @@ class LicensePluginJavaMultiProjectShould {
             licenses {
                 additionalProjects ':module2'
                 reports {
-                    html.enabled.set(true)
+                    html.enabled = true
                 }
             }
             dependencies {
@@ -185,7 +186,7 @@ class LicensePluginJavaMultiProjectShould {
             licenses {
                 additionalProjects ':module2'
                 reports {
-                    html.enabled.set(true)
+                    html.enabled = true
                 }
             }
             dependencies {

@@ -8,6 +8,7 @@ executors:
           username: chrimaeon
           password: $DOCKERHUB_PASSWORD
     environment:
+      TERM: "dumb"
       JAVA_TOOL_OPTIONS: "-Xmx3g"
       GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=2 -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false"
 
