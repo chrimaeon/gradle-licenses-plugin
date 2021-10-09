@@ -45,7 +45,6 @@ fun Logger.logResults(desc: TestDescriptor, result: TestResult) {
     } else {
         this.lifecycle(message, *params)
     }
-
 }
 
 private fun getFormattedResult(result: TestResult): String {
