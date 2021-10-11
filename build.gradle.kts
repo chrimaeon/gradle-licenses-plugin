@@ -314,6 +314,7 @@ tasks {
 
 dependencies {
     compileOnly(Deps.androidGradlePlugin)
+    compileOnly(Deps.kotlinMultiplatformPlugin)
 
     val kotlinReflect = kotlin("reflect", Deps.kotlinVersion)
     // Necessary to bump a transitive dependency.
@@ -335,6 +336,7 @@ dependencies {
     testImplementation(Deps.mockitoKotlin)
 
     "functionalTestImplementation"(Deps.androidGradlePlugin)
+    "functionalTestImplementation"(Deps.kotlinMultiplatformPlugin)
     "functionalTestImplementation"(gradleTestKit())
     "functionalTestImplementation"(kotlinReflect)
 

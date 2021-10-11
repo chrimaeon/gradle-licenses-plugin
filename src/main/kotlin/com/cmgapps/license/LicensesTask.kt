@@ -427,6 +427,29 @@ abstract class AndroidLicensesTask : LicensesTask() {
     }
 }
 
+abstract class KotlinMultiplatformTask : LicensesTask() {
+
+    @get:Internal
+    internal lateinit var targetNames: List<String>
+
+    override fun collectDependencies() {
+        super.collectDependencies()
+
+        val configurations = mutableSetOf<Configuration>()
+
+        targetNames.forEach { name ->
+            project.configurations.find { it.name == "${name}MainApi" }?.let {
+                configurations.add(it)
+            }
+            project.configurations.find { it.name == "${name}MainImplementation" }?.let {
+                configurations.add(it)
+            }
+        }
+
+        addConfigurations(configurations)
+    }
+}
+
 private fun File.writeText(text: String) = PrintStream(outputStream()).use {
     it.print(text)
     it.flush()
@@ -436,8 +459,4 @@ private fun File.prepare() {
     delete()
     parentFile.mkdirs()
     createNewFile()
-}
-
-private fun String.capitalize() = replaceFirstChar {
-    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
 }

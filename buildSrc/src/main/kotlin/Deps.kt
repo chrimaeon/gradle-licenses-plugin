@@ -26,6 +26,7 @@ object Deps {
     }
 
     const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.2"
+    const val kotlinMultiplatformPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     const val apacheCommonsCsv = "org.apache.commons:commons-csv:1.9.0"
     const val mavenModel = "org.apache.maven:maven-model:3.8.3"
     const val jUnit = "org.junit.jupiter:junit-jupiter:5.8.1"

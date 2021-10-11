@@ -26,7 +26,8 @@ import org.gradle.api.Action
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.util.GradleVersion
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import java.util.Locale
 
 @Suppress("unused")
@@ -36,6 +37,10 @@ class LicensesPlugin : Plugin<Project> {
         project.extensions.create("licenses", LicensesExtension::class.java, project).also { extension ->
             project.plugins.withId("java") {
                 configureJavaProject(project, extension)
+            }
+
+            project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
+                configureMultiplatformProject(project, extension)
             }
 
             ANDROID_IDS.forEach { id ->
@@ -65,7 +70,7 @@ class LicensesPlugin : Plugin<Project> {
                 task.addBasicConfiguration(extension)
             }
 
-            registerTask(project, LicensesTask::class.java, taskName, configuration)
+            project.tasks.register(taskName, LicensesTask::class.java, configuration)
         }
 
         @JvmStatic
@@ -82,8 +87,50 @@ class LicensesPlugin : Plugin<Project> {
                     task.productFlavors = androidVariant.productFlavors
                 }
 
-                registerTask(project, AndroidLicensesTask::class.java, taskName, configuration)
+                project.tasks.register(taskName, AndroidLicensesTask::class.java, configuration)
             }
+        }
+
+        @JvmStatic
+        private fun configureMultiplatformProject(project: Project, extension: LicensesExtension) {
+            val kotlinMultiplatformExtension = project.extensions.getByName("kotlin") as KotlinMultiplatformExtension
+
+            kotlinMultiplatformExtension.targets.all { target ->
+                if (target.platformType == KotlinPlatformType.common) {
+                    return@all
+                }
+
+                val configuration = Action<KotlinMultiplatformTask> { task ->
+                    task.addBasicConfiguration(extension)
+                    task.targetNames = listOf("common", target.name)
+                }
+
+                project.tasks.register(
+                    "licenseMultiplatform${target.name.capitalize()}Report",
+                    KotlinMultiplatformTask::class.java,
+                    configuration
+                )
+            }
+
+            val targetNames = mutableListOf("common")
+            kotlinMultiplatformExtension.targets.all { target ->
+                if (target.platformType == KotlinPlatformType.common) {
+                    return@all
+                }
+
+                targetNames.add(target.name)
+            }
+
+            val configuration = Action<KotlinMultiplatformTask> { task ->
+                task.addBasicConfiguration(extension)
+                task.targetNames = targetNames
+            }
+
+            project.tasks.register(
+                "licenseMultiplatformReport",
+                KotlinMultiplatformTask::class.java,
+                configuration
+            )
         }
 
         @JvmStatic
@@ -92,20 +139,6 @@ class LicensesPlugin : Plugin<Project> {
             description = TASK_DESC
             group = TASK_GROUP
             reports(extension.reports)
-        }
-
-        @JvmStatic
-        private fun <T : LicensesTask> registerTask(
-            project: Project,
-            type: Class<T>,
-            taskName: String,
-            configuration: Action<T>
-        ) {
-            if (GradleVersion.current() >= GradleVersion.version("4.9")) {
-                project.tasks.register(taskName, type, configuration)
-            } else {
-                project.tasks.create(taskName, type, configuration)
-            }
         }
 
         @Suppress("DEPRECATION")
