@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Kotlin Multiplatform support
 
 ### Changed
 - Extension property to set `enabled` and `destination`
