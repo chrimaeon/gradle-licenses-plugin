@@ -229,6 +229,7 @@ tasks {
     }
 
     jacocoTestCoverageVerification {
+        inputs.dir(buildDir.resolve("jacoco"))
         executionData(jacocoExecData)
         violationRules {
             rule {
