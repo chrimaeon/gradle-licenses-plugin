@@ -188,6 +188,10 @@ changelog {
     version.set(versionName)
 }
 
+jacoco {
+    toolVersion = Deps.jacocoAgentVersion
+}
+
 tasks {
     val setupJacocoRuntime by registering(WriteProperties::class) {
         outputFile =
@@ -217,10 +221,6 @@ tasks {
         dependsOn(functionalTest, ktlint)
     }
 
-    jacoco {
-        toolVersion = Deps.jacocoAgentVersion
-    }
-
     val jacocoExecData = fileTree("$buildDir/jacoco").include("*.exec")
 
     jacocoTestReport {
@@ -247,6 +247,8 @@ tasks {
                 mapOf(
                     "Implementation-Title" to pomName,
                     "Implementation-Version" to versionName,
+                    "Implementation-Vendor" to "CMG Mobile Apps",
+                    "Created-By" to """${System.getProperty("java.version")} (${System.getProperty("java.vendor")})""",
                     "Built-By" to System.getProperty("user.name"),
                     "Built-Date" to Date(),
                     "Built-JDK" to System.getProperty("java.version"),
