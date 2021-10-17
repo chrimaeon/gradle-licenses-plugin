@@ -19,7 +19,5 @@ package com.cmgapps.license.reporter
 import com.cmgapps.license.model.Library
 
 class CustomReport(libraries: List<Library>, private val action: CustomReportAction) : Report(libraries) {
-    override fun generate(): String {
-        return action(libraries)
-    }
+    override fun generate() = action(libraries)
 }

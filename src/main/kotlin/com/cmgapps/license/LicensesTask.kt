@@ -278,7 +278,7 @@ abstract class LicensesTask : DefaultTask() {
         }
     }
 
-    private inner class LicensesReportsContainerImpl() : LicensesReportsContainer {
+    private inner class LicensesReportsContainerImpl : LicensesReportsContainer {
         override val csv: LicensesReport by LicenseReportDelegate(ReportType.CSV)
         override fun csv(config: Action<LicensesReport>) {
             csv.configure(config)
