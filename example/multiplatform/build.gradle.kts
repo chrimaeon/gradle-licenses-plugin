@@ -15,12 +15,42 @@
  */
 
 plugins {
-    java
+    kotlin("multiplatform") version "1.5.31"
     id("com.cmgapps.licenses") version "1.0.0"
 }
 
 repositories {
     mavenCentral()
+}
+
+kotlin {
+    jvm()
+    js(IR) {
+        browser()
+    }
+
+    iosArm64()
+    iosX64()
+
+    sourceSets {
+        named("commonMain") {
+            dependencies {
+                implementation("org.apache.maven:maven-model:3.6.3")
+            }
+        }
+
+        named("jvmMain") {
+            dependencies {
+                implementation("org.apache.commons:commons-csv:1.9.0")
+            }
+        }
+
+        named("iosX64Main") {
+            dependencies {
+                implementation("com.squareup.retrofit2:retrofit:2.3.0")
+            }
+        }
+    }
 }
 
 licenses {
@@ -37,13 +67,4 @@ licenses {
             generate { list -> list.map { it.name }.joinToString() }
         }
     }
-}
-
-tasks.register<Copy>("copyLicense") {
-    from(tasks.named("licenseReport"))
-    into(rootProject.projectDir)
-}
-
-dependencies {
-    implementation("org.apache.maven:maven-model:3.6.3")
 }

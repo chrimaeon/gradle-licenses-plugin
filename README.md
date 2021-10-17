@@ -1,8 +1,9 @@
 # Gradle Licenses Plugin [![CircleCI](https://circleci.com/gh/chrimaeon/gradle-licenses-plugin.svg?style=svg)](https://circleci.com/gh/chrimaeon/gradle-licenses-plugin)
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg?style=for-the-badge)](http://www.apache.org/licenses/LICENSE-2.0)
-[![MavenCentral](https://img.shields.io/maven-central/v/com.cmgapps/gradle-licenses-plugin?style=for-the-badge)](https://repo1.maven.org/maven2/com/cmgapps/gradle-licenses-plugin/)
-[![gradlePluginPortal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/cmgapps/licenses/com.cmgapps.licenses.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin%20Portal&style=for-the-badge)](https://plugins.gradle.org/plugin/com.cmgapps.licenses)
+[![Gradle Plugin](https://img.shields.io/badge/Gradle-6.8%2B-%2302303A.svg?style=for-the-badge&logo=Gradle)](https://gradle.org/)
+[![MavenCentral](https://img.shields.io/maven-central/v/com.cmgapps/gradle-licenses-plugin?style=for-the-badge&logo=Apache%20Maven)](https://repo1.maven.org/maven2/com/cmgapps/gradle-licenses-plugin/)
+[![gradlePluginPortal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/cmgapps/licenses/com.cmgapps.licenses.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin%20Portal&style=for-the-badge&logo=Gradle)](https://plugins.gradle.org/plugin/com.cmgapps.licenses)
 
 This Gradle plugin provides tasks to generate a file with the licenses used from the project's dependencies.
 
@@ -12,11 +13,12 @@ Using the plugins DSL
 
 ```groovy
 plugins {
-    id "com.cmgapps.licenses" version "3.3.0"
+    id "com.cmgapps.licenses" version "4.0.0"
 }
 ```
 
-Using legacy plugin application 
+Using legacy plugin application
+
 ```groovy
 buildscript {
     repositories {
@@ -24,34 +26,43 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.cmgapps:gradle-licenses-plugin:3.3.0")
+        classpath("com.cmgapps:gradle-licenses-plugin:4.0.0")
     }
 }
 
 apply(plugin: "com.cmgapps.licenses")
 ```
+
 ### Tasks
 
 Applying the plugin will create tasks to generate the license report
 
 For `"java"` and `"java-library"`
-*  `licenseReport`
+
+* `licenseReport`
 
 For `"com.android.application"`, `"com.android.library"`, `"com.android.feature"` and `"com.android.dynamic-feature"`
+
 * `license<variant>Report`
+
+For `"org.jetbrains.kotlin.multiplatform"`
+
+* `licenseMultiplatformReport` collects licenses from all targets
+* `licenseMultiplatform<target>Report` collects licenses from `common` and the specified `<target>`
 
 ### Configuration
 
 #### Output Format
 
 Example:
-```groovy
+
+```kotlin
 licenses {
     reports {
-        html.enabled.set(false) // html is enabled by default
+        html.enabled = false // html is enabled by default
         xml {
-            enabled.set(true)
-            destination.set(file("$buildDir/reports/licenses.xml"))
+            enabled = true
+            destination = file("$buildDir/reports/licenses.xml")
         }
     }
 }
@@ -60,27 +71,35 @@ licenses {
 The plugin can output different formats.
 
 * `HTML`
-    generates a formatted HTML website
+  generates a formatted HTML website
     * Styling
 
-      For an HTML report you can define custom stylesheet using a [TextResource]:
-       ```groovy
+      For an HTML report you can define custom stylesheet using a `File` or `String`:
+       ```kotlin
         licenses {
             reports {
-                html.stylesheet = resources.text.fromString("body {background: #FAFAFA}")
+                html.stylesheet("body {background: #FAFAFA}")
             }     
         }
         ```
+      or
+        ```kotlin
+        licenses {
+            reports {
+                html.stylesheet(file("$projectDir/styles/licenses.css"))
+            } 
+        }
+        ```
 * `JSON`
-    generates a Json file
+  generates a Json file
 * `XML`
-    generates a valid XML version 1.0 file
+  generates a valid XML version 1.0 file
 * `Text`
-    generates a plain text report file
+  generates a plain text report file
 * `Mardown`
-    generates a Markdown file
+  generates a Markdown file
 * `Custom`
-    add your own reporter as a lambda function
+  add your own reporter as a lambda function
     ```groovy
     licenses {
         custom {

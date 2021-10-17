@@ -14,31 +14,8 @@
  * limitations under the License.
  */
 
-plugins {
-    id 'java'
-    id 'com.cmgapps.licenses' version '1.0.0'
+pluginManagement {
+    includeBuild("../../")
 }
 
-repositories {
-    mavenCentral()
-}
-
-licenses {
-    reports {
-        csv {
-            enabled = true
-            destination = file("$buildDir/csv-report/customdir.csv")
-        }
-        json.enabled = true
-
-        custom {
-            enabled = true
-            destination = file("$buildDir/reports/licenses/licenses.txt")
-            generate { list -> list.collect { it.name }.join(', ') }
-        }
-    }
-}
-
-dependencies {
-    implementation 'org.apache.maven:maven-model:3.6.3'
-}
+rootProject.name = "gradle-licenses-plugin-sample-kotlin"

@@ -8,6 +8,7 @@ executors:
           username: chrimaeon
           password: $DOCKERHUB_PASSWORD
     environment:
+      TERM: "dumb"
       JAVA_TOOL_OPTIONS: "-Xmx3g"
       GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=2 -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false"
 
@@ -40,6 +41,7 @@ commands:
 jobs:
   test:
     executor: android-executor
+    resource_class: medium
     steps:
       - checkout
       - restore_gradle_wrapper
@@ -49,7 +51,7 @@ jobs:
           command: ./gradlew check
       - run:
           name: Generate and verify code coverage and
-          command: ./gradlew jacocoTestReport jacocoTestCoverageVerification
+          command: ./gradlew jacocoTestReport
       - save_gradle_wrapper
       - save_gradle_cache
       - store_test_results:

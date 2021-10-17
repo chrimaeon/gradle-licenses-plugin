@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019. Christian Grach <christian.grach@cmgapps.com>
+ * Copyright (c) 2021. Christian Grach <christian.grach@cmgapps.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.cmgapps.license.reporter
+package com.cmgapps.license
 
-import com.cmgapps.license.model.Library
+import java.util.Locale
 
-class CustomReport(libraries: List<Library>, private val action: CustomReportAction) : Report(libraries) {
-    override fun generate() = action(libraries)
+fun String.capitalize() = replaceFirstChar {
+    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
 }

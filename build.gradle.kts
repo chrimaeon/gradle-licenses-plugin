@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import com.cmgapps.gradle.logResults
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
@@ -187,6 +188,10 @@ changelog {
     version.set(versionName)
 }
 
+jacoco {
+    toolVersion = Deps.jacocoAgentVersion
+}
+
 tasks {
     val setupJacocoRuntime by registering(WriteProperties::class) {
         outputFile =
@@ -216,10 +221,6 @@ tasks {
         dependsOn(functionalTest, ktlint)
     }
 
-    jacoco {
-        toolVersion = Deps.jacocoAgentVersion
-    }
-
     val jacocoExecData = fileTree("$buildDir/jacoco").include("*.exec")
 
     jacocoTestReport {
@@ -228,6 +229,7 @@ tasks {
     }
 
     jacocoTestCoverageVerification {
+        inputs.dir(buildDir.resolve("jacoco"))
         executionData(jacocoExecData)
         violationRules {
             rule {
@@ -245,6 +247,8 @@ tasks {
                 mapOf(
                     "Implementation-Title" to pomName,
                     "Implementation-Version" to versionName,
+                    "Implementation-Vendor" to "CMG Mobile Apps",
+                    "Created-By" to """${System.getProperty("java.version")} (${System.getProperty("java.vendor")})""",
                     "Built-By" to System.getProperty("user.name"),
                     "Built-Date" to Date(),
                     "Built-JDK" to System.getProperty("java.version"),
@@ -267,9 +271,7 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
-        testLogging {
-            events("passed", "skipped", "failed")
-        }
+        afterTest(KotlinClosure2(logger::logResults))
     }
 
     withType<KotlinCompile> {
@@ -315,6 +317,7 @@ tasks {
 
 dependencies {
     compileOnly(Deps.androidGradlePlugin)
+    compileOnly(Deps.kotlinMultiplatformPlugin)
 
     val kotlinReflect = kotlin("reflect", Deps.kotlinVersion)
     // Necessary to bump a transitive dependency.
@@ -336,6 +339,7 @@ dependencies {
     testImplementation(Deps.mockitoKotlin)
 
     "functionalTestImplementation"(Deps.androidGradlePlugin)
+    "functionalTestImplementation"(Deps.kotlinMultiplatformPlugin)
     "functionalTestImplementation"(gradleTestKit())
     "functionalTestImplementation"(kotlinReflect)
 

@@ -95,7 +95,7 @@ abstract class LicensesTask : DefaultTask() {
 
     init {
         reports = LicensesReportsContainerImpl()
-        reports.html.enabled.set(true)
+        reports.html.enabled = true
         reports.getAll().forEach {
             outputs.file(it.destination)
         }
@@ -240,7 +240,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         reports.getAll().forEach { licenseReport ->
-            if (licenseReport.enabled.get()) {
+            if (licenseReport.enabled) {
                 val report = when (licenseReport.type) {
                     ReportType.CSV -> CsvReport(libraries)
                     ReportType.CUSTOM -> {
@@ -254,7 +254,7 @@ abstract class LicensesTask : DefaultTask() {
                     }
                     ReportType.HTML -> HtmlReport(
                         libraries,
-                        reports.html.stylesheet.orNull,
+                        reports.html._stylesheet.orNull,
                         logger
                     )
                     ReportType.JSON -> JsonReport(libraries)
@@ -269,7 +269,7 @@ abstract class LicensesTask : DefaultTask() {
     }
 
     private fun LicensesReport.writeFileReport(report: Report) {
-        with(destination.get().asFile) {
+        with(destination) {
             prepare()
             writeText(report.generate())
             logger.lifecycle(
@@ -278,7 +278,7 @@ abstract class LicensesTask : DefaultTask() {
         }
     }
 
-    private inner class LicensesReportsContainerImpl() : LicensesReportsContainer {
+    private inner class LicensesReportsContainerImpl : LicensesReportsContainer {
         override val csv: LicensesReport by LicenseReportDelegate(ReportType.CSV)
         override fun csv(config: Action<LicensesReport>) {
             csv.configure(config)
@@ -366,8 +366,8 @@ abstract class LicensesTask : DefaultTask() {
                 } else {
                     (
                         Class.forName(property.returnType.javaType.typeName)
-                            .getConstructor(ReportType::class.java, Task::class.java)
-                            .newInstance(reportType, this@LicensesTask) as T
+                            .getConstructor(ReportType::class.java, Task::class.java, Project::class.java)
+                            .newInstance(reportType, this@LicensesTask, project) as T
                         ).also { value = it }
                 }
             }
@@ -427,6 +427,29 @@ abstract class AndroidLicensesTask : LicensesTask() {
     }
 }
 
+abstract class KotlinMultiplatformTask : LicensesTask() {
+
+    @get:Internal
+    internal lateinit var targetNames: List<String>
+
+    override fun collectDependencies() {
+        super.collectDependencies()
+
+        val configurations = mutableSetOf<Configuration>()
+
+        targetNames.forEach { name ->
+            project.configurations.find { it.name == "${name}MainApi" }?.let {
+                configurations.add(it)
+            }
+            project.configurations.find { it.name == "${name}MainImplementation" }?.let {
+                configurations.add(it)
+            }
+        }
+
+        addConfigurations(configurations)
+    }
+}
+
 private fun File.writeText(text: String) = PrintStream(outputStream()).use {
     it.print(text)
     it.flush()
@@ -436,8 +459,4 @@ private fun File.prepare() {
     delete()
     parentFile.mkdirs()
     createNewFile()
-}
-
-private fun String.capitalize() = replaceFirstChar {
-    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
 }

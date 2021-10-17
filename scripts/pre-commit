@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+FILES=$(git diff --cached --name-only | grep -i -E "\.kts?" || true)
+
+if [ -n "$FILES" ]
+then
+    ktlint "$FILES"
+else
+    echo "No file for ktlint"
+fi
+

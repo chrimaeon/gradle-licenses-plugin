@@ -62,7 +62,8 @@ class LicensePluginAndroidShould {
 
         buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
         reportFolder = "$testProjectDir/build/reports/licenses"
-        mavenRepoUrl = javaClass.getResource("/maven").toURI().toString()
+        mavenRepoUrl =
+            javaClass.getResource("/maven")?.toURI()?.toString() ?: error("""resource folder "/maven" not found!""")
 
         buildFile + """
             buildscript {
@@ -162,7 +163,7 @@ class LicensePluginAndroidShould {
             
             licenses {
                 reports {
-                    text.enabled.set(true)
+                    text.enabled = true
                 }
             }
             

@@ -19,7 +19,8 @@ package com.cmgapps.license.util
 import org.gradle.testkit.runner.GradleRunner
 import java.io.File
 
-fun Any.getFileContent(fileName: String) = javaClass.getResource("/licenses/$fileName").readText()
+fun Any.getFileContent(fileName: String) = javaClass.getResource("/licenses/$fileName")?.readText()
+    ?: error("""resource file "/licenses/$fileName" not found! """)
 
 operator fun File.plus(text: String) = appendText(text)
 infix fun File.write(text: String) = writeText(text)
