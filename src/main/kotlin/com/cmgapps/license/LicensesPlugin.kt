@@ -28,7 +28,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
-import java.util.Locale
 
 @Suppress("unused")
 class LicensesPlugin : Plugin<Project> {
@@ -76,9 +75,7 @@ class LicensesPlugin : Plugin<Project> {
         @JvmStatic
         private fun configureAndroidProject(project: Project, extension: LicensesExtension) {
             getAndroidVariants(project)?.all { androidVariant ->
-                val taskName = "license" + androidVariant.name.replaceFirstChar {
-                    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
-                } + "Report"
+                val taskName = "license" + androidVariant.name.capitalize() + "Report"
 
                 val configuration = Action<AndroidLicensesTask> { task ->
                     task.addBasicConfiguration(extension)

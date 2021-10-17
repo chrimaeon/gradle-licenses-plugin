@@ -46,11 +46,9 @@ internal class HtmlReport(
             if (library.licenses.isNotEmpty()) {
                 val key = library.licenses[0]
 
-                if (!licenseListMap.contains(key)) {
-                    licenseListMap[key] = mutableListOf()
-                }
-
-                licenseListMap[key]?.add(library)
+                licenseListMap[key] ?: mutableListOf<Library>().also {
+                    licenseListMap[key] = it
+                }.add(library)
             }
         }
 

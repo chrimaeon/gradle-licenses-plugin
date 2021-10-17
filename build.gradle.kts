@@ -325,6 +325,7 @@ dependencies {
 
     implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
     implementation(Deps.mavenModel)
+    implementation(Deps.mavenArtifact)
     implementation(Deps.kotlinSerialization)
     implementation(Deps.apacheCommonsCsv)
 

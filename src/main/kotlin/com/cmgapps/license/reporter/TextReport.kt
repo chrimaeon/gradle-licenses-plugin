@@ -17,52 +17,59 @@
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.model.Library
+import com.cmgapps.license.model.License
 
 internal class TextReport(libraries: List<Library>) : Report(libraries) {
-    override fun generate(): String {
-        return StringBuilder().apply {
-            append("Licenses\n")
-            val libLength = libraries.size
-            libraries.forEachIndexed { libIndex, library ->
-                if (libIndex < libLength - 1) {
-                    append("$ITEM_PREFIX ")
-                } else {
-                    append("$LAST_ITEM_PREFIX ")
-                }
-                append(library.name)
-                append(':')
-                append(library.version)
-                val licensesLength = library.licenses.size
-                library.licenses.forEachIndexed { index, license ->
-
-                    if (libIndex < libLength - 1) {
-                        append(LINE_PREFIX)
-                    } else {
-                        append(LAST_LINE_PREFIX)
-                    }
-
-                    append("$ITEM_PREFIX License: ")
-                    append(license.name)
-
-                    if (libIndex < libLength - 1) {
-                        append(LINE_PREFIX)
-                    } else {
-                        append(LAST_LINE_PREFIX)
-                    }
-
-                    if (index < licensesLength - 1) {
-                        append(ITEM_PREFIX)
-                    } else {
-                        append(LAST_ITEM_PREFIX)
-                    }
-                    append(" URL: ")
-                    append(license.url)
-                }
-                if (libIndex < libLength - 1) {
-                    append('\n')
-                }
+    override fun generate() = buildString {
+        append("Licenses\n")
+        val libLength = libraries.size
+        libraries.forEachIndexed { libIndex, library ->
+            appendPrefix(libIndex, libLength)
+            append(library.name)
+            append(':')
+            append(library.version)
+            appendLicenses(libIndex, libLength, library.licenses)
+            if (libIndex < libLength - 1) {
+                append('\n')
             }
-        }.toString()
+        }
+    }
+
+    private fun StringBuilder.appendPrefix(index: Int, length: Int) {
+        if (index < length - 1) {
+            append("$ITEM_PREFIX ")
+        } else {
+            append("$LAST_ITEM_PREFIX ")
+        }
+    }
+
+    private fun StringBuilder.appendLicenses(libIndex: Int, libLength: Int, licenses: List<License>) {
+        val licensesLength = licenses.size
+
+        licenses.forEachIndexed { index, license ->
+            if (libIndex < libLength - 1) {
+                append(LINE_PREFIX)
+            } else {
+                append(LAST_LINE_PREFIX)
+            }
+
+            append("$ITEM_PREFIX License: ")
+            append(license.name)
+
+            if (libIndex < libLength - 1) {
+                append(LINE_PREFIX)
+            } else {
+                append(LAST_LINE_PREFIX)
+            }
+
+            if (index < licensesLength - 1) {
+                append(ITEM_PREFIX)
+            } else {
+                append(LAST_ITEM_PREFIX)
+            }
+            append(" URL: ")
+            append(license.url)
+        }
     }
 
     private companion object {

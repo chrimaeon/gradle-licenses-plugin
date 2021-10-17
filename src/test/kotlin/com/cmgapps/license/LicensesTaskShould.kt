@@ -331,4 +331,39 @@ class LicensesTaskShould {
 
         assertThat(File(reportFolder).listFiles()?.size, `is`(7))
     }
+
+    @Test
+    fun `sort libraries`() {
+        val outputFile = File(reportFolder, "licenses.txt")
+
+        project.dependencies.add("compile", "group:another:2.0.0")
+        project.dependencies.add("compile", "group:other:1.0.0")
+        val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+            task.reports {
+                it.html.enabled = false
+                it.text {
+                    it.enabled = true
+                    it.destination = outputFile
+                }
+            }
+        }
+
+        task.licensesReport()
+
+        assertThat(
+            outputFile.readText(),
+            `is`(
+                "Licenses\n" +
+                    "├─ Fake dependency another:2.0.0\n" +
+                    "│  ├─ License: Some license\n" +
+                    "│  └─ URL: http://website.tld/\n" +
+                    "├─ Fake dependency name:1.0.0\n" +
+                    "│  ├─ License: Some license\n" +
+                    "│  └─ URL: http://website.tld/\n" +
+                    "└─ Fake dependency other:1.0.0\n" +
+                    "   ├─ License: Some license\n" +
+                    "   └─ URL: http://website.tld/"
+            )
+        )
+    }
 }

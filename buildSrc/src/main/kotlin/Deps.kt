@@ -29,6 +29,7 @@ object Deps {
     const val kotlinMultiplatformPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     const val apacheCommonsCsv = "org.apache.commons:commons-csv:1.9.0"
     const val mavenModel = "org.apache.maven:maven-model:3.8.3"
+    const val mavenArtifact = "org.apache.maven:maven-artifact:3.8.3"
     const val jUnit = "org.junit.jupiter:junit-jupiter:5.8.1"
     const val hamcrest = "org.hamcrest:hamcrest:2.2"
     const val ktlint = "com.pinterest:ktlint:0.42.1"

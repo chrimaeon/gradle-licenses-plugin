@@ -16,8 +16,6 @@
 
 package com.cmgapps.license
 
-import java.util.Locale
-
 fun String.capitalize() = replaceFirstChar {
-    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+    if (it.isLowerCase()) it.titlecase() else it.toString()
 }

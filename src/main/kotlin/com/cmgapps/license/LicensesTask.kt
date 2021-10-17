@@ -33,6 +33,7 @@ import com.cmgapps.license.reporter.ReportType
 import com.cmgapps.license.reporter.TextReport
 import com.cmgapps.license.reporter.XmlReport
 import groovy.lang.Closure
+import org.apache.maven.artifact.versioning.ComparableVersion
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
@@ -148,20 +149,21 @@ abstract class LicensesTask : DefaultTask() {
 
             val model = getPomModel(it.file)
             val licenses = findLicenses(model)
-            val version = findVersion(model)
-            val description = findDescription(model)
 
             if (licenses.isEmpty()) {
                 logger.warn("${model.name} dependency does not have a license.")
             }
+
             Library(
                 model.name
                     ?: "${model.groupId}:${model.artifactId}",
-                version,
-                description,
+                findVersion(model)?.let { ComparableVersion(it) } ?: ComparableVersion(""),
+                findDescription(model),
                 licenses
             )
         }
+            .sortedWith(Library.Comparator())
+            .toList()
     }
 
     private fun getPomModel(file: File): Model = MavenXpp3Reader().run {
@@ -213,17 +215,15 @@ abstract class LicensesTask : DefaultTask() {
         return getPomModel(pomFile)
     }
 
-    private fun findVersion(model: Model): String? {
-        return when {
-            model.version != null -> model.version
-            model.parent != null ->
-                if (model.parent.version != null) {
-                    model.parent.version
-                } else {
-                    findVersion(getParentPomFile(model.parent))
-                }
-            else -> null
-        }
+    private fun findVersion(model: Model): String? = when {
+        model.version != null -> model.version
+        model.parent != null ->
+            if (model.parent.version != null) {
+                model.parent.version
+            } else {
+                findVersion(getParentPomFile(model.parent))
+            }
+        else -> null
     }
 
     private fun findDescription(model: Model): String? {

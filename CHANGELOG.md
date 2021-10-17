@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- sort dependencies by name and version
 
 ### Deprecated
 
