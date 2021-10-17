@@ -59,6 +59,12 @@ class HtmlReportShould {
                     "<pre>" +
                     getFileContent("apache-2.0.txt") +
                     "</pre>" +
+                    "<ul>" +
+                    "<li>Test lib 1</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    getFileContent("mit.txt") +
+                    "</pre>" +
                     "</body>" +
                     "</html>"
             )
