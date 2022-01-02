@@ -1,4 +1,4 @@
-# Gradle Licenses Plugin [![CircleCI](https://circleci.com/gh/chrimaeon/gradle-licenses-plugin.svg?style=svg)](https://circleci.com/gh/chrimaeon/gradle-licenses-plugin)
+# Gradle Licenses Plugin [![Build & Test](https://github.com/chrimaeon/gradle-licenses-plugin/actions/workflows/main.yml/badge.svg)](https://github.com/chrimaeon/gradle-licenses-plugin/actions/workflows/main.yml) [![codecov](https://codecov.io/gh/chrimaeon/gradle-licenses-plugin/branch/master/graph/badge.svg?token=XY0G488B3B)](https://codecov.io/gh/chrimaeon/gradle-licenses-plugin)
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg?style=for-the-badge)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Gradle Plugin](https://img.shields.io/badge/Gradle-6.8%2B-%2302303A.svg?style=for-the-badge&logo=Gradle)](https://gradle.org/)

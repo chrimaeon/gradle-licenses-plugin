@@ -46,4 +46,5 @@ jobs:
             build/reports/*
             build/test-results/*
 
-      - uses: codecov/codecov-action@v2
+      - name: Upload Codecov
+        uses: codecov/codecov-action@v2
