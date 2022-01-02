@@ -160,14 +160,14 @@ publishing {
             url = if (versionName.endsWith("SNAPSHOT")) snapshotUrl else releaseUrl
 
             val credentials = Properties().apply {
-                val credFile = file("./credentials.properties")
+                val credFile = projectDir.resolve("credentials.properties")
                 if (credFile.exists()) {
                     load(credFile.inputStream())
                 }
             }
             credentials {
-                username = credentials.getProperty("sonaUsername")
-                password = credentials.getProperty("sonaPassword")
+                username = credentials.getProperty("username")
+                password = credentials.getProperty("password")
             }
         }
     }
