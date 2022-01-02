@@ -26,7 +26,7 @@ internal class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : R
                         +library.name
                     }
                     version {
-                        +(library.version ?: "")
+                        +(library.version.toString())
                     }
 
                     description {

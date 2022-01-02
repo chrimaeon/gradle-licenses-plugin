@@ -26,7 +26,5 @@ internal class JsonReport(libraries: List<Library>) : Report(libraries) {
         prettyPrint = true
     }
 
-    override fun generate(): String {
-        return json.encodeToString(libraries)
-    }
+    override fun generate() = json.encodeToString(libraries)
 }

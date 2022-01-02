@@ -19,6 +19,7 @@ package com.cmgapps.license.reporter
 import com.cmgapps.license.helper.LibrariesHelper
 import com.cmgapps.license.model.License
 import com.cmgapps.license.util.getFileContent
+import org.apache.maven.artifact.versioning.ComparableVersion
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.hamcrest.MatcherAssert.assertThat
@@ -58,6 +59,12 @@ class HtmlReportShould {
                     "<pre>" +
                     getFileContent("apache-2.0.txt") +
                     "</pre>" +
+                    "<ul>" +
+                    "<li>Test lib 1</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    getFileContent("mit.txt") +
+                    "</pre>" +
                     "</body>" +
                     "</html>"
             )
@@ -72,7 +79,7 @@ class HtmlReportShould {
             listOf(
                 LibraryModel(
                     name = "Lib with invalid license",
-                    version = "1.0.0",
+                    version = ComparableVersion("1.0.0"),
                     licenses = listOf(
                         License(name = "foo", url = "http://www.license.foo")
                     ),

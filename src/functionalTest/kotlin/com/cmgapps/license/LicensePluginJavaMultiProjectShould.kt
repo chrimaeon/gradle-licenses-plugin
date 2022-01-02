@@ -18,7 +18,6 @@ package com.cmgapps.license
 
 import com.cmgapps.license.util.getFileContent
 import com.cmgapps.license.util.plus
-import com.cmgapps.license.util.withJaCoCo
 import org.gradle.testkit.runner.GradleRunner
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -60,7 +59,6 @@ class LicensePluginJavaMultiProjectShould {
             .withProjectDir(testProjectDir.toFile())
             .withArguments(":module1:licenseReport")
             .withPluginClasspath()
-            .withJaCoCo()
     }
 
     @Test
@@ -163,10 +161,10 @@ class LicensePluginJavaMultiProjectShould {
                     "</head>" +
                     "<body>" +
                     "<h3>Notice for packages:</h3>" +
+                    "<ul><li>Fake dependency name</li></ul><div class=\"license\"><p>Some license</p><a href=\"http://website.tld/\">http://website.tld/</a></div>" +
                     "<ul><li>Retrofit</li></ul><pre>" +
                     getFileContent("apache-2.0.txt") +
                     "</pre>" +
-                    "<ul><li>Fake dependency name</li></ul><div class=\"license\"><p>Some license</p><a href=\"http://website.tld/\">http://website.tld/</a></div>" +
                     "</body>" +
                     "</html>"
             )

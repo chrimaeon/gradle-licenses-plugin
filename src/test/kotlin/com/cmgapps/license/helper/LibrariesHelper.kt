@@ -18,13 +18,14 @@ package com.cmgapps.license.helper
 
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import org.apache.maven.artifact.versioning.ComparableVersion
 
 object LibrariesHelper {
 
     val libraries = listOf(
         Library(
             "Test lib 1",
-            "1.0",
+            ComparableVersion("1.0"),
             "proper description",
             listOf(
                 License(

@@ -42,15 +42,8 @@ internal class HtmlReport(
         val licenseListMap = mutableMapOf<License, MutableList<Library>>()
 
         libraries.forEach { library ->
-
-            if (library.licenses.isNotEmpty()) {
-                val key = library.licenses[0]
-
-                if (!licenseListMap.contains(key)) {
-                    licenseListMap[key] = mutableListOf()
-                }
-
-                licenseListMap[key]?.add(library)
+            library.licenses.forEach { license ->
+                licenseListMap[license] ?: mutableListOf<Library>().also { licenseListMap[license] = it }.add(library)
             }
         }
 

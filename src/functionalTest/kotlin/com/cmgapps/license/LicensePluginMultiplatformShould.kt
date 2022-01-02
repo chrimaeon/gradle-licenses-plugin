@@ -17,7 +17,6 @@
 package com.cmgapps.license
 
 import com.cmgapps.license.util.plus
-import com.cmgapps.license.util.withJaCoCo
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
@@ -89,7 +88,6 @@ class LicensePluginMultiplatformShould {
 
         gradleRunner = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
-            .withJaCoCo()
     }
 
     @Test
@@ -164,13 +162,13 @@ class LicensePluginMultiplatformShould {
             File("$reportFolder/$taskName/licenses.txt").readText().trim(),
             `is`(
                 "Licenses\n" +
-                    "├─ com.google.firebase:firebase-core:10.0.1\n" +
+                    "├─ Fake dependency name:1.0.0\n" +
+                    "│  ├─ License: Some license\n" +
+                    "│  └─ URL: http://website.tld/\n" +
                     "├─ Retrofit:2.3.0\n" +
                     "│  ├─ License: Apache 2.0\n" +
                     "│  └─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt\n" +
-                    "└─ Fake dependency name:1.0.0\n" +
-                    "   ├─ License: Some license\n" +
-                    "   └─ URL: http://website.tld/"
+                    "└─ com.google.firebase:firebase-core:10.0.1"
             )
         )
     }
@@ -230,10 +228,10 @@ class LicensePluginMultiplatformShould {
             File("$reportFolder/$taskName/licenses.txt").readText().trim(),
             `is`(
                 "Licenses\n" +
-                    "├─ com.google.firebase:firebase-core:10.0.1\n" +
-                    "└─ Retrofit:2.3.0\n" +
-                    "   ├─ License: Apache 2.0\n" +
-                    "   └─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    "├─ Retrofit:2.3.0\n" +
+                    "│  ├─ License: Apache 2.0\n" +
+                    "│  └─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt\n" +
+                    "└─ com.google.firebase:firebase-core:10.0.1"
             )
         )
     }
@@ -282,10 +280,10 @@ class LicensePluginMultiplatformShould {
             File("$reportFolder/$taskName/licenses.txt").readText().trim(),
             `is`(
                 "Licenses\n" +
-                    "├─ com.google.firebase:firebase-core:10.0.1\n" +
-                    "└─ Fake dependency name:1.0.0\n" +
-                    "   ├─ License: Some license\n" +
-                    "   └─ URL: http://website.tld/"
+                    "├─ Fake dependency name:1.0.0\n" +
+                    "│  ├─ License: Some license\n" +
+                    "│  └─ URL: http://website.tld/\n" +
+                    "└─ com.google.firebase:firebase-core:10.0.1"
             )
         )
     }
@@ -334,10 +332,10 @@ class LicensePluginMultiplatformShould {
             File("$reportFolder/$taskName/licenses.txt").readText().trim(),
             `is`(
                 "Licenses\n" +
-                    "├─ com.google.firebase:firebase-core:10.0.1\n" +
-                    "└─ Fake dependency name:1.0.0\n" +
-                    "   ├─ License: Some license\n" +
-                    "   └─ URL: http://website.tld/"
+                    "├─ Fake dependency name:1.0.0\n" +
+                    "│  ├─ License: Some license\n" +
+                    "│  └─ URL: http://website.tld/\n" +
+                    "└─ com.google.firebase:firebase-core:10.0.1"
             )
         )
     }

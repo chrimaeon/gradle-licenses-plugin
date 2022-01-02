@@ -19,25 +19,23 @@ package com.cmgapps.license.reporter
 import com.cmgapps.license.model.Library
 
 internal class MarkdownReport(libraries: List<Library>) : Report(libraries) {
-    override fun generate(): String {
-        return StringBuilder().apply {
-            append("# Open source licenses\n")
-            append("### Notice for packages:\n")
-            libraries.forEach { library ->
-                append(library.name)
-                append(' ')
-                append('_')
-                append(library.version)
-                append("_:")
-                library.licenses.forEach { license ->
-                    append("\n* ")
-                    append(license.name)
-                    append(" (")
-                    append(license.url)
-                    append(")")
-                }
-                append("\n\n")
+    override fun generate() = buildString {
+        append("# Open source licenses\n")
+        append("### Notice for packages:\n")
+        libraries.forEach { library ->
+            append(library.name)
+            append(' ')
+            append('_')
+            append(library.version)
+            append("_:")
+            library.licenses.forEach { license ->
+                append("\n* ")
+                append(license.name)
+                append(" (")
+                append(license.url)
+                append(")")
             }
-        }.toString()
+            append("\n\n")
+        }
     }
 }

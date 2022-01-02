@@ -18,7 +18,6 @@ package com.cmgapps.license
 
 import com.cmgapps.license.util.getFileContent
 import com.cmgapps.license.util.plus
-import com.cmgapps.license.util.withJaCoCo
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
@@ -69,7 +68,6 @@ class LicensePluginJavaShould {
             .withProjectDir(testProjectDir.toFile())
             .withArguments(":licenseReport")
             .withPluginClasspath()
-            .withJaCoCo()
     }
 
     @DisabledIfEnvironmentVariable(named = "CIRCLECI", matches = "true")

@@ -16,10 +16,42 @@
 
 package com.cmgapps.license.model
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import org.apache.maven.artifact.versioning.ComparableVersion
 
 @Serializable
 data class License(val name: String, val url: String)
 
 @Serializable
-data class Library(val name: String, val version: String?, val description: String?, val licenses: List<License>)
+data class Library(
+    val name: String,
+    @Serializable(ComparableVersionSerializer::class)
+    val version: ComparableVersion,
+    val description: String?,
+    val licenses: List<License>
+) {
+    companion object {
+        @Suppress("FunctionName")
+        @JvmStatic
+        fun Comparator(): Comparator<Library> =
+            Comparator.comparing(Library::name).thenComparing(Library::version, reverseOrder())
+    }
+}
+
+object ComparableVersionSerializer : KSerializer<ComparableVersion> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ComparableVersion", PrimitiveKind.STRING)
+
+    override fun deserialize(decoder: Decoder): ComparableVersion {
+        return ComparableVersion(decoder.decodeString())
+    }
+
+    override fun serialize(encoder: Encoder, value: ComparableVersion) {
+        encoder.encodeString(value.toString())
+    }
+}

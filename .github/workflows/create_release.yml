@@ -1,0 +1,23 @@
+name: Create Github Release
+
+on:
+  push:
+    tags:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  create-github-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create Release Notes
+        run: ./gradlew --quiet getChangelog --no-header > ./RELEASE_NOTES.md
+      - name: Create Release
+        uses: chrimaeon/github-create-release-action@0.2.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          tag_name: ${{ github.ref }}
+          body_file: ./RELEASE_NOTES.md
+          draft: false

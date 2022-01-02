@@ -79,17 +79,15 @@ internal abstract class Tag(protected val name: String) : Element {
         }
     }
 
-    private fun renderAttributes(): String {
-        val builder = StringBuilder()
+    private fun renderAttributes(): String = buildString {
         for ((attr, value) in attributes) {
-            builder.append(" $attr=\"$value\"")
+            append(" $attr=\"$value\"")
         }
-        return builder.toString()
     }
 
-    fun toString(format: Boolean = true): String = StringBuilder().apply {
+    fun toString(format: Boolean = true): String = buildString {
         render(this, "", format)
-    }.toString()
+    }
 
     override fun toString(): String = toString(true)
 }

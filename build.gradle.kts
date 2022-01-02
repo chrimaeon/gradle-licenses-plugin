@@ -16,6 +16,7 @@
 
 import com.cmgapps.gradle.logResults
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import kotlinx.kover.api.VerificationValueType.COVERED_LINES_PERCENTAGE
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
 import java.util.Properties
@@ -25,13 +26,13 @@ plugins {
     `java-gradle-plugin`
     `maven-publish`
     signing
-    jacoco
     id("com.github.ben-manes.versions") version Deps.Plugins.versionsVersion
     kotlin("jvm") version Deps.kotlinVersion
     id("com.gradle.plugin-publish") version Deps.Plugins.pluginPublishVersion
     id("org.jetbrains.dokka") version Deps.Plugins.dokkaVersion
     kotlin("plugin.serialization") version Deps.kotlinVersion
     id("org.jetbrains.changelog") version Deps.Plugins.changelogPluginVersion
+    id("org.jetbrains.kotlinx.kover") version "0.4.4"
 }
 
 repositories {
@@ -44,20 +45,12 @@ val functionalTestSourceSet: SourceSet = sourceSets.create("functionalTest") {
     java {
         srcDir("src/$sourceSetName/kotlin")
     }
-
-    compileClasspath += sourceSets.main.get().output + configurations.testRuntimeClasspath.get()
-    runtimeClasspath += output + compileClasspath
+    resources {
+        srcDirs(sourceSets.main.get().resources.srcDirs)
+    }
 }
 
 val ktlint: Configuration by configurations.creating
-
-configurations {
-    named("functionalTestImplementation") {
-        extendsFrom(testImplementation.get())
-    }
-
-    register("jacocoRuntime")
-}
 
 idea {
     module {
@@ -152,7 +145,7 @@ publishing {
                 licenses {
                     license {
                         name.set("Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
                     }
                 }
             }
@@ -167,14 +160,14 @@ publishing {
             url = if (versionName.endsWith("SNAPSHOT")) snapshotUrl else releaseUrl
 
             val credentials = Properties().apply {
-                val credFile = file("./credentials.properties")
+                val credFile = projectDir.resolve("credentials.properties")
                 if (credFile.exists()) {
                     load(credFile.inputStream())
                 }
             }
             credentials {
-                username = credentials.getProperty("sonaUsername")
-                password = credentials.getProperty("sonaPassword")
+                username = credentials.getProperty("username")
+                password = credentials.getProperty("password")
             }
         }
     }
@@ -188,25 +181,15 @@ changelog {
     version.set(versionName)
 }
 
-jacoco {
-    toolVersion = Deps.jacocoAgentVersion
+kover {
+    coverageEngine.set(kotlinx.kover.api.CoverageEngine.JACOCO)
 }
 
 tasks {
-    val setupJacocoRuntime by registering(WriteProperties::class) {
-        outputFile =
-            functionalTestSourceSet.output.resourcesDir!!.resolve("testkit/testkit-gradle.properties")
-        property(
-            "org.gradle.jvmargs",
-            "-javaagent:${configurations["jacocoRuntime"].asPath}=destfile=$buildDir/jacoco/functionalTest.exec"
-        )
-    }
-
     val functionalTest by registering(Test::class) {
         group = "verification"
         testClassesDirs = functionalTestSourceSet.output.classesDirs
         classpath = functionalTestSourceSet.runtimeClasspath
-        dependsOn(setupJacocoRuntime)
     }
 
     val ktlint by registering(JavaExec::class) {
@@ -219,26 +202,6 @@ tasks {
 
     check {
         dependsOn(functionalTest, ktlint)
-    }
-
-    val jacocoExecData = fileTree("$buildDir/jacoco").include("*.exec")
-
-    jacocoTestReport {
-        executionData(jacocoExecData)
-        dependsOn(test, functionalTest)
-    }
-
-    jacocoTestCoverageVerification {
-        inputs.dir(buildDir.resolve("jacoco"))
-        executionData(jacocoExecData)
-        violationRules {
-            rule {
-                limit {
-                    counter = "INSTRUCTION"
-                    minimum = "0.8".toBigDecimal()
-                }
-            }
-        }
     }
 
     jar {
@@ -287,7 +250,7 @@ tasks {
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "7.2"
+        gradleVersion = "7.3.3"
     }
 
     val updateReadme by registering {
@@ -313,6 +276,16 @@ tasks {
     patchChangelog {
         dependsOn(updateReadme)
     }
+
+    koverVerify {
+        rule {
+            name = "Minimal Line coverage"
+            bound {
+                minValue = 80
+                valueType = COVERED_LINES_PERCENTAGE
+            }
+        }
+    }
 }
 
 dependencies {
@@ -325,6 +298,7 @@ dependencies {
 
     implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
     implementation(Deps.mavenModel)
+    implementation(Deps.mavenArtifact)
     implementation(Deps.kotlinSerialization)
     implementation(Deps.apacheCommonsCsv)
 
@@ -338,10 +312,12 @@ dependencies {
     testImplementation(kotlinReflect)
     testImplementation(Deps.mockitoKotlin)
 
+    "functionalTestImplementation"(Deps.jUnit) {
+        exclude(group = "org.hamcrest")
+    }
     "functionalTestImplementation"(Deps.androidGradlePlugin)
     "functionalTestImplementation"(Deps.kotlinMultiplatformPlugin)
+    "functionalTestImplementation"(Deps.hamcrest)
     "functionalTestImplementation"(gradleTestKit())
     "functionalTestImplementation"(kotlinReflect)
-
-    "jacocoRuntime"("org.jacoco:org.jacoco.agent:${jacoco.toolVersion}:runtime")
 }

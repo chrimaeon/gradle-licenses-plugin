@@ -19,6 +19,7 @@ package com.cmgapps.license.reporter
 import com.cmgapps.license.helper.LibrariesHelper
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import org.apache.maven.artifact.versioning.ComparableVersion
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
@@ -41,7 +42,11 @@ class CsvReportShould {
     fun `escape strings in report`() {
         val license = License("License name with a \" in it", "just a plain url")
         val library =
-            Library("Name with a , in it", "version with a \n in it", "description with \r in it", listOf(license))
+            Library(
+                "Name with a , in it",
+                ComparableVersion("version with a \n in it"),
+                "description with \r in it", listOf(license)
+            )
         val result = CsvReport(listOf(library)).generate()
 
         assertThat(
