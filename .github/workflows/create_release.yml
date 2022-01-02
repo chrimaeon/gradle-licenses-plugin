@@ -21,3 +21,32 @@ jobs:
           tag_name: ${{ github.ref }}
           body_file: ./RELEASE_NOTES.md
           draft: false
+      - name: Notify Slack
+        uses: chrimaeon/github-slack-action@v1
+        with:
+          slack_token: ${{ secrets.SLACK_TOKEN }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+          text: "${{ github.ref_name }} on ${{ github.repository }} released! :raised_hands:"
+          blocks: |
+            [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "New release for ${{ github.repository }}"
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Version*\n${{ github.ref_name }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*URL*\n${{ steps.create_release.outputs.html_url }}"
+                  }
+                ]
+              }
+            ]
