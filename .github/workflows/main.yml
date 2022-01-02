@@ -45,3 +45,5 @@ jobs:
           path: |
             build/reports/*
             build/test-results/*
+
+      - uses: codecov/codecov-action@v2
