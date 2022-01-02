@@ -17,7 +17,6 @@
 package com.cmgapps.license
 
 import com.cmgapps.license.util.plus
-import com.cmgapps.license.util.withJaCoCo
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
@@ -89,7 +88,6 @@ class LicensePluginMultiplatformShould {
 
         gradleRunner = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
-            .withJaCoCo()
     }
 
     @Test

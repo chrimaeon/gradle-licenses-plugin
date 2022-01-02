@@ -45,18 +45,12 @@ val functionalTestSourceSet: SourceSet = sourceSets.create("functionalTest") {
     java {
         srcDir("src/$sourceSetName/kotlin")
     }
-
-    compileClasspath += sourceSets.main.get().output //+ configurations.testRuntimeClasspath.get()
-    runtimeClasspath += output + compileClasspath
+    resources {
+        srcDirs(sourceSets.main.get().resources.srcDirs)
+    }
 }
 
 val ktlint: Configuration by configurations.creating
-
-configurations {
-    named("functionalTestImplementation") {
-        extendsFrom(testImplementation.get())
-    }
-}
 
 idea {
     module {
@@ -151,7 +145,7 @@ publishing {
                 licenses {
                     license {
                         name.set("Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
                     }
                 }
             }
@@ -185,6 +179,10 @@ signing {
 
 changelog {
     version.set(versionName)
+}
+
+kover {
+    coverageEngine.set(kotlinx.kover.api.CoverageEngine.JACOCO)
 }
 
 tasks {
@@ -314,8 +312,12 @@ dependencies {
     testImplementation(kotlinReflect)
     testImplementation(Deps.mockitoKotlin)
 
+    "functionalTestImplementation"(Deps.jUnit) {
+        exclude(group = "org.hamcrest")
+    }
     "functionalTestImplementation"(Deps.androidGradlePlugin)
     "functionalTestImplementation"(Deps.kotlinMultiplatformPlugin)
+    "functionalTestImplementation"(Deps.hamcrest)
     "functionalTestImplementation"(gradleTestKit())
     "functionalTestImplementation"(kotlinReflect)
 }

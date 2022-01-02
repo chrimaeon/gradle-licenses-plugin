@@ -21,8 +21,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.apache.maven.artifact.versioning.ComparableVersion
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -100,7 +100,7 @@ internal class LibraryShould {
             description = "description",
             licenses = listOf(License("License name", "http://domain.com"))
         )
-        assertThat(json.decodeFromString(json.encodeToString(lib)), `is`(lib))
+        assertThat(json.decodeFromString<Library>(json.encodeToString(lib)), `is`(lib))
     }
 
     @Test
@@ -127,7 +127,10 @@ internal class LibraryShould {
             Library("A", ComparableVersion("2.0"), description = null, licenses = emptyList()),
             Library("A", ComparableVersion("0.3-alpha4"), description = null, licenses = emptyList()),
             Library(
-                "C", ComparableVersion("13"), description = "desc", licenses = listOf(
+                "C",
+                ComparableVersion("13"),
+                description = "desc",
+                licenses = listOf(
                     License(
                         "license",
                         "http://domain.tld"
@@ -143,7 +146,10 @@ internal class LibraryShould {
                 Library("A", ComparableVersion("0.3-alpha4"), description = null, licenses = emptyList()),
                 Library("B", ComparableVersion("1.0"), description = null, licenses = emptyList()),
                 Library(
-                    "C", ComparableVersion("13"), description = "desc", licenses = listOf(
+                    "C",
+                    ComparableVersion("13"),
+                    description = "desc",
+                    licenses = listOf(
                         License(
                             "license",
                             "http://domain.tld"

@@ -17,7 +17,6 @@
 package com.cmgapps.license
 
 import com.cmgapps.license.util.plus
-import com.cmgapps.license.util.withJaCoCo
 import com.cmgapps.license.util.write
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -83,7 +82,6 @@ class LicensePluginAndroidShould {
 
         gradleRunner = GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
-            .withJaCoCo()
     }
 
     @Test

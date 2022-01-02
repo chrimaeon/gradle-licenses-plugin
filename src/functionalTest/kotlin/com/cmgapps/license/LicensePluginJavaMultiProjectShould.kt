@@ -18,7 +18,6 @@ package com.cmgapps.license
 
 import com.cmgapps.license.util.getFileContent
 import com.cmgapps.license.util.plus
-import com.cmgapps.license.util.withJaCoCo
 import org.gradle.testkit.runner.GradleRunner
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -60,7 +59,6 @@ class LicensePluginJavaMultiProjectShould {
             .withProjectDir(testProjectDir.toFile())
             .withArguments(":module1:licenseReport")
             .withPluginClasspath()
-            .withJaCoCo()
     }
 
     @Test
