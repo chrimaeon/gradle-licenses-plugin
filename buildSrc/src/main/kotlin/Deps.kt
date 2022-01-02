@@ -15,24 +15,23 @@
  */
 
 object Deps {
-    const val kotlinVersion = "1.5.31"
-    const val jacocoAgentVersion = "0.8.7"
+    const val kotlinVersion = "1.6.10"
 
     object Plugins {
-        const val dokkaVersion = "1.5.31"
-        const val changelogPluginVersion = "1.3.0"
-        const val pluginPublishVersion = "0.16.0"
-        const val versionsVersion = "0.39.0"
+        const val dokkaVersion = "1.6.10"
+        const val changelogPluginVersion = "1.3.1"
+        const val pluginPublishVersion = "0.19.0"
+        const val versionsVersion = "0.40.0"
     }
 
-    const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.2"
+    const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.4"
     const val kotlinMultiplatformPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     const val apacheCommonsCsv = "org.apache.commons:commons-csv:1.9.0"
-    const val mavenModel = "org.apache.maven:maven-model:3.8.3"
-    const val mavenArtifact = "org.apache.maven:maven-artifact:3.8.3"
-    const val jUnit = "org.junit.jupiter:junit-jupiter:5.8.1"
+    const val mavenModel = "org.apache.maven:maven-model:3.8.4"
+    const val mavenArtifact = "org.apache.maven:maven-artifact:3.8.4"
+    const val jUnit = "org.junit.jupiter:junit-jupiter:5.8.2"
     const val hamcrest = "org.hamcrest:hamcrest:2.2"
-    const val ktlint = "com.pinterest:ktlint:0.42.1"
-    const val kotlinSerialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0"
-    const val mockitoKotlin = "org.mockito.kotlin:mockito-kotlin:3.2.0"
+    const val ktlint = "com.pinterest:ktlint:0.43.2"
+    const val kotlinSerialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
+    const val mockitoKotlin = "org.mockito.kotlin:mockito-kotlin:4.0.0"
 }

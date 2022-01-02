@@ -16,6 +16,7 @@
 
 import com.cmgapps.gradle.logResults
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import kotlinx.kover.api.VerificationValueType.COVERED_LINES_PERCENTAGE
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
 import java.util.Properties
@@ -25,13 +26,13 @@ plugins {
     `java-gradle-plugin`
     `maven-publish`
     signing
-    jacoco
     id("com.github.ben-manes.versions") version Deps.Plugins.versionsVersion
     kotlin("jvm") version Deps.kotlinVersion
     id("com.gradle.plugin-publish") version Deps.Plugins.pluginPublishVersion
     id("org.jetbrains.dokka") version Deps.Plugins.dokkaVersion
     kotlin("plugin.serialization") version Deps.kotlinVersion
     id("org.jetbrains.changelog") version Deps.Plugins.changelogPluginVersion
+    id("org.jetbrains.kotlinx.kover") version "0.4.4"
 }
 
 repositories {
@@ -45,7 +46,7 @@ val functionalTestSourceSet: SourceSet = sourceSets.create("functionalTest") {
         srcDir("src/$sourceSetName/kotlin")
     }
 
-    compileClasspath += sourceSets.main.get().output + configurations.testRuntimeClasspath.get()
+    compileClasspath += sourceSets.main.get().output //+ configurations.testRuntimeClasspath.get()
     runtimeClasspath += output + compileClasspath
 }
 
@@ -55,8 +56,6 @@ configurations {
     named("functionalTestImplementation") {
         extendsFrom(testImplementation.get())
     }
-
-    register("jacocoRuntime")
 }
 
 idea {
@@ -188,25 +187,11 @@ changelog {
     version.set(versionName)
 }
 
-jacoco {
-    toolVersion = Deps.jacocoAgentVersion
-}
-
 tasks {
-    val setupJacocoRuntime by registering(WriteProperties::class) {
-        outputFile =
-            functionalTestSourceSet.output.resourcesDir!!.resolve("testkit/testkit-gradle.properties")
-        property(
-            "org.gradle.jvmargs",
-            "-javaagent:${configurations["jacocoRuntime"].asPath}=destfile=$buildDir/jacoco/functionalTest.exec"
-        )
-    }
-
     val functionalTest by registering(Test::class) {
         group = "verification"
         testClassesDirs = functionalTestSourceSet.output.classesDirs
         classpath = functionalTestSourceSet.runtimeClasspath
-        dependsOn(setupJacocoRuntime)
     }
 
     val ktlint by registering(JavaExec::class) {
@@ -219,26 +204,6 @@ tasks {
 
     check {
         dependsOn(functionalTest, ktlint)
-    }
-
-    val jacocoExecData = fileTree("$buildDir/jacoco").include("*.exec")
-
-    jacocoTestReport {
-        executionData(jacocoExecData)
-        dependsOn(test, functionalTest)
-    }
-
-    jacocoTestCoverageVerification {
-        inputs.dir(buildDir.resolve("jacoco"))
-        executionData(jacocoExecData)
-        violationRules {
-            rule {
-                limit {
-                    counter = "INSTRUCTION"
-                    minimum = "0.8".toBigDecimal()
-                }
-            }
-        }
     }
 
     jar {
@@ -287,7 +252,7 @@ tasks {
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "7.2"
+        gradleVersion = "7.3.3"
     }
 
     val updateReadme by registering {
@@ -312,6 +277,16 @@ tasks {
 
     patchChangelog {
         dependsOn(updateReadme)
+    }
+
+    koverVerify {
+        rule {
+            name = "Minimal Line coverage"
+            bound {
+                minValue = 80
+                valueType = COVERED_LINES_PERCENTAGE
+            }
+        }
     }
 }
 
@@ -343,6 +318,4 @@ dependencies {
     "functionalTestImplementation"(Deps.kotlinMultiplatformPlugin)
     "functionalTestImplementation"(gradleTestKit())
     "functionalTestImplementation"(kotlinReflect)
-
-    "jacocoRuntime"("org.jacoco:org.jacoco.agent:${jacoco.toolVersion}:runtime")
 }
