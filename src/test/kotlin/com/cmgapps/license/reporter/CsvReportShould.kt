@@ -33,7 +33,8 @@ class CsvReportShould {
             result,
             `is`(
                 "Name,Version,Description,License Name,License Url\r\n" +
-                    "Test lib 1,1.0,proper description,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt\r\n"
+                    "Test lib 1,1.0,proper description,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt\r\n" +
+                    "Test lib 2,2.3.4,descriptions of lib 2,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt\r\n"
             )
         )
     }

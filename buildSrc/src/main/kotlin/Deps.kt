@@ -24,7 +24,7 @@ object Deps {
         const val versionsVersion = "0.40.0"
     }
 
-    const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.4"
+    const val androidGradlePlugin = "com.android.tools.build:gradle:7.1.2"
     const val kotlinMultiplatformPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     const val apacheCommonsCsv = "org.apache.commons:commons-csv:1.9.0"
     const val mavenModel = "org.apache.maven:maven-model:3.8.4"

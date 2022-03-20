@@ -55,6 +55,7 @@ class HtmlReportShould {
                     "<h3>Notice for packages:</h3>" +
                     "<ul>" +
                     "<li>Test lib 1</li>" +
+                    "<li>Test lib 2</li>" +
                     "</ul>" +
                     "<pre>" +
                     getFileContent("apache-2.0.txt") +

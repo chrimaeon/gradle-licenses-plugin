@@ -35,8 +35,19 @@ object LibrariesHelper {
                 License(
                     "MIT License",
                     "http://opensource.org/licenses/MIT"
-                )
-            )
+                ),
+            ),
+        ),
+        Library(
+            "Test lib 2",
+            ComparableVersion("2.3.4"),
+            "descriptions of lib 2",
+            listOf(
+                License(
+                    "Apache 2.0",
+                    "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                ),
+            ),
         )
     )
 }
