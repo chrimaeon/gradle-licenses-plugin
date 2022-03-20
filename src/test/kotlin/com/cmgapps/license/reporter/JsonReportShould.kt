@@ -45,6 +45,17 @@ class JsonReportShould {
                                 "url": "http://opensource.org/licenses/MIT"
                             }
                         ]
+                    },
+                    {
+                        "name": "Test lib 2",
+                        "version": "2.3.4",
+                        "description": "descriptions of lib 2",
+                        "licenses": [
+                            {
+                                "name": "Apache 2.0",
+                                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                            }
+                        ]
                     }
                 ]
                 """.trimIndent()

@@ -13,19 +13,28 @@
 
 ### Security
 
-## [4.1.0]
+## [4.2.0]
 ### Added
+- XSD Schema for the XML reporter
 
 ### Changed
-- Sort dependencies by name and version
+- XML Schema changed
+  - `<version>` is now attribute to `<library>`
+  - `<url>` is now a attribute to `<license>`
+  - `<library>` has an `id` attribute now
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+- HTML Reports includes all libraries again
 
 ### Security
+
+## [4.1.0]
+### Changed
+- Sort dependencies by name and version
 
 ## [4.0.0]
 ### Added

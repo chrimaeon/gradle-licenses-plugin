@@ -1,17 +1,7 @@
 /*
  * Copyright (c) 2019. Christian Grach <christian.grach@cmgapps.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.cmgapps.license.reporter
@@ -21,12 +11,12 @@ internal class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : R
     override fun generate(): String {
         return libraries {
             for (library in libraries) {
-                library {
+                library(
+                    id = "${library.name} ${library.version}".replace(whitespaceRegex, "_"),
+                    version = library.version.toString()
+                ) {
                     name {
                         +library.name
-                    }
-                    version {
-                        +(library.version.toString())
                     }
 
                     description {
@@ -35,12 +25,9 @@ internal class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : R
 
                     licenses {
                         for (license in library.licenses) {
-                            license {
+                            license(url = license.url) {
                                 name {
                                     +license.name
-                                }
-                                url {
-                                    +license.url
                                 }
                             }
                         }
@@ -49,11 +36,20 @@ internal class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : R
             }
         }.toString()
     }
+
+    companion object {
+        private val whitespaceRegex = "\\s".toRegex()
+    }
 }
 
 internal class Libraries : Tag("libraries") {
 
-    fun library(init: Library.() -> Unit) = initTag(Library(), init)
+    fun library(id: String, version: String, init: Library.() -> Unit): Library {
+        val tag = initTag(Library(), init)
+        tag.attributes["id"] = id
+        tag.attributes["version"] = version
+        return tag
+    }
 
     override fun render(builder: StringBuilder, intent: String, format: Boolean) {
         builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>")
@@ -66,7 +62,6 @@ internal class Libraries : Tag("libraries") {
 
 internal class Library : Tag("library") {
     fun name(init: Name.() -> Unit) = initTag(Name(), init)
-    fun version(init: Version.() -> Unit) = initTag(Version(), init)
     fun description(init: Description.() -> Unit) = initTag(Description(), init)
     fun licenses(init: Licenses.() -> Unit) = initTag(Licenses(), init)
 }
@@ -75,18 +70,22 @@ internal class Name : TagWithText("name")
 internal class Version : TagWithText("version")
 internal class Description : TagWithText("description")
 internal class Licenses : Tag("licenses") {
-    fun license(init: License.() -> Unit) = initTag(License(), init)
+    fun license(url: String, init: License.() -> Unit) {
+        val tag = initTag(License(), init)
+        tag.attributes["url"] = url
+    }
 }
 
 internal class License : Tag("license") {
     fun name(init: Name.() -> Unit) = initTag(Name(), init)
-    fun url(init: Url.() -> Unit) = initTag(Url(), init)
 }
-
-internal class Url : TagWithText("url")
 
 internal fun libraries(init: Libraries.() -> Unit): Libraries {
     val libraries = Libraries()
+    libraries.attributes["xmlns"] = "https://www.cmgapps.com"
+    libraries.attributes["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+    libraries.attributes["xsi:schemaLocation"] = "https://www.cmgapps.com https://www.cmgapps.com/xsd/licenses.xsd"
+
     libraries.init()
     return libraries
 }

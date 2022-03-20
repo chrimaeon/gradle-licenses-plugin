@@ -43,7 +43,12 @@ internal class HtmlReport(
 
         libraries.forEach { library ->
             library.licenses.forEach { license ->
-                licenseListMap[license] ?: mutableListOf<Library>().also { licenseListMap[license] = it }.add(library)
+                val licenseList = licenseListMap[license]
+                if (licenseList == null) {
+                    licenseListMap[license] = mutableListOf(library)
+                } else {
+                    licenseList.add(library)
+                }
             }
         }
 

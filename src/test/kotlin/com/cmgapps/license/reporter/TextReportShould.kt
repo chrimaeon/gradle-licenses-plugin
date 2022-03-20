@@ -29,12 +29,17 @@ class TextReportShould {
         assertThat(
             report,
             `is`(
-                "Licenses\n" +
-                    "└─ Test lib 1:1.0\n" +
-                    "   ├─ License: Apache 2.0\n" +
-                    "   ├─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt\n" +
-                    "   ├─ License: MIT License\n" +
-                    "   └─ URL: http://opensource.org/licenses/MIT"
+                """
+                    Licenses
+                    ├─ Test lib 1:1.0
+                    │  ├─ License: Apache 2.0
+                    │  ├─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt
+                    │  ├─ License: MIT License
+                    │  └─ URL: http://opensource.org/licenses/MIT
+                    └─ Test lib 2:2.3.4
+                       ├─ License: Apache 2.0
+                       └─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt
+                """.trimIndent()
             )
         )
     }

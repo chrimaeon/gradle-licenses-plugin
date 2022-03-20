@@ -29,13 +29,18 @@ class MarkdownReportShould {
         assertThat(
             result,
             `is`(
-                """# Open source licenses
-                  |### Notice for packages:
-                  |Test lib 1 _1.0_:
-                  |* Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)
-                  |* MIT License (http://opensource.org/licenses/MIT)
-                  |
-                  |""".trimMargin()
+                """
+                    # Open source licenses
+                    ### Notice for packages:
+                    Test lib 1 _1.0_:
+                    * Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)
+                    * MIT License (http://opensource.org/licenses/MIT)
+                    
+                    Test lib 2 _2.3.4_:
+                    * Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)
+                    
+                    
+                """.trimIndent()
             )
         )
     }
