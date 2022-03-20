@@ -2,14 +2,20 @@
 
 ## [Unreleased]
 ### Added
+- XSD Schema for the XML reporter
 
 ### Changed
+- XML Schema changed
+  - `<version>` is now attribute to `<library>`
+  - `<url>` is now a attribute to `<license>`
+  - `<library>` has an `id` attribute now
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+- HTML Reports includes all libraries again
 
 ### Security
 

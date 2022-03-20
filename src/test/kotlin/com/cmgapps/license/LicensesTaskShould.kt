@@ -1,17 +1,7 @@
 /*
  * Copyright (c) 2019. Christian Grach <christian.grach@cmgapps.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.cmgapps.license
@@ -174,30 +164,27 @@ class LicensesTaskShould {
         assertThat(
             outputFile.readText(),
             `is`(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
-                    "<libraries>\n" +
-                    "  <library>\n" +
-                    "    <name>\n" +
-                    "      Fake dependency name\n" +
-                    "    </name>\n" +
-                    "    <version>\n" +
-                    "      1.0.0\n" +
-                    "    </version>\n" +
-                    "    <description>\n" +
-                    "      Fake dependency description\n" +
-                    "    </description>\n" +
-                    "    <licenses>\n" +
-                    "      <license>\n" +
-                    "        <name>\n" +
-                    "          Some license\n" +
-                    "        </name>\n" +
-                    "        <url>\n" +
-                    "          http://website.tld/\n" +
-                    "        </url>\n" +
-                    "      </license>\n" +
-                    "    </licenses>\n" +
-                    "  </library>\n" +
-                    "</libraries>\n"
+                """
+                    <?xml version="1.0" encoding="UTF-8" ?>
+                    <libraries xmlns="https://www.cmgapps.com" xsi:schemaLocation="https://www.cmgapps.com https://www.cmgapps.com/xsd/licenses.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                      <library id="Fake_dependency_name_1.0.0" version="1.0.0">
+                        <name>
+                          Fake dependency name
+                        </name>
+                        <description>
+                          Fake dependency description
+                        </description>
+                        <licenses>
+                          <license url="http://website.tld/">
+                            <name>
+                              Some license
+                            </name>
+                          </license>
+                        </licenses>
+                      </library>
+                    </libraries>
+                    
+                """.trimIndent()
             )
         )
     }
