@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [4.2.0]
+### Added
 - XSD Schema for the XML reporter
 
 ### Changed
@@ -20,18 +33,8 @@
 ### Security
 
 ## [4.1.0]
-### Added
-
 ### Changed
 - Sort dependencies by name and version
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
 
 ## [4.0.0]
 ### Added
