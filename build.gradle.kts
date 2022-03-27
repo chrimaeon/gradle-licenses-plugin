@@ -22,7 +22,7 @@ plugins {
     id("org.jetbrains.dokka") version Deps.Plugins.dokkaVersion
     kotlin("plugin.serialization") version Deps.kotlinVersion
     id("org.jetbrains.changelog") version Deps.Plugins.changelogPluginVersion
-    id("org.jetbrains.kotlinx.kover") version "0.4.4"
+    id("org.jetbrains.kotlinx.kover") version Deps.Plugins.koverVersion
 }
 
 repositories {
@@ -250,7 +250,7 @@ tasks {
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "7.3.3"
+        gradleVersion = "7.4.1"
     }
 
     val updateReadme by registering {

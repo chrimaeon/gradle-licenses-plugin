@@ -20,18 +20,19 @@ object Deps {
     object Plugins {
         const val dokkaVersion = "1.6.10"
         const val changelogPluginVersion = "1.3.1"
-        const val pluginPublishVersion = "0.19.0"
-        const val versionsVersion = "0.40.0"
+        const val pluginPublishVersion = "0.20.0"
+        const val versionsVersion = "0.42.0"
+        const val koverVersion = "0.5.0"
     }
 
     const val androidGradlePlugin = "com.android.tools.build:gradle:7.1.2"
     const val kotlinMultiplatformPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     const val apacheCommonsCsv = "org.apache.commons:commons-csv:1.9.0"
-    const val mavenModel = "org.apache.maven:maven-model:3.8.4"
-    const val mavenArtifact = "org.apache.maven:maven-artifact:3.8.4"
+    const val mavenModel = "org.apache.maven:maven-model:3.8.5"
+    const val mavenArtifact = "org.apache.maven:maven-artifact:3.8.5"
     const val jUnit = "org.junit.jupiter:junit-jupiter:5.8.2"
     const val hamcrest = "org.hamcrest:hamcrest:2.2"
-    const val ktlint = "com.pinterest:ktlint:0.43.2"
+    const val ktlint = "com.pinterest:ktlint:0.45.1"
     const val kotlinSerialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
     const val mockitoKotlin = "org.mockito.kotlin:mockito-kotlin:4.0.0"
 }
