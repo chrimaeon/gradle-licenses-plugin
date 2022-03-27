@@ -1,23 +1,14 @@
 /*
  * Copyright (c) 2019. Christian Grach <christian.grach@cmgapps.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.helper.LibrariesHelper
 import com.cmgapps.license.model.License
+import com.cmgapps.license.model.MavenCoordinates
 import com.cmgapps.license.util.getFileContent
 import org.apache.maven.artifact.versioning.ComparableVersion
 import org.gradle.api.logging.Logger
@@ -79,12 +70,12 @@ class HtmlReportShould {
         HtmlReport(
             listOf(
                 LibraryModel(
+                    MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
                     name = "Lib with invalid license",
-                    version = ComparableVersion("1.0.0"),
+                    description = null,
                     licenses = listOf(
                         License(name = "foo", url = "http://www.license.foo")
                     ),
-                    description = null,
                 )
             ),
             null,
@@ -94,7 +85,7 @@ class HtmlReportShould {
         verify(logger).warn(
             """
                |No mapping found for license: 'foo' with url 'http://www.license.foo'
-               |used by 'Lib with invalid license'
+               |used by 'test.group:test.artifact:1.0'
                |
                |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
             """.trimMargin()

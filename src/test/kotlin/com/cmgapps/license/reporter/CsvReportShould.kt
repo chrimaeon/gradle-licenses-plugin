@@ -1,17 +1,7 @@
 /*
  * Copyright (c) 2019. Christian Grach <christian.grach@cmgapps.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.cmgapps.license.reporter
@@ -19,6 +9,7 @@ package com.cmgapps.license.reporter
 import com.cmgapps.license.helper.LibrariesHelper
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import com.cmgapps.license.model.MavenCoordinates
 import org.apache.maven.artifact.versioning.ComparableVersion
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -32,9 +23,10 @@ class CsvReportShould {
         assertThat(
             result,
             `is`(
-                "Name,Version,Description,License Name,License Url\r\n" +
-                    "Test lib 1,1.0,proper description,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt\r\n" +
-                    "Test lib 2,2.3.4,descriptions of lib 2,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt\r\n"
+                "Name,Version,MavenCoordinates,Description,License Name,License Url\r\n" +
+                    "Test lib 1,1.0,test.group:test.artifact:1.0,proper description,Apache 2.0,https://www.apache.org/licenses/LICENSE-2.0.txt\r\n" +
+                    "Test lib 2,2.3.4,group.test2:artifact:2.3.4,descriptions of lib 2,Apache 2.0,https://www.apache.org/licenses/LICENSE-2.0.txt\r\n"
+
             )
         )
     }
@@ -44,17 +36,17 @@ class CsvReportShould {
         val license = License("License name with a \" in it", "just a plain url")
         val library =
             Library(
-                "Name with a , in it",
-                ComparableVersion("version with a \n in it"),
-                "description with \r in it", listOf(license)
+                MavenCoordinates("groupC", "articfactA", ComparableVersion("version with a \n in it")),
+                name = "Name with a , in it",
+                description = "description with \r in it", listOf(license)
             )
         val result = CsvReport(listOf(library)).generate()
 
         assertThat(
             result,
             `is`(
-                "Name,Version,Description,License Name,License Url\r\n" +
-                    "\"Name with a , in it\",\"version with a \n in it\",\"description with \r in it\",\"License name with a \"\" in it\",just a plain url\r\n"
+                "Name,Version,MavenCoordinates,Description,License Name,License Url\r\n" +
+                    "\"Name with a , in it\",\"version with a \n in it\",\"groupC:articfactA:version with a \n in it\",\"description with \r in it\",\"License name with a \"\" in it\",just a plain url\r\n"
             )
         )
     }

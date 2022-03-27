@@ -132,8 +132,12 @@ class LicensesTaskShould {
                 """
                 [
                     {
+                        "mavenCoordinates": {
+                            "groupId": "group",
+                            "artifactId": "name",
+                            "version": "1.0.0"
+                        },
                         "name": "Fake dependency name",
-                        "version": "1.0.0",
                         "description": "Fake dependency description",
                         "licenses": [
                             {
@@ -167,7 +171,7 @@ class LicensesTaskShould {
                 """
                     <?xml version="1.0" encoding="UTF-8" ?>
                     <libraries xmlns="https://www.cmgapps.com" xsi:schemaLocation="https://www.cmgapps.com https://www.cmgapps.com/xsd/licenses.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-                      <library id="Fake_dependency_name_1.0.0" version="1.0.0">
+                      <library id="group:name:1.0.0" version="1.0.0">
                         <name>
                           Fake dependency name
                         </name>
@@ -248,8 +252,8 @@ class LicensesTaskShould {
         assertThat(
             outputFile.readText(),
             `is`(
-                "Name,Version,Description,License Name,License Url\r\n" +
-                    "Fake dependency name,1.0.0,Fake dependency description,Some license,http://website.tld/\r\n"
+                "Name,Version,MavenCoordinates,Description,License Name,License Url\r\n" +
+                    "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,Some license,http://website.tld/\r\n"
             )
         )
     }
@@ -260,7 +264,11 @@ class LicensesTaskShould {
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports {
                 it.custom.enabled = true
-                it.custom.generate { list -> list.joinToString { lib -> lib.name } }
+                it.custom.generate { list ->
+                    list.joinToString { lib ->
+                        lib.name ?: lib.mavenCoordinates.identifierWithoutVersion
+                    }
+                }
             }
         }
 
@@ -305,7 +313,11 @@ class LicensesTaskShould {
             task.reports {
                 it.csv.enabled = true
                 it.custom.enabled = true
-                it.custom.generate { list -> list.joinToString { lib -> lib.name } }
+                it.custom.generate { list ->
+                    list.joinToString { lib ->
+                        lib.name ?: lib.mavenCoordinates.identifierWithoutVersion
+                    }
+                }
                 it.html.enabled = true
                 it.json.enabled = true
                 it.markdown.enabled = true
