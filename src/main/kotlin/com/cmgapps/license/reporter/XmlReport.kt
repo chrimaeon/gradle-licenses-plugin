@@ -12,11 +12,11 @@ internal class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : R
         return libraries {
             for (library in libraries) {
                 library(
-                    id = "${library.name} ${library.version}".replace(whitespaceRegex, "_"),
-                    version = library.version.toString()
+                    id = library.mavenCoordinates.toString(),
+                    version = library.mavenCoordinates.version.toString()
                 ) {
                     name {
-                        +library.name
+                        +(library.name ?: library.mavenCoordinates.toString())
                     }
 
                     description {
@@ -35,10 +35,6 @@ internal class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : R
                 }
             }
         }.toString()
-    }
-
-    companion object {
-        private val whitespaceRegex = "\\s".toRegex()
     }
 }
 

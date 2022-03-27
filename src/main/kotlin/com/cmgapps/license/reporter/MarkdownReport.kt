@@ -1,41 +1,51 @@
 /*
  * Copyright (c) 2019. Christian Grach <christian.grach@cmgapps.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.cmgapps.license.reporter
 
+import com.cmgapps.license.helper.LicensesHelper
+import com.cmgapps.license.helper.getLicenseText
+import com.cmgapps.license.helper.logLicenseWarning
+import com.cmgapps.license.helper.toLicensesMap
 import com.cmgapps.license.model.Library
+import org.gradle.api.logging.Logger
 
-internal class MarkdownReport(libraries: List<Library>) : Report(libraries) {
+internal class MarkdownReport(
+    libraries: List<Library>,
+    private val logger: Logger,
+) : Report(libraries) {
     override fun generate() = buildString {
         append("# Open source licenses\n")
-        append("### Notice for packages:\n")
-        libraries.forEach { library ->
-            append(library.name)
-            append(' ')
-            append('_')
-            append(library.version)
-            append("_:")
-            library.licenses.forEach { license ->
-                append("\n* ")
-                append(license.name)
-                append(" (")
-                append(license.url)
-                append(")")
+        append("## Notice for packages")
+        libraries.toLicensesMap().forEach { (license, libraries) ->
+            libraries.asSequence().sortedBy { it.name }.forEach { library ->
+                append('\n')
+                append("* ")
+                append(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
             }
-            append("\n\n")
+
+            val licenseUrl = license.url
+            val licenseName = license.name
+
+            append("\n```\n")
+            when {
+                LicensesHelper.LICENSE_MAP.containsKey(licenseUrl) -> {
+                    append(LicensesHelper.LICENSE_MAP[licenseUrl].getLicenseText() ?: "")
+                }
+                LicensesHelper.LICENSE_MAP.containsKey(licenseName) -> {
+                    append(LicensesHelper.LICENSE_MAP[licenseName].getLicenseText() ?: "")
+                }
+                else -> {
+                    logger.logLicenseWarning(license, libraries)
+                    append(licenseName)
+                    append("\n")
+                    append(licenseUrl)
+                }
+            }
+            append("\n```\n")
         }
     }
 }

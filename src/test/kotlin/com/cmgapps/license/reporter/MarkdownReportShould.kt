@@ -1,47 +1,113 @@
 /*
  * Copyright (c) 2019. Christian Grach <christian.grach@cmgapps.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.helper.LibrariesHelper
+import com.cmgapps.license.model.Library
+import com.cmgapps.license.model.License
+import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.util.getFileContent
+import org.apache.maven.artifact.versioning.ComparableVersion
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 
 class MarkdownReportShould {
 
     @Test
     fun `generate Markdown report`() {
-        val result = MarkdownReport(LibrariesHelper.libraries).generate()
+        val logger: Logger = Logging.getLogger("TestLogger")
+
+        val result = MarkdownReport(LibrariesHelper.libraries, logger).generate()
         assertThat(
             result,
             `is`(
                 """
-                    # Open source licenses
-                    ### Notice for packages:
-                    Test lib 1 _1.0_:
-                    * Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)
-                    * MIT License (http://opensource.org/licenses/MIT)
-                    
-                    Test lib 2 _2.3.4_:
-                    * Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)
-                    
-                    
-                """.trimIndent()
+                    |# Open source licenses
+                    |## Notice for packages
+                    |* Test lib 1
+                    |* Test lib 2
+                    |```
+                    |${getFileContent("apache-2.0.txt")}
+                    |```
+                    |
+                    |* Test lib 1
+                    |```
+                    |${getFileContent("mit.txt")}
+                    |```
+                    |
+                """.trimMargin()
             )
+        )
+    }
+
+    @Test
+    fun `generate Markdown report for libs without matching license`() {
+        val logger: Logger = Logging.getLogger("TestLogger")
+
+        val result = MarkdownReport(
+            listOf(
+                Library(
+                    MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
+                    name = "Lib with invalid license",
+                    description = null,
+                    licenses = listOf(
+                        License(name = "foo", url = "http://www.license.foo")
+                    ),
+                )
+            ),
+            logger
+        ).generate()
+        assertThat(
+            result,
+            `is`(
+                """
+                    |# Open source licenses
+                    |## Notice for packages
+                    |* Lib with invalid license
+                    |```
+                    |foo
+                    |http://www.license.foo
+                    |```
+                    |
+                """.trimMargin()
+            )
+        )
+    }
+
+    @Test
+    fun `report library without matching license`() {
+        val logger = mock<Logger>()
+
+        MarkdownReport(
+            listOf(
+                Library(
+                    MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
+                    name = "Lib with invalid license",
+                    description = null,
+                    licenses = listOf(
+                        License(name = "foo", url = "http://www.license.foo")
+                    ),
+                )
+            ),
+            logger
+        ).generate()
+
+        verify(logger).warn(
+            """
+               |No mapping found for license: 'foo' with url 'http://www.license.foo'
+               |used by 'test.group:test.artifact:1.0'
+               |
+               |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
+            """.trimMargin()
         )
     }
 }

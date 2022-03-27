@@ -13,6 +13,22 @@
 
 ### Security
 
+## [4.3.0]
+### Added
+
+### Changed
+- add maven coordinates to Library model
+- `version` is not part of the `mavenCoordinates` in the Library model
+- Improved Markdown reporter
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [4.2.0]
 ### Added
 - XSD Schema for the XML reporter
@@ -23,14 +39,8 @@
   - `<url>` is now a attribute to `<license>`
   - `<library>` has an `id` attribute now
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 - HTML Reports includes all libraries again
-
-### Security
 
 ## [4.1.0]
 ### Changed

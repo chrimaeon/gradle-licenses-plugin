@@ -1,17 +1,7 @@
 /*
  * Copyright (c) 2018. Christian Grach <christian.grach@cmgapps.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.cmgapps.license
@@ -19,6 +9,7 @@ package com.cmgapps.license
 import com.android.builder.model.ProductFlavor
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import com.cmgapps.license.model.MavenCoordinates
 import com.cmgapps.license.reporter.CsvReport
 import com.cmgapps.license.reporter.CustomReport
 import com.cmgapps.license.reporter.CustomizableHtmlReport
@@ -148,21 +139,24 @@ abstract class LicensesTask : DefaultTask() {
         return pomConfiguration.resolvedConfiguration.lenientConfiguration.artifacts.map {
 
             val model = getPomModel(it.file)
-            val licenses = findLicenses(model)
+            val licenses = model.findLicenses()
 
             if (licenses.isEmpty()) {
                 logger.warn("${model.name} dependency does not have a license.")
             }
 
             Library(
-                model.name
-                    ?: "${model.groupId}:${model.artifactId}",
-                findVersion(model)?.let { ComparableVersion(it) } ?: ComparableVersion(""),
-                findDescription(model),
+                MavenCoordinates(
+                    model.findGroupId().orEmpty(),
+                    model.findArtifactId().orEmpty(),
+                    model.findVersion()?.let { version -> ComparableVersion(version) } ?: ComparableVersion(""),
+                ),
+                model.name,
+                model.findDescription(),
                 licenses
             )
         }
-            .sortedWith(Library.Comparator())
+            .sortedWith(Library.NameComparator())
             .toList()
     }
 
@@ -172,9 +166,9 @@ abstract class LicensesTask : DefaultTask() {
         }
     }
 
-    private fun findLicenses(pom: Model): List<License> {
-        if (pom.licenses.isNotEmpty()) {
-            return pom.licenses.mapNotNull { license ->
+    private fun Model.findLicenses(): List<License> {
+        if (licenses.isNotEmpty()) {
+            return licenses.mapNotNull { license ->
                 try {
                     URL(license.url)
                     License(
@@ -190,18 +184,17 @@ abstract class LicensesTask : DefaultTask() {
 
         logger.info("Project $name has no license in POM file.")
 
-        if (pom.parent != null) {
+        if (parent != null) {
             logger.info("Checking parent POM file.")
-            val parentPom = getParentPomFile(pom.parent)
-            return findLicenses(parentPom)
+            return parent.getModel().findLicenses()
         }
 
         return emptyList()
     }
 
-    private fun getParentPomFile(parent: Parent): Model {
+    private fun Parent.getModel(): Model {
 
-        val dependency = "${parent.groupId}:${parent.artifactId}:${parent.version}@pom"
+        val dependency = "$groupId:$artifactId:$version@pom"
 
         project.configurations.create(TEMP_POM_CONFIGURATION).dependencies.add(
             project.dependencies.add(TEMP_POM_CONFIGURATION, dependency)
@@ -215,23 +208,33 @@ abstract class LicensesTask : DefaultTask() {
         return getPomModel(pomFile)
     }
 
-    private fun findVersion(model: Model): String? = when {
-        model.version != null -> model.version
-        model.parent != null ->
-            if (model.parent.version != null) {
-                model.parent.version
+    private fun Model.findVersion(): String? = when {
+        version != null -> version
+        parent != null ->
+            if (parent.version != null) {
+                parent.version
             } else {
-                findVersion(getParentPomFile(model.parent))
+                parent.getModel().findVersion()
             }
         else -> null
     }
 
-    private fun findDescription(model: Model): String? {
-        return when {
-            model.description != null -> model.description
-            model.parent != null -> findDescription(getParentPomFile(model.parent))
-            else -> null
-        }
+    private fun Model.findDescription(): String? = when {
+        description != null -> description
+        parent != null -> parent.getModel().findDescription()
+        else -> null
+    }
+
+    private fun Model.findGroupId(): String? = when {
+        groupId != null -> groupId
+        parent != null -> if (parent.groupId != null) parent.groupId else parent.getModel().findGroupId()
+        else -> null
+    }
+
+    private fun Model.findArtifactId(): String? = when {
+        artifactId != null -> artifactId
+        parent != null -> if (parent.artifactId != null) parent.artifactId else parent.getModel().findArtifactId()
+        else -> null
     }
 
     private fun createReport(libraries: List<Library>) {
@@ -258,7 +261,7 @@ abstract class LicensesTask : DefaultTask() {
                         logger
                     )
                     ReportType.JSON -> JsonReport(libraries)
-                    ReportType.MARKDOWN -> MarkdownReport(libraries)
+                    ReportType.MARKDOWN -> MarkdownReport(libraries, logger)
                     ReportType.TEXT -> TextReport(libraries)
                     ReportType.XML -> XmlReport(libraries)
                 }

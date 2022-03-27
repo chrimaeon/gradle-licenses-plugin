@@ -1,24 +1,16 @@
 /*
  * Copyright (c) 2018. Christian Grach <christian.grach@cmgapps.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.helper.LicensesHelper
+import com.cmgapps.license.helper.getLicenseText
+import com.cmgapps.license.helper.logLicenseWarning
+import com.cmgapps.license.helper.toLicensesMap
 import com.cmgapps.license.model.Library
-import com.cmgapps.license.model.License
 import org.gradle.api.logging.Logger
 import org.gradle.api.resources.TextResource
 
@@ -38,20 +30,6 @@ internal class HtmlReport(
     }
 
     override fun generate(): String {
-
-        val licenseListMap = mutableMapOf<License, MutableList<Library>>()
-
-        libraries.forEach { library ->
-            library.licenses.forEach { license ->
-                val licenseList = licenseListMap[license]
-                if (licenseList == null) {
-                    licenseListMap[license] = mutableListOf(library)
-                } else {
-                    licenseList.add(library)
-                }
-            }
-        }
-
         return html {
             head {
                 meta(mapOf("charset" to "UTF-8"))
@@ -68,11 +46,11 @@ internal class HtmlReport(
                     +NOTICE_LIBRARIES
                 }
 
-                licenseListMap.entries.forEach { (license, libraries) ->
+                libraries.toLicensesMap().forEach { (license, libraries) ->
                     ul {
                         libraries.asSequence().sortedBy { it.name }.forEach { library ->
                             li {
-                                +library.name
+                                +(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
                             }
                         }
                     }
@@ -82,20 +60,13 @@ internal class HtmlReport(
 
                     when {
                         LicensesHelper.LICENSE_MAP.containsKey(licenseUrl) -> pre {
-                            +(getLicenseText(LicensesHelper.LICENSE_MAP[licenseUrl]) ?: "")
+                            +(LicensesHelper.LICENSE_MAP[licenseUrl].getLicenseText() ?: "")
                         }
                         LicensesHelper.LICENSE_MAP.containsKey(licenseName) -> pre {
-                            +(getLicenseText(LicensesHelper.LICENSE_MAP[licenseName]) ?: "")
+                            +(LicensesHelper.LICENSE_MAP[licenseName].getLicenseText() ?: "")
                         }
                         else -> {
-                            logger.warn(
-                                """
-                                    |No mapping found for license: '$licenseName' with url '$licenseUrl'
-                                    |used by ${libraries.joinToString { "'${it.name}'" }}
-                                    |
-                                    |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
-                                    """.trimMargin()
-                            )
+                            logger.logLicenseWarning(license, libraries)
                             div("license") {
                                 p {
                                     +licenseName
@@ -110,9 +81,6 @@ internal class HtmlReport(
             }
         }.toString(false)
     }
-
-    private fun getLicenseText(fileName: String?): String? =
-        javaClass.getResource("/licenses/$fileName")?.readText()
 }
 
 internal class HTML : TagWithText("html") {

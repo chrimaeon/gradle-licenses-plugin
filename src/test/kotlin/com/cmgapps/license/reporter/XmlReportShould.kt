@@ -22,7 +22,7 @@ class XmlReportShould {
                 """
                     <?xml version="1.0" encoding="UTF-8" ?>
                     <libraries xmlns="https://www.cmgapps.com" xsi:schemaLocation="https://www.cmgapps.com https://www.cmgapps.com/xsd/licenses.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-                      <library id="Test_lib_1_1.0" version="1.0">
+                      <library id="test.group:test.artifact:1.0" version="1.0">
                         <name>
                           Test lib 1
                         </name>
@@ -30,19 +30,19 @@ class XmlReportShould {
                           proper description
                         </description>
                         <licenses>
-                          <license url="http://www.apache.org/licenses/LICENSE-2.0.txt">
+                          <license url="https://www.apache.org/licenses/LICENSE-2.0.txt">
                             <name>
                               Apache 2.0
                             </name>
                           </license>
-                          <license url="http://opensource.org/licenses/MIT">
+                          <license url="https://opensource.org/licenses/MIT">
                             <name>
                               MIT License
                             </name>
                           </license>
                         </licenses>
                       </library>
-                      <library id="Test_lib_2_2.3.4" version="2.3.4">
+                      <library id="group.test2:artifact:2.3.4" version="2.3.4">
                         <name>
                           Test lib 2
                         </name>
@@ -50,7 +50,7 @@ class XmlReportShould {
                           descriptions of lib 2
                         </description>
                         <licenses>
-                          <license url="http://www.apache.org/licenses/LICENSE-2.0.txt">
+                          <license url="https://www.apache.org/licenses/LICENSE-2.0.txt">
                             <name>
                               Apache 2.0
                             </name>

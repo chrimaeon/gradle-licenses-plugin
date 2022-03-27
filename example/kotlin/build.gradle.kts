@@ -19,7 +19,10 @@ licenses {
             enabled = true
             destination = buildDir.resolve("csv-report").resolve("customdir.csv")
         }
+        html.enabled = true
         json.enabled = true
+        markdown.enabled = true
+        text.enabled = true
 
         custom {
             enabled = true
