@@ -207,11 +207,16 @@ class LicensesTaskShould {
         assertThat(
             outputFile.readText(),
             `is`(
-                "# Open source licenses\n" +
-                    "### Notice for packages:\n" +
-                    "Fake dependency name _1.0.0_:\n" +
-                    "* Some license (http://website.tld/)\n" +
-                    "\n"
+                """
+                    # Open source licenses
+                    ## Notice for packages
+                    * Fake dependency name
+                    ```
+                    Some license
+                    http://website.tld/
+                    ```
+                    
+                """.trimIndent()
             )
         )
     }

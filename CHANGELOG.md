@@ -6,6 +6,7 @@
 ### Changed
 - add maven coordinates to Library model
 - `version` is not part of the `mavenCoordinates` in the Library model
+- Improved Markdown reporter
 
 ### Deprecated
 

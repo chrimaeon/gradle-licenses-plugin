@@ -21,7 +21,7 @@ licenses {
         }
         html.enabled = true
         json.enabled = true
-        markdwon.enabled = true
+        markdown.enabled = true
         text.enabled = true
 
         custom {

@@ -261,7 +261,7 @@ abstract class LicensesTask : DefaultTask() {
                         logger
                     )
                     ReportType.JSON -> JsonReport(libraries)
-                    ReportType.MARKDOWN -> MarkdownReport(libraries)
+                    ReportType.MARKDOWN -> MarkdownReport(libraries, logger)
                     ReportType.TEXT -> TextReport(libraries)
                     ReportType.XML -> XmlReport(libraries)
                 }

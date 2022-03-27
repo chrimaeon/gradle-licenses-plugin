@@ -16,6 +16,10 @@
 
 package com.cmgapps.license.helper
 
+import com.cmgapps.license.model.Library
+import com.cmgapps.license.model.License
+import org.gradle.api.logging.Logger
+
 /**
  * Map License name and URL to license text file.
  *
@@ -136,3 +140,35 @@ internal object LicensesHelper {
         "https://opensource.org/licenses/cddl1" to CDDL_FILE_NAME
     )
 }
+
+fun List<Library>.toLicensesMap(): Map<License, List<Library>> {
+    val licenseListMap = mutableMapOf<License, MutableList<Library>>()
+
+    this.forEach { library ->
+        library.licenses.forEach { license ->
+            val licenseList = licenseListMap[license]
+            if (licenseList == null) {
+                licenseListMap[license] = mutableListOf(library)
+            } else {
+                licenseList.add(library)
+            }
+        }
+    }
+
+    return licenseListMap
+}
+
+fun String?.getLicenseText(): String? = if (this == null) {
+    null
+} else {
+    LicensesHelper::class.java.getResource("/licenses/$this")!!.readText()
+}
+
+fun Logger.logLicenseWarning(license: License, libraries: List<Library>) = this.warn(
+    """
+        |No mapping found for license: '${license.name}' with url '${license.url}'
+        |used by ${libraries.joinToString { "'${it.mavenCoordinates}'" }}
+        |
+        |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
+    """.trimMargin()
+)
