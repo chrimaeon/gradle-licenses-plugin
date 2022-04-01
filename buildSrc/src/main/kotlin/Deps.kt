@@ -15,12 +15,12 @@
  */
 
 object Deps {
-    const val kotlinVersion = "1.6.10"
+    const val kotlinVersion = "1.6.20"
 
     object Plugins {
         const val dokkaVersion = "1.6.10"
         const val changelogPluginVersion = "1.3.1"
-        const val pluginPublishVersion = "0.20.0"
+        const val pluginPublishVersion = "0.21.0"
         const val versionsVersion = "0.42.0"
         const val koverVersion = "0.5.0"
     }

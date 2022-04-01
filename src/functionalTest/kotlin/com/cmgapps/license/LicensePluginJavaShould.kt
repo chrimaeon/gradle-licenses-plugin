@@ -15,7 +15,6 @@ import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.matchesPattern
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -60,7 +59,6 @@ class LicensePluginJavaShould {
             .withPluginClasspath()
     }
 
-    @DisabledIfEnvironmentVariable(named = "CIRCLECI", matches = "true")
     @ParameterizedTest(name = "{displayName} - Gradle Version={0}")
     @ValueSource(strings = ["6.8", "6.9", "7.0", "7.1", "7.2", "7.3", "7.4"])
     fun `apply Licenses plugin to various Gradle versions`(version: String) {

@@ -250,7 +250,7 @@ tasks {
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "7.4.1"
+        gradleVersion = "7.4.2"
     }
 
     val updateReadme by registering {
