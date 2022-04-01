@@ -187,7 +187,10 @@ tasks {
         description = "Check Kotlin code style."
         mainClass.set("com.pinterest.ktlint.Main")
         classpath = ktlint
-        args = listOf("src/**/*.kt", "--format", "--reporter=plain", "--reporter=checkstyle,output=$buildDir/reports/ktlint.xml")
+        args = listOf(
+            "src/**/*.kt",
+            "--format",
+        )
     }
 
     val ktlint by registering(JavaExec::class) {
@@ -195,10 +198,12 @@ tasks {
         description = "Check Kotlin code style."
         mainClass.set("com.pinterest.ktlint.Main")
         classpath = ktlint
-        args = listOf("src/**/*.kt", "--reporter=plain", "--reporter=checkstyle,output=$buildDir/reports/ktlint.xml")
+        args = listOf(
+            "src/**/*.kt",
+            "--reporter=plain",
+            "--reporter=checkstyle,output=$buildDir/reports/ktlint.xml",
+        )
     }
-
-
 
     check {
         dependsOn(functionalTest, ktlint)
@@ -307,7 +312,6 @@ dependencies {
     testImplementation(Deps.jUnit) {
         exclude(group = "org.hamcrest")
     }
-    testImplementation(Deps.androidGradlePlugin)
     testImplementation(Deps.hamcrest)
     testImplementation(kotlinReflect)
     testImplementation(Deps.mockitoKotlin)
@@ -315,7 +319,6 @@ dependencies {
     "functionalTestImplementation"(Deps.jUnit) {
         exclude(group = "org.hamcrest")
     }
-    "functionalTestImplementation"(Deps.androidGradlePlugin)
     "functionalTestImplementation"(Deps.kotlinMultiplatformPlugin)
     "functionalTestImplementation"(Deps.hamcrest)
     "functionalTestImplementation"(gradleTestKit())
