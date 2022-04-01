@@ -141,6 +141,7 @@ class LicensesTaskShould {
                         "description": "Fake dependency description",
                         "licenses": [
                             {
+                                "id": "UNKNOWN",
                                 "name": "Some license",
                                 "url": "http://website.tld/"
                             }

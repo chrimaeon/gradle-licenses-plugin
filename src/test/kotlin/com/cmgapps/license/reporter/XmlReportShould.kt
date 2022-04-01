@@ -6,7 +6,7 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.helper.LibrariesHelper
+import com.cmgapps.license.helper.testLibraries
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
@@ -15,7 +15,7 @@ class XmlReportShould {
 
     @Test
     fun generateReport() {
-        val report = XmlReport(LibrariesHelper.libraries).generate()
+        val report = XmlReport(testLibraries).generate()
         assertThat(
             report,
             `is`(
@@ -52,7 +52,7 @@ class XmlReportShould {
                         <licenses>
                           <license url="https://www.apache.org/licenses/LICENSE-2.0.txt">
                             <name>
-                              Apache 2.0
+                              The Apache Software License, Version 2.0
                             </name>
                           </license>
                         </licenses>

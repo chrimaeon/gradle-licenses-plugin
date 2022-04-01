@@ -6,11 +6,11 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.helper.LicensesHelper
-import com.cmgapps.license.helper.getLicenseText
 import com.cmgapps.license.helper.logLicenseWarning
+import com.cmgapps.license.helper.text
 import com.cmgapps.license.helper.toLicensesMap
 import com.cmgapps.license.model.Library
+import com.cmgapps.license.model.LicenseId
 import org.gradle.api.logging.Logger
 import org.gradle.api.resources.TextResource
 
@@ -55,27 +55,19 @@ internal class HtmlReport(
                         }
                     }
 
-                    val licenseUrl = license.url
-                    val licenseName = license.name
-
-                    when {
-                        LicensesHelper.LICENSE_MAP.containsKey(licenseUrl) -> pre {
-                            +(LicensesHelper.LICENSE_MAP[licenseUrl].getLicenseText() ?: "")
-                        }
-                        LicensesHelper.LICENSE_MAP.containsKey(licenseName) -> pre {
-                            +(LicensesHelper.LICENSE_MAP[licenseName].getLicenseText() ?: "")
-                        }
-                        else -> {
+                    when (license.id) {
+                        LicenseId.UNKNOWN -> {
                             logger.logLicenseWarning(license, libraries)
                             div("license") {
                                 p {
-                                    +licenseName
+                                    +license.name
                                 }
-                                a(licenseUrl) {
-                                    +licenseUrl
+                                a(license.url) {
+                                    +license.url
                                 }
                             }
                         }
+                        else -> pre { +(license.id.text ?: "") }
                     }
                 }
             }

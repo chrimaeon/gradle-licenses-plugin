@@ -7,8 +7,10 @@
 package com.cmgapps.license
 
 import com.android.builder.model.ProductFlavor
+import com.cmgapps.license.helper.LICENSE_MAP
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import com.cmgapps.license.model.LicenseId
 import com.cmgapps.license.model.MavenCoordinates
 import com.cmgapps.license.reporter.CsvReport
 import com.cmgapps.license.reporter.CustomReport
@@ -170,10 +172,15 @@ abstract class LicensesTask : DefaultTask() {
         if (licenses.isNotEmpty()) {
             return licenses.mapNotNull { license ->
                 try {
-                    URL(license.url)
+                    val url = license.url
+                    val name = license.name.trim().capitalize()
+                    // check for valid url
+                    URL(url)
+
                     License(
-                        license.name.trim().capitalize(),
-                        license.url
+                        getLicenseId(url, name),
+                        name = name,
+                        url = url,
                     )
                 } catch (ignore: Exception) {
                     logger.warn("$name dependency has an invalid license URL; skipping license")
@@ -462,4 +469,10 @@ private fun File.prepare() {
     delete()
     parentFile.mkdirs()
     createNewFile()
+}
+
+private fun getLicenseId(licenseUrl: String, licenseName: String): LicenseId = when {
+    LICENSE_MAP.containsKey(licenseUrl) -> LICENSE_MAP[licenseUrl]!!
+    LICENSE_MAP.containsKey(licenseName) -> LICENSE_MAP[licenseName]!!
+    else -> LicenseId.UNKNOWN
 }

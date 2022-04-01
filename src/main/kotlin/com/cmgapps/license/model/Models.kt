@@ -38,8 +38,39 @@ data class MavenCoordinates(
     }
 }
 
+enum class LicenseId {
+    APACHE,
+    CDDL,
+    BSD_2,
+    BSD_3,
+    EPL_2,
+    GPL_2,
+    GPL_3,
+    LGPL_2_1,
+    LGPL_3,
+    MIT,
+    MPL_2,
+    UNKNOWN;
+}
+
 @Serializable
-data class License(val name: String, val url: String)
+data class License(val id: LicenseId, val name: String, val url: String) {
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as License
+
+        if (id != other.id) return false
+
+        return true
+    }
+}
 
 @Serializable
 data class Library(

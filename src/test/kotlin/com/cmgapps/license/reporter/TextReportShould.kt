@@ -6,7 +6,7 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.helper.LibrariesHelper
+import com.cmgapps.license.helper.testLibraries
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
@@ -15,7 +15,7 @@ class TextReportShould {
 
     @Test
     fun `generate Text report`() {
-        val report = TextReport(LibrariesHelper.libraries).generate()
+        val report = TextReport(testLibraries).generate()
         assertThat(
             report,
             `is`(
@@ -27,7 +27,7 @@ class TextReportShould {
                     │  ├─ License: MIT License
                     │  └─ URL: https://opensource.org/licenses/MIT
                     └─ Test lib 2:2.3.4
-                       ├─ License: Apache 2.0
+                       ├─ License: The Apache Software License, Version 2.0
                        └─ URL: https://www.apache.org/licenses/LICENSE-2.0.txt
                 """.trimIndent()
             )

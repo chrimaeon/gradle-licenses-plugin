@@ -4,12 +4,14 @@
 ### Added
 
 ### Changed
+- HTML and Markdown reports merge licenses with a more sophisticated algorithm
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+- CSV Reporter reports all licenses not only the first one
 
 ### Security
 

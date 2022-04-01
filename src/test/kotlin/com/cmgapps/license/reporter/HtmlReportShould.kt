@@ -6,8 +6,9 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.helper.LibrariesHelper
+import com.cmgapps.license.helper.testLibraries
 import com.cmgapps.license.model.License
+import com.cmgapps.license.model.LicenseId
 import com.cmgapps.license.model.MavenCoordinates
 import com.cmgapps.license.util.getFileContent
 import org.apache.maven.artifact.versioning.ComparableVersion
@@ -27,7 +28,7 @@ class HtmlReportShould {
         val logger: Logger = Logging.getLogger("TestLogger")
 
         val result = HtmlReport(
-            LibrariesHelper.libraries,
+            testLibraries,
             null,
             logger
         ).generate()
@@ -74,7 +75,7 @@ class HtmlReportShould {
                     name = "Lib with invalid license",
                     description = null,
                     licenses = listOf(
-                        License(name = "foo", url = "http://www.license.foo")
+                        License(LicenseId.UNKNOWN, name = "foo", url = "https://www.license.foo")
                     ),
                 )
             ),
@@ -84,7 +85,7 @@ class HtmlReportShould {
 
         verify(logger).warn(
             """
-               |No mapping found for license: 'foo' with url 'http://www.license.foo'
+               |No mapping found for license: 'foo' with url 'https://www.license.foo'
                |used by 'test.group:test.artifact:1.0'
                |
                |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 

@@ -6,11 +6,11 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.helper.LicensesHelper
-import com.cmgapps.license.helper.getLicenseText
 import com.cmgapps.license.helper.logLicenseWarning
+import com.cmgapps.license.helper.text
 import com.cmgapps.license.helper.toLicensesMap
 import com.cmgapps.license.model.Library
+import com.cmgapps.license.model.LicenseId
 import org.gradle.api.logging.Logger
 
 internal class MarkdownReport(
@@ -27,23 +27,15 @@ internal class MarkdownReport(
                 append(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
             }
 
-            val licenseUrl = license.url
-            val licenseName = license.name
-
             append("\n```\n")
-            when {
-                LicensesHelper.LICENSE_MAP.containsKey(licenseUrl) -> {
-                    append(LicensesHelper.LICENSE_MAP[licenseUrl].getLicenseText() ?: "")
-                }
-                LicensesHelper.LICENSE_MAP.containsKey(licenseName) -> {
-                    append(LicensesHelper.LICENSE_MAP[licenseName].getLicenseText() ?: "")
-                }
-                else -> {
+            when (license.id) {
+                LicenseId.UNKNOWN -> {
                     logger.logLicenseWarning(license, libraries)
-                    append(licenseName)
+                    append(license.name)
                     append("\n")
-                    append(licenseUrl)
+                    append(license.url)
                 }
+                else -> append(license.id.text ?: "")
             }
             append("\n```\n")
         }

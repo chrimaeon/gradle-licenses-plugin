@@ -32,7 +32,7 @@ internal class LibraryShould {
                 MavenCoordinates("lib.group", "my.artifact", ComparableVersion("1.0.0-alpha-4")),
                 name = "Lib name",
                 description = "description",
-                licenses = listOf(License("License name", "http://domain.com"))
+                licenses = listOf(License(LicenseId.UNKNOWN, "License name", "https://domain.com"))
             )
         )
         assertThat(
@@ -48,8 +48,9 @@ internal class LibraryShould {
                     "\"description\":\"description\"," +
                     "\"licenses\":[" +
                     "{" +
+                    "\"id\":\"UNKNOWN\"," +
                     "\"name\":\"License name\"," +
-                    "\"url\":\"http://domain.com\"" +
+                    "\"url\":\"https://domain.com\"" +
                     "}" +
                     "]" +
                     "}"
@@ -61,21 +62,24 @@ internal class LibraryShould {
     fun deserialize() {
         val lib: Library =
             json.decodeFromString(
-                "{" +
-                    "\"mavenCoordinates\":{" +
-                    "\"groupId\":\"lib.group\"," +
-                    "\"artifactId\":\"my.artifact\"," +
-                    "\"version\":\"1.0.0-alpha-4\"" +
-                    "}," +
-                    "\"name\":\"Lib name\"," +
-                    "\"description\":\"description\"," +
-                    "\"licenses\":[" +
-                    "{" +
-                    "\"name\":\"License name\"," +
-                    "\"url\":\"http://domain.com\"" +
-                    "}" +
-                    "]" +
-                    "}"
+                """
+                    |{
+                    |  "mavenCoordinates": {
+                    |    "groupId": "lib.group",
+                    |    "artifactId": "my.artifact",
+                    |    "version": "1.0.0-alpha-4"
+                    |  },
+                    |  "name": "Lib name",
+                    |  "description": "description",
+                    |  "licenses": [
+                    |    {
+                    |      "id": "UNKNOWN"
+                    |      "name":"License name",
+                    |      "url":"https://domain.com"
+                    |    }
+                    |  ]
+                    |}
+                """.trimMargin()
             )
         assertThat(
             lib,
@@ -84,7 +88,7 @@ internal class LibraryShould {
                     MavenCoordinates("lib.group", "my.artifact", ComparableVersion("1.0.0-alpha-4")),
                     name = "Lib name",
                     description = "description",
-                    licenses = listOf(License("License name", "http://domain.com"))
+                    licenses = listOf(License(LicenseId.UNKNOWN, "License name", "https://domain.com"))
                 )
             )
         )
@@ -96,7 +100,7 @@ internal class LibraryShould {
             MavenCoordinates("lib.group", "my.artifact", ComparableVersion("1.0.0-alpha-4")),
             name = "Lib name",
             description = "description",
-            licenses = listOf(License("License name", "http://domain.com"))
+            licenses = listOf(License(LicenseId.UNKNOWN, "License name", "https://domain.com"))
         )
         assertThat(json.decodeFromString<Library>(json.encodeToString(lib)), `is`(lib))
     }
@@ -113,8 +117,9 @@ internal class LibraryShould {
             "\"description\":\"description\"," +
             "\"licenses\":[" +
             "{" +
+            "\"id\":\"UNKNOWN\"," +
             "\"name\":\"License name\"," +
-            "\"url\":\"http://domain.com\"" +
+            "\"url\":\"https://domain.com\"" +
             "}" +
             "]" +
             "}"
@@ -125,35 +130,36 @@ internal class LibraryShould {
     fun `sort by name and version`() {
         val sortedList = listOf(
             Library(
-                MavenCoordinates("groupB", "articfactA", ComparableVersion("1.0")),
+                MavenCoordinates("groupB", "artifactA", ComparableVersion("1.0")),
                 name = "B",
                 description = null,
                 licenses = emptyList(),
             ),
             Library(
-                MavenCoordinates("groupA", "articfactA", ComparableVersion("1.0")),
+                MavenCoordinates("groupA", "artifactA", ComparableVersion("1.0")),
                 name = "A",
                 description = "desc",
                 licenses = emptyList()
             ),
             Library(
-                MavenCoordinates("groupA", "articfactC", ComparableVersion("2.0")),
+                MavenCoordinates("groupA", "artifactC", ComparableVersion("2.0")),
                 name = "A",
                 description = null,
                 licenses = emptyList(),
             ),
             Library(
-                MavenCoordinates("groupA", "articfactB", ComparableVersion("0.3-alpha4")),
+                MavenCoordinates("groupA", "artifactB", ComparableVersion("0.3-alpha4")),
                 name = "A",
                 description = null,
                 licenses = emptyList()
             ),
             Library(
-                MavenCoordinates("groupC", "articfactA", ComparableVersion("13")),
+                MavenCoordinates("groupC", "artifactA", ComparableVersion("13")),
                 name = "C",
                 description = "desc",
                 licenses = listOf(
                     License(
+                        LicenseId.UNKNOWN,
                         "license",
                         "http://domain.tld"
                     )
@@ -164,35 +170,36 @@ internal class LibraryShould {
             sortedList,
             contains(
                 Library(
-                    MavenCoordinates("groupA", "articfactC", ComparableVersion("2.0")),
+                    MavenCoordinates("groupA", "artifactC", ComparableVersion("2.0")),
                     name = "A",
                     description = null,
                     licenses = emptyList(),
                 ),
                 Library(
-                    MavenCoordinates("groupA", "articfactA", ComparableVersion("1.0")),
+                    MavenCoordinates("groupA", "artifactA", ComparableVersion("1.0")),
                     name = "A",
                     description = "desc",
                     licenses = emptyList()
                 ),
                 Library(
-                    MavenCoordinates("groupA", "articfactB", ComparableVersion("0.3-alpha4")),
+                    MavenCoordinates("groupA", "artifactB", ComparableVersion("0.3-alpha4")),
                     name = "A",
                     description = null,
                     licenses = emptyList()
                 ),
                 Library(
-                    MavenCoordinates("groupB", "articfactA", ComparableVersion("1.0")),
+                    MavenCoordinates("groupB", "artifactA", ComparableVersion("1.0")),
                     name = "B",
                     description = null,
                     licenses = emptyList(),
                 ),
                 Library(
-                    MavenCoordinates("groupC", "articfactA", ComparableVersion("13")),
+                    MavenCoordinates("groupC", "artifactA", ComparableVersion("13")),
                     name = "C",
                     description = "desc",
                     licenses = listOf(
                         License(
+                            LicenseId.UNKNOWN,
                             "license",
                             "http://domain.tld"
                         )
@@ -206,41 +213,42 @@ internal class LibraryShould {
     fun `sort by mavenCoordinates`() {
         val sortedList = listOf(
             Library(
-                MavenCoordinates("groupB", "articfactA", ComparableVersion("1.0")),
+                MavenCoordinates("groupB", "artifactA", ComparableVersion("1.0")),
                 name = "B",
                 description = null,
                 licenses = emptyList(),
             ),
             Library(
-                MavenCoordinates("groupA", "articfactA", ComparableVersion("1.0")),
+                MavenCoordinates("groupA", "artifactA", ComparableVersion("1.0")),
                 name = "A",
                 description = "desc",
                 licenses = emptyList()
             ),
             Library(
-                MavenCoordinates("groupA", "articfactC", ComparableVersion("2.0")),
+                MavenCoordinates("groupA", "artifactC", ComparableVersion("2.0")),
                 name = "A",
                 description = null,
                 licenses = emptyList(),
             ),
             Library(
-                MavenCoordinates("groupA", "articfactC", ComparableVersion("3.0.1")),
+                MavenCoordinates("groupA", "artifactC", ComparableVersion("3.0.1")),
                 name = "A",
                 description = null,
                 licenses = emptyList(),
             ),
             Library(
-                MavenCoordinates("groupA", "articfactB", ComparableVersion("0.3-alpha4")),
+                MavenCoordinates("groupA", "artifactB", ComparableVersion("0.3-alpha4")),
                 name = "A",
                 description = null,
                 licenses = emptyList()
             ),
             Library(
-                MavenCoordinates("groupC", "articfactA", ComparableVersion("13")),
+                MavenCoordinates("groupC", "artifactA", ComparableVersion("13")),
                 name = "C",
                 description = "desc",
                 licenses = listOf(
                     License(
+                        LicenseId.UNKNOWN,
                         "license",
                         "http://domain.tld"
                     )
@@ -251,41 +259,42 @@ internal class LibraryShould {
             sortedList,
             contains(
                 Library(
-                    MavenCoordinates("groupA", "articfactA", ComparableVersion("1.0")),
+                    MavenCoordinates("groupA", "artifactA", ComparableVersion("1.0")),
                     name = "A",
                     description = "desc",
                     licenses = emptyList()
                 ),
                 Library(
-                    MavenCoordinates("groupA", "articfactB", ComparableVersion("0.3-alpha4")),
+                    MavenCoordinates("groupA", "artifactB", ComparableVersion("0.3-alpha4")),
                     name = "A",
                     description = null,
                     licenses = emptyList()
                 ),
                 Library(
-                    MavenCoordinates("groupA", "articfactC", ComparableVersion("3.0.1")),
+                    MavenCoordinates("groupA", "artifactC", ComparableVersion("3.0.1")),
                     name = "A",
                     description = null,
                     licenses = emptyList(),
                 ),
                 Library(
-                    MavenCoordinates("groupA", "articfactC", ComparableVersion("2.0")),
+                    MavenCoordinates("groupA", "artifactC", ComparableVersion("2.0")),
                     name = "A",
                     description = null,
                     licenses = emptyList(),
                 ),
                 Library(
-                    MavenCoordinates("groupB", "articfactA", ComparableVersion("1.0")),
+                    MavenCoordinates("groupB", "artifactA", ComparableVersion("1.0")),
                     name = "B",
                     description = null,
                     licenses = emptyList(),
                 ),
                 Library(
-                    MavenCoordinates("groupC", "articfactA", ComparableVersion("13")),
+                    MavenCoordinates("groupC", "artifactA", ComparableVersion("13")),
                     name = "C",
                     description = "desc",
                     licenses = listOf(
                         License(
+                            LicenseId.UNKNOWN,
                             "license",
                             "http://domain.tld"
                         )

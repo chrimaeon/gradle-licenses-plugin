@@ -6,9 +6,10 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.helper.LibrariesHelper
+import com.cmgapps.license.helper.testLibraries
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import com.cmgapps.license.model.LicenseId
 import com.cmgapps.license.model.MavenCoordinates
 import com.cmgapps.license.util.getFileContent
 import org.apache.maven.artifact.versioning.ComparableVersion
@@ -26,7 +27,7 @@ class MarkdownReportShould {
     fun `generate Markdown report`() {
         val logger: Logger = Logging.getLogger("TestLogger")
 
-        val result = MarkdownReport(LibrariesHelper.libraries, logger).generate()
+        val result = MarkdownReport(testLibraries, logger).generate()
         assertThat(
             result,
             `is`(
@@ -60,7 +61,7 @@ class MarkdownReportShould {
                     name = "Lib with invalid license",
                     description = null,
                     licenses = listOf(
-                        License(name = "foo", url = "http://www.license.foo")
+                        License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo")
                     ),
                 )
             ),
@@ -94,7 +95,7 @@ class MarkdownReportShould {
                     name = "Lib with invalid license",
                     description = null,
                     licenses = listOf(
-                        License(name = "foo", url = "http://www.license.foo")
+                        License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo")
                     ),
                 )
             ),

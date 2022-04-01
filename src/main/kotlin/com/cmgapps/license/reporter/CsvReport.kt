@@ -16,15 +16,16 @@ internal class CsvReport(libraries: List<Library>) : Report(libraries) {
     override fun generate(): String = StringWriter().use { writer ->
         CSVPrinter(writer, CSVFormat.RFC4180.builder().setHeader(*HEADER).build()).use { printer ->
             libraries.forEach { library ->
-                val license = library.licenses.firstOrNull()
-                printer.printRecord(
-                    library.name,
-                    library.mavenCoordinates.version,
-                    library.mavenCoordinates,
-                    library.description,
-                    license?.name,
-                    license?.url
-                )
+                library.licenses.forEach { license ->
+                    printer.printRecord(
+                        library.name,
+                        library.mavenCoordinates.version,
+                        library.mavenCoordinates,
+                        library.description,
+                        license.name,
+                        license.url
+                    )
+                }
             }
             printer.flush()
         }
@@ -33,6 +34,7 @@ internal class CsvReport(libraries: List<Library>) : Report(libraries) {
 
     companion object {
         @JvmStatic
-        private val HEADER = arrayOf("Name", "Version", "MavenCoordinates", "Description", "License Name", "License Url")
+        private val HEADER =
+            arrayOf("Name", "Version", "MavenCoordinates", "Description", "License Name", "License Url")
     }
 }
