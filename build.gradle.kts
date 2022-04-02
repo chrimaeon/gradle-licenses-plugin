@@ -184,7 +184,7 @@ tasks {
 
     register<JavaExec>("ktlintFormat") {
         group = "Verification"
-        description = "Check Kotlin code style."
+        description = "Format Kotlin code style."
         mainClass.set("com.pinterest.ktlint.Main")
         classpath = ktlint
         args = listOf(

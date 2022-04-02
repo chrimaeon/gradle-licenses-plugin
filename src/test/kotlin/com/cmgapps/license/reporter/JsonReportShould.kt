@@ -31,12 +31,12 @@ class JsonReportShould {
                         "description": "proper description",
                         "licenses": [
                             {
-                                "id": "APACHE",
+                                "spdxLicenseIdentifier": "Apache-2.0",
                                 "name": "Apache 2.0",
                                 "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
                             },
                             {
-                                "id": "MIT",
+                                "spdxLicenseIdentifier": "MIT",
                                 "name": "MIT License",
                                 "url": "https://opensource.org/licenses/MIT"
                             }
@@ -52,7 +52,7 @@ class JsonReportShould {
                         "description": "descriptions of lib 2",
                         "licenses": [
                             {
-                                "id": "APACHE",
+                                "spdxLicenseIdentifier": "Apache-2.0",
                                 "name": "The Apache Software License, Version 2.0",
                                 "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
                             }

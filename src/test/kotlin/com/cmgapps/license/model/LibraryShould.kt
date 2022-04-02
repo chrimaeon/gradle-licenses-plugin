@@ -48,7 +48,7 @@ internal class LibraryShould {
                     "\"description\":\"description\"," +
                     "\"licenses\":[" +
                     "{" +
-                    "\"id\":\"UNKNOWN\"," +
+                    "\"spdxLicenseIdentifier\":null," +
                     "\"name\":\"License name\"," +
                     "\"url\":\"https://domain.com\"" +
                     "}" +
@@ -73,7 +73,7 @@ internal class LibraryShould {
                     |  "description": "description",
                     |  "licenses": [
                     |    {
-                    |      "id": "UNKNOWN"
+                    |      "spdxLicenseIdentifier": null
                     |      "name":"License name",
                     |      "url":"https://domain.com"
                     |    }
@@ -117,7 +117,7 @@ internal class LibraryShould {
             "\"description\":\"description\"," +
             "\"licenses\":[" +
             "{" +
-            "\"id\":\"UNKNOWN\"," +
+            "\"spdxLicenseIdentifier\":null," +
             "\"name\":\"License name\"," +
             "\"url\":\"https://domain.com\"" +
             "}" +

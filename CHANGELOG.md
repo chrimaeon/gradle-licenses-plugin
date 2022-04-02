@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- [SPDX License Identifier](https://spdx.org/licenses/) for various reports
 
 ### Changed
 - HTML and Markdown reports merge licenses with a more sophisticated algorithm

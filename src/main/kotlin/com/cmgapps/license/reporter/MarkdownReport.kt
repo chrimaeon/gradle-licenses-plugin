@@ -35,7 +35,7 @@ internal class MarkdownReport(
                     append("\n")
                     append(license.url)
                 }
-                else -> append(license.id.text ?: "")
+                else -> append(license.id.text)
             }
             append("\n```\n")
         }

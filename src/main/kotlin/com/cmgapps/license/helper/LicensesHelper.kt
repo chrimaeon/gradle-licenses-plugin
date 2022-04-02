@@ -19,7 +19,6 @@ internal val LicenseId.filename: String
         LicenseId.BSD_2 -> "bsd-2-clause.txt"
         LicenseId.BSD_3 -> "bsd-3-clause.txt"
         LicenseId.CDDL -> "cddl.txt"
-        LicenseId.UNKNOWN -> ""
         LicenseId.EPL_2 -> "epl-2.0.txt"
         LicenseId.GPL_2 -> "gpl-2.0.txt"
         LicenseId.GPL_3 -> "gpl-3.0.txt"
@@ -27,10 +26,17 @@ internal val LicenseId.filename: String
         LicenseId.LGPL_3 -> "lgpl-3.0.txt"
         LicenseId.MIT -> "mit.txt"
         LicenseId.MPL_2 -> "mpl-2.0.txt"
+        else -> throw IllegalArgumentException("$this does not have a file associated")
     }
 
-internal val LicenseId.text: String?
-    get() = this::class.java.getResource("/licenses/${this.filename}")?.readText()
+internal val LicenseId.text: String
+    get() {
+        if (this == LicenseId.UNKNOWN) {
+            return ""
+        }
+
+        return this::class.java.getResource("/licenses/${this.filename}")!!.readText()
+    }
 
 /**
  * Map License name or URL to license id.

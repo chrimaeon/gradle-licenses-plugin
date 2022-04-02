@@ -22,6 +22,7 @@ internal class CsvReport(libraries: List<Library>) : Report(libraries) {
                         library.mavenCoordinates.version,
                         library.mavenCoordinates,
                         library.description,
+                        license.id.spdxLicenseIdentifier,
                         license.name,
                         license.url
                     )
@@ -35,6 +36,14 @@ internal class CsvReport(libraries: List<Library>) : Report(libraries) {
     companion object {
         @JvmStatic
         private val HEADER =
-            arrayOf("Name", "Version", "MavenCoordinates", "Description", "License Name", "License Url")
+            arrayOf(
+                "Name",
+                "Version",
+                "MavenCoordinates",
+                "Description",
+                "SPDX-License-Identifier",
+                "License Name",
+                "License Url",
+            )
     }
 }

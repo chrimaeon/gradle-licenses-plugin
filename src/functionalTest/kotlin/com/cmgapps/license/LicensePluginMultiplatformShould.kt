@@ -108,7 +108,7 @@ class LicensePluginMultiplatformShould {
     }
 
     @Test
-    fun `generate overall licenses`() {
+    fun `generate overall licenses as TXT`() {
 
         val taskName = "licenseMultiplatformReport"
 
@@ -161,20 +161,24 @@ class LicensePluginMultiplatformShould {
         assertThat(
             File("$reportFolder/$taskName/licenses.txt").readText().trim(),
             `is`(
-                "Licenses\n" +
-                    "├─ Fake dependency name:1.0.0\n" +
-                    "│  ├─ License: Some license\n" +
-                    "│  └─ URL: http://website.tld/\n" +
-                    "├─ Retrofit:2.3.0\n" +
-                    "│  ├─ License: Apache 2.0\n" +
-                    "│  └─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt\n" +
-                    "└─ com.google.firebase:firebase-core:10.0.1"
+                """
+                    |Licenses
+                    |├─ Fake dependency name:1.0.0
+                    |│  ├─ License: Some license
+                    |│  └─ URL: http://website.tld/
+                    |├─ Retrofit:2.3.0
+                    |│  ├─ License: Apache 2.0
+                    |│  ├─ SPDX-License-Identifier: Apache-2.0
+                    |│  └─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt
+                    |└─ com.google.firebase:firebase-core:10.0.1
+                    |   └─ License: Undefined
+                """.trimMargin()
             )
         )
     }
 
     @Test
-    fun `generate JVM licenses`() {
+    fun `generate JVM licenses as TXT`() {
 
         val taskName = "licenseMultiplatformJvmReport"
 
@@ -227,11 +231,15 @@ class LicensePluginMultiplatformShould {
         assertThat(
             File("$reportFolder/$taskName/licenses.txt").readText().trim(),
             `is`(
-                "Licenses\n" +
-                    "├─ Retrofit:2.3.0\n" +
-                    "│  ├─ License: Apache 2.0\n" +
-                    "│  └─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt\n" +
-                    "└─ com.google.firebase:firebase-core:10.0.1"
+                """
+                    |Licenses
+                    |├─ Retrofit:2.3.0
+                    |│  ├─ License: Apache 2.0
+                    |│  ├─ SPDX-License-Identifier: Apache-2.0
+                    |│  └─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt
+                    |└─ com.google.firebase:firebase-core:10.0.1
+                    |   └─ License: Undefined
+                """.trimMargin()
             )
         )
     }
@@ -279,11 +287,14 @@ class LicensePluginMultiplatformShould {
         assertThat(
             File("$reportFolder/$taskName/licenses.txt").readText().trim(),
             `is`(
-                "Licenses\n" +
-                    "├─ Fake dependency name:1.0.0\n" +
-                    "│  ├─ License: Some license\n" +
-                    "│  └─ URL: http://website.tld/\n" +
-                    "└─ com.google.firebase:firebase-core:10.0.1"
+                """
+                    |Licenses
+                    |├─ Fake dependency name:1.0.0
+                    |│  ├─ License: Some license
+                    |│  └─ URL: http://website.tld/
+                    |└─ com.google.firebase:firebase-core:10.0.1
+                    |   └─ License: Undefined
+                """.trimMargin()
             )
         )
     }
@@ -331,11 +342,14 @@ class LicensePluginMultiplatformShould {
         assertThat(
             File("$reportFolder/$taskName/licenses.txt").readText().trim(),
             `is`(
-                "Licenses\n" +
-                    "├─ Fake dependency name:1.0.0\n" +
-                    "│  ├─ License: Some license\n" +
-                    "│  └─ URL: http://website.tld/\n" +
-                    "└─ com.google.firebase:firebase-core:10.0.1"
+                """
+                    |Licenses
+                    |├─ Fake dependency name:1.0.0
+                    |│  ├─ License: Some license
+                    |│  └─ URL: http://website.tld/
+                    |└─ com.google.firebase:firebase-core:10.0.1
+                    |   └─ License: Undefined
+                """.trimMargin()
             )
         )
     }

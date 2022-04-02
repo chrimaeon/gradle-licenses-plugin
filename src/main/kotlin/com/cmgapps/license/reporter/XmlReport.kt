@@ -25,7 +25,7 @@ internal class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : R
 
                     licenses {
                         for (license in library.licenses) {
-                            license(url = license.url) {
+                            license(spdxLicenseIdentifier = license.id.spdxLicenseIdentifier, url = license.url) {
                                 name {
                                     +license.name
                                 }
@@ -66,9 +66,12 @@ internal class Name : TagWithText("name")
 internal class Version : TagWithText("version")
 internal class Description : TagWithText("description")
 internal class Licenses : Tag("licenses") {
-    fun license(url: String, init: License.() -> Unit) {
+    fun license(spdxLicenseIdentifier: String? = null, url: String, init: License.() -> Unit) {
         val tag = initTag(License(), init)
         tag.attributes["url"] = url
+        if (spdxLicenseIdentifier != null) {
+            tag.attributes["spdx-license-identifier"] = spdxLicenseIdentifier
+        }
     }
 }
 

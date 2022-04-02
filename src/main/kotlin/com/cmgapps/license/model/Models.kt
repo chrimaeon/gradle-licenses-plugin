@@ -27,7 +27,7 @@ data class MavenCoordinates(
     val identifierWithoutVersion = "$groupId:$artifactId"
 
     override fun toString(): String =
-        "$groupId:$artifactId" + if (version.toString().isNotEmpty()) ":$version" else ""
+        identifierWithoutVersion + if (version.toString().isNotEmpty()) ":$version" else ""
 
     companion object {
         @JvmStatic
@@ -51,9 +51,43 @@ enum class LicenseId {
     MIT,
     MPL_2,
     UNKNOWN;
+
+    val spdxLicenseIdentifier: String?
+        get() = when (this) {
+            APACHE -> "Apache-2.0"
+            BSD_2 -> "BSD-2-Clause"
+            BSD_3 -> "BSD-3-Clause"
+            CDDL -> "CDDL-1.0"
+            UNKNOWN -> null
+            EPL_2 -> "EPL-2.0"
+            GPL_2 -> "GPL-2.0-only"
+            GPL_3 -> "GPL-3.0-only"
+            LGPL_2_1 -> "LGPL-2.1-only"
+            LGPL_3 -> "LGPL-3.0-only"
+            MIT -> "MIT"
+            MPL_2 -> "MPL-2.0"
+        }
+
+    companion object {
+        @JvmStatic
+        fun fromSpdxLicenseIdentifier(spdxLicenseIdentifier: String?): LicenseId = when (spdxLicenseIdentifier) {
+            "Apache-2.0" -> APACHE
+            "BSD-2-Clause" -> BSD_2
+            "BSD-3-Clause" -> BSD_3
+            "CDDL-1.0" -> CDDL
+            "EPL-2.0" -> EPL_2
+            "GPL-2.0-only" -> GPL_2
+            "GPL-3.0-only" -> GPL_3
+            "LGPL-2.1-only" -> LGPL_2_1
+            "LGPL-3.0-only" -> LGPL_3
+            "MIT" -> MIT
+            "MPL-2.0" -> MPL_2
+            else -> UNKNOWN
+        }
+    }
 }
 
-@Serializable
+@Serializable(with = LicenseSerializer::class)
 data class License(val id: LicenseId, val name: String, val url: String) {
 
     override fun hashCode(): Int {
