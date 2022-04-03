@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [4.4.0]
+### Added
 - [SPDX License Identifier](https://spdx.org/licenses/) for various reports
 
 ### Changed
@@ -17,20 +30,10 @@
 ### Security
 
 ## [4.3.0]
-### Added
-
 ### Changed
 - add maven coordinates to Library model
 - `version` is not part of the `mavenCoordinates` in the Library model
 - Improved Markdown reporter
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
 
 ## [4.2.0]
 ### Added
