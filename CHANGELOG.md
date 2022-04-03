@@ -13,21 +13,27 @@
 
 ### Security
 
-## [4.3.0]
+## [4.4.0]
 ### Added
+- [SPDX License Identifier](https://spdx.org/licenses/) for various reports
 
 ### Changed
-- add maven coordinates to Library model
-- `version` is not part of the `mavenCoordinates` in the Library model
-- Improved Markdown reporter
+- HTML and Markdown reports merge licenses with a more sophisticated algorithm
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+- CSV Reporter reports all licenses not only the first one
 
 ### Security
+
+## [4.3.0]
+### Changed
+- add maven coordinates to Library model
+- `version` is not part of the `mavenCoordinates` in the Library model
+- Improved Markdown reporter
 
 ## [4.2.0]
 ### Added

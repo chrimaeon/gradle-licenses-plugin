@@ -40,6 +40,19 @@ internal class TextReport(libraries: List<Library>) : Report(libraries) {
     private fun StringBuilder.appendLicenses(libIndex: Int, libLength: Int, licenses: List<License>) {
         val licensesLength = licenses.size
 
+        if (licenses.isEmpty()) {
+            if (libIndex < libLength - 1) {
+                append(LINE_PREFIX)
+            } else {
+                append(LAST_LINE_PREFIX)
+            }
+
+            append(LAST_ITEM_PREFIX)
+
+            append(" License: Undefined")
+            return
+        }
+
         licenses.forEachIndexed { index, license ->
             if (libIndex < libLength - 1) {
                 append(LINE_PREFIX)
@@ -49,6 +62,17 @@ internal class TextReport(libraries: List<Library>) : Report(libraries) {
 
             append("$ITEM_PREFIX License: ")
             append(license.name)
+
+            license.id.spdxLicenseIdentifier?.let {
+                if (libIndex < libLength - 1) {
+                    append(LINE_PREFIX)
+                } else {
+                    append(LAST_LINE_PREFIX)
+                }
+
+                append("$ITEM_PREFIX SPDX-License-Identifier: ")
+                append(license.id.spdxLicenseIdentifier)
+            }
 
             if (libIndex < libLength - 1) {
                 append(LINE_PREFIX)

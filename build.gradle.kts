@@ -22,7 +22,7 @@ plugins {
     id("org.jetbrains.dokka") version Deps.Plugins.dokkaVersion
     kotlin("plugin.serialization") version Deps.kotlinVersion
     id("org.jetbrains.changelog") version Deps.Plugins.changelogPluginVersion
-    id("org.jetbrains.kotlinx.kover") version "0.4.4"
+    id("org.jetbrains.kotlinx.kover") version Deps.Plugins.koverVersion
 }
 
 repositories {
@@ -184,10 +184,13 @@ tasks {
 
     register<JavaExec>("ktlintFormat") {
         group = "Verification"
-        description = "Check Kotlin code style."
+        description = "Format Kotlin code style."
         mainClass.set("com.pinterest.ktlint.Main")
         classpath = ktlint
-        args = listOf("src/**/*.kt", "--format", "--reporter=plain", "--reporter=checkstyle,output=$buildDir/reports/ktlint.xml")
+        args = listOf(
+            "src/**/*.kt",
+            "--format",
+        )
     }
 
     val ktlint by registering(JavaExec::class) {
@@ -195,10 +198,12 @@ tasks {
         description = "Check Kotlin code style."
         mainClass.set("com.pinterest.ktlint.Main")
         classpath = ktlint
-        args = listOf("src/**/*.kt", "--reporter=plain", "--reporter=checkstyle,output=$buildDir/reports/ktlint.xml")
+        args = listOf(
+            "src/**/*.kt",
+            "--reporter=plain",
+            "--reporter=checkstyle,output=$buildDir/reports/ktlint.xml",
+        )
     }
-
-
 
     check {
         dependsOn(functionalTest, ktlint)
@@ -250,7 +255,7 @@ tasks {
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "7.3.3"
+        gradleVersion = "7.4.2"
     }
 
     val updateReadme by registering {
@@ -262,7 +267,7 @@ tasks {
 
         doLast {
             val content = readmeFile.readText()
-            val oldVersion = """id "com.cmgapps.licenses" version "(.*)"""".toRegex().find(content)?.let {
+            val oldVersion = """id\("com.cmgapps.licenses"\) version "(.*)"""".toRegex(RegexOption.MULTILINE).find(content)?.let {
                 it.groupValues[1]
             } ?: error("Cannot find oldVersion")
 
@@ -307,7 +312,6 @@ dependencies {
     testImplementation(Deps.jUnit) {
         exclude(group = "org.hamcrest")
     }
-    testImplementation(Deps.androidGradlePlugin)
     testImplementation(Deps.hamcrest)
     testImplementation(kotlinReflect)
     testImplementation(Deps.mockitoKotlin)
@@ -315,7 +319,6 @@ dependencies {
     "functionalTestImplementation"(Deps.jUnit) {
         exclude(group = "org.hamcrest")
     }
-    "functionalTestImplementation"(Deps.androidGradlePlugin)
     "functionalTestImplementation"(Deps.kotlinMultiplatformPlugin)
     "functionalTestImplementation"(Deps.hamcrest)
     "functionalTestImplementation"(gradleTestKit())

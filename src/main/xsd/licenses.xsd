@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright (c) 2022. Christian Grach <christian.grach@cmgapps.com>
+  ~
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<xs:schema xmlns:cmg="https://www.cmgapps.com"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           attributeFormDefault="qualified"
+           elementFormDefault="qualified"
+           targetNamespace="https://www.cmgapps.com">
+    <xs:element
+            name="libraries"
+            type="cmg:librariesType"/>
+    <xs:complexType name="licenseType">
+        <xs:sequence>
+            <xs:element
+                    type="xs:string"
+                    name="name"/>
+        </xs:sequence>
+        <xs:attribute
+                type="xs:string"
+                name="url"
+                use="required"/>
+        <xs:attribute
+                type="xs:string"
+                name="spdx-license-identifier"/>
+    </xs:complexType>
+    <xs:complexType name="licensesType">
+        <xs:sequence>
+            <xs:element
+                    type="cmg:licenseType"
+                    name="license"
+                    maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="libraryType">
+        <xs:sequence>
+            <xs:element
+                    type="xs:string"
+                    name="name"/>
+            <xs:element
+                    type="xs:string"
+                    name="description"/>
+            <xs:element
+                    type="cmg:licensesType"
+                    name="licenses"/>
+        </xs:sequence>
+        <xs:attribute
+                type="xs:string"
+                name="id"
+                use="required"/>
+        <xs:attribute
+                type="xs:string"
+                name="version"
+                use="required"/>
+    </xs:complexType>
+    <xs:complexType name="librariesType">
+        <xs:sequence>
+            <xs:element
+                    type="cmg:libraryType"
+                    name="library"
+                    minOccurs="0"
+                    maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

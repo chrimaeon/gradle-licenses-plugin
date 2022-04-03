@@ -141,6 +141,7 @@ class LicensesTaskShould {
                         "description": "Fake dependency description",
                         "licenses": [
                             {
+                                "spdxLicenseIdentifier": null,
                                 "name": "Some license",
                                 "url": "http://website.tld/"
                             }
@@ -257,8 +258,8 @@ class LicensesTaskShould {
         assertThat(
             outputFile.readText(),
             `is`(
-                "Name,Version,MavenCoordinates,Description,License Name,License Url\r\n" +
-                    "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,Some license,http://website.tld/\r\n"
+                "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
+                    "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/\r\n"
             )
         )
     }

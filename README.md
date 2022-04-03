@@ -9,29 +9,69 @@ This Gradle plugin provides tasks to generate a file with the licenses used from
 
 ## Usage
 
-Using the plugins DSL
+### Integration
+
+#### Using the plugins DSL
+
+<details open="open">
+<summary>Kotlin</summary>
+
+```kotlin
+plugins {
+    id("com.cmgapps.licenses") version "4.4.0"
+}
+```
+</details>
+
+<details>
+<summary>Groovy</summary>
 
 ```groovy
 plugins {
-    id "com.cmgapps.licenses" version "4.3.0"
+    id 'com.cmgapps.licenses' version '4.4.0'
 }
 ```
+</details>
 
-Using legacy plugin application
+#### Using legacy plugin application
+
+<details open="open">
+<summary>Kotlin</summary>
+
+```kotlin
+buildscript {
+    repositories {
+        maven {
+            url = uri("https://plugins.gradle.org/m2/")
+        }
+    }
+    dependencies {
+        classpath("com.cmgapps:gradle-licenses-plugin:4.4.0")
+    }
+}
+
+apply(plugin = "com.cmgapps.licenses")
+```
+</details>
+
+<details>
+<summary>Groovy</summary>
 
 ```groovy
 buildscript {
     repositories {
-        mavenCentral()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
     }
-
     dependencies {
-        classpath("com.cmgapps:gradle-licenses-plugin:4.3.0")
+        classpath 'com.cmgapps:gradle-licenses-plugin:4.4.0'
     }
 }
 
-apply(plugin: "com.cmgapps.licenses")
+apply plugin: 'com.cmgapps.licenses'
 ```
+</details>
 
 ### Tasks
 
@@ -91,7 +131,7 @@ The plugin can output different formats.
         }
         ```
 * `JSON`
-  generates a Json file
+  generates a JSON file
 * `XML`
   generates a valid XML version 1.0 file
 * `Text`
@@ -100,24 +140,58 @@ The plugin can output different formats.
   generates a Markdown file
 * `Custom`
   add your own reporter as a lambda function
-    ```groovy
+  
+  <details open="open">
+  <summary>Kotlin</summary>
+    
+  ```kotlin
     licenses {
         custom {
-            enabled.set(true)
-            generate = { list -> list.collect { it.name }.join(', ') }
+            enabled = true
+            destination = buildDir.resolve("reports").resolve("licenses.txt")
+            generate { list -> list.map { it.name }.joinToString() }
         }
     }
     ```
+  </details>
+
+  <details>
+  <summary>Groovy</summary>
+  
+  ```groovy
+    licenses {
+        custom {
+            enabled = true
+            destination = file("$buildDir/reports/licenses/licenses.txt")
+            generate { list -> list.collect { it.name }.join(', ') }
+        }
+   }
+   ```
+   </details>
 
 #### Multi-project Builds
 
 For multi-project build, you can add projects you want to collect license information from in the main project.
+
+<details open="open">
+<summary>Kotlin</summary>
+
+```kotlin
+licenses {
+    additionalProjects(":module2", ":module3")
+}
+```
+</details>
+
+<details>
+<summary>Groovy</summary>
 
 ```groovy
 licenses {
     additionalProjects ':module2', ':module3'
 }
 ```
+</details>
 
 ## License
 

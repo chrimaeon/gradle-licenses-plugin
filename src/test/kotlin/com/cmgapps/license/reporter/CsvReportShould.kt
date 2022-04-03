@@ -6,9 +6,10 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.helper.LibrariesHelper
+import com.cmgapps.license.helper.testLibraries
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
+import com.cmgapps.license.model.LicenseId
 import com.cmgapps.license.model.MavenCoordinates
 import org.apache.maven.artifact.versioning.ComparableVersion
 import org.hamcrest.MatcherAssert.assertThat
@@ -19,13 +20,14 @@ class CsvReportShould {
 
     @Test
     fun `generate report`() {
-        val result = CsvReport(LibrariesHelper.libraries).generate()
+        val result = CsvReport(testLibraries).generate()
         assertThat(
             result,
             `is`(
-                "Name,Version,MavenCoordinates,Description,License Name,License Url\r\n" +
-                    "Test lib 1,1.0,test.group:test.artifact:1.0,proper description,Apache 2.0,https://www.apache.org/licenses/LICENSE-2.0.txt\r\n" +
-                    "Test lib 2,2.3.4,group.test2:artifact:2.3.4,descriptions of lib 2,Apache 2.0,https://www.apache.org/licenses/LICENSE-2.0.txt\r\n"
+                "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
+                    "Test lib 1,1.0,test.group:test.artifact:1.0,proper description,Apache-2.0,Apache 2.0,https://www.apache.org/licenses/LICENSE-2.0.txt\r\n" +
+                    "Test lib 1,1.0,test.group:test.artifact:1.0,proper description,MIT,MIT License,https://opensource.org/licenses/MIT\r\n" +
+                    "Test lib 2,2.3.4,group.test2:artifact:2.3.4,descriptions of lib 2,Apache-2.0,\"The Apache Software License, Version 2.0\",https://www.apache.org/licenses/LICENSE-2.0.txt\r\n"
 
             )
         )
@@ -33,7 +35,7 @@ class CsvReportShould {
 
     @Test
     fun `escape strings in report`() {
-        val license = License("License name with a \" in it", "just a plain url")
+        val license = License(LicenseId.UNKNOWN, "License name with a \" in it", "just a plain url")
         val library =
             Library(
                 MavenCoordinates("groupC", "articfactA", ComparableVersion("version with a \n in it")),
@@ -45,8 +47,8 @@ class CsvReportShould {
         assertThat(
             result,
             `is`(
-                "Name,Version,MavenCoordinates,Description,License Name,License Url\r\n" +
-                    "\"Name with a , in it\",\"version with a \n in it\",\"groupC:articfactA:version with a \n in it\",\"description with \r in it\",\"License name with a \"\" in it\",just a plain url\r\n"
+                "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
+                    "\"Name with a , in it\",\"version with a \n in it\",\"groupC:articfactA:version with a \n in it\",\"description with \r in it\",,\"License name with a \"\" in it\",just a plain url\r\n"
             )
         )
     }

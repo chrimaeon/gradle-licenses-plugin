@@ -6,7 +6,7 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.helper.LibrariesHelper
+import com.cmgapps.license.helper.testLibraries
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
@@ -15,7 +15,7 @@ class JsonReportShould {
 
     @Test
     fun generateReport() {
-        val report = JsonReport(LibrariesHelper.libraries).generate()
+        val report = JsonReport(testLibraries).generate()
         assertThat(
             report,
             `is`(
@@ -31,10 +31,12 @@ class JsonReportShould {
                         "description": "proper description",
                         "licenses": [
                             {
+                                "spdxLicenseIdentifier": "Apache-2.0",
                                 "name": "Apache 2.0",
                                 "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
                             },
                             {
+                                "spdxLicenseIdentifier": "MIT",
                                 "name": "MIT License",
                                 "url": "https://opensource.org/licenses/MIT"
                             }
@@ -50,7 +52,8 @@ class JsonReportShould {
                         "description": "descriptions of lib 2",
                         "licenses": [
                             {
-                                "name": "Apache 2.0",
+                                "spdxLicenseIdentifier": "Apache-2.0",
+                                "name": "The Apache Software License, Version 2.0",
                                 "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
                             }
                         ]

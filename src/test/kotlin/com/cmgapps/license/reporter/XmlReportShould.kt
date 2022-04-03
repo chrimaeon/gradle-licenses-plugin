@@ -6,7 +6,7 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.helper.LibrariesHelper
+import com.cmgapps.license.helper.testLibraries
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
@@ -15,7 +15,7 @@ class XmlReportShould {
 
     @Test
     fun generateReport() {
-        val report = XmlReport(LibrariesHelper.libraries).generate()
+        val report = XmlReport(testLibraries).generate()
         assertThat(
             report,
             `is`(
@@ -30,12 +30,12 @@ class XmlReportShould {
                           proper description
                         </description>
                         <licenses>
-                          <license url="https://www.apache.org/licenses/LICENSE-2.0.txt">
+                          <license spdx-license-identifier="Apache-2.0" url="https://www.apache.org/licenses/LICENSE-2.0.txt">
                             <name>
                               Apache 2.0
                             </name>
                           </license>
-                          <license url="https://opensource.org/licenses/MIT">
+                          <license spdx-license-identifier="MIT" url="https://opensource.org/licenses/MIT">
                             <name>
                               MIT License
                             </name>
@@ -50,9 +50,9 @@ class XmlReportShould {
                           descriptions of lib 2
                         </description>
                         <licenses>
-                          <license url="https://www.apache.org/licenses/LICENSE-2.0.txt">
+                          <license spdx-license-identifier="Apache-2.0" url="https://www.apache.org/licenses/LICENSE-2.0.txt">
                             <name>
-                              Apache 2.0
+                              The Apache Software License, Version 2.0
                             </name>
                           </license>
                         </licenses>
