@@ -10,7 +10,7 @@ jobs:
   create-github-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Create Release Notes
         run: ./gradlew --quiet getChangelog --no-header > ./RELEASE_NOTES.md
       - name: Create Release
