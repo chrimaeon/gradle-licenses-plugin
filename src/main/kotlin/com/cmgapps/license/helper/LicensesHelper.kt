@@ -66,6 +66,7 @@ internal val LICENSE_MAP = mapOf(
     // https://github.com/github/choosealicense.com/blob/gh-pages/_licenses/bsd-2-clause.txt
     "BSD-2-Clause" to LicenseId.BSD_2,
     "BSD 2-Clause \"Simplified\" License" to LicenseId.BSD_2,
+    "BSD 2-Clause License" to LicenseId.BSD_2,
     "http://opensource.org/licenses/BSD-2-Clause" to LicenseId.BSD_2,
     "https://opensource.org/licenses/BSD-2-Clause" to LicenseId.BSD_2,
 
