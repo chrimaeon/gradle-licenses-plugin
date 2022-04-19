@@ -19,7 +19,7 @@ jobs:
           distribution: zulu
           java-version: 11
       - name: Gradle Cache
-        uses: actions/cache@v3.0.1
+        uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches/modules-*
@@ -27,7 +27,7 @@ jobs:
             ~/.gradle/caches/build-cache-*
           key: gradle-${{ hashFiles('**/build.gradle.kts', '**/Deps.kt') }}
       - name: Gradle Wrapper Cache
-        uses: actions/cache@v3.0.1
+        uses: actions/cache@v3
         with:
           path: ~/.gradle/wrapper
           key: gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
