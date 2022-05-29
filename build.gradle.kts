@@ -6,6 +6,7 @@
 
 import com.cmgapps.gradle.logResults
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import com.github.benmanes.gradle.versions.updates.gradle.GradleReleaseChannel
 import kotlinx.kover.api.VerificationValueType.COVERED_LINES_PERCENTAGE
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
@@ -16,18 +17,13 @@ plugins {
     `java-gradle-plugin`
     `maven-publish`
     signing
-    id("com.github.ben-manes.versions") version Deps.Plugins.versionsVersion
-    kotlin("jvm") version Deps.kotlinVersion
-    id("com.gradle.plugin-publish") version Deps.Plugins.pluginPublishVersion
-    id("org.jetbrains.dokka") version Deps.Plugins.dokkaVersion
-    kotlin("plugin.serialization") version Deps.kotlinVersion
-    id("org.jetbrains.changelog") version Deps.Plugins.changelogPluginVersion
-    id("org.jetbrains.kotlinx.kover") version Deps.Plugins.koverVersion
-}
-
-repositories {
-    mavenCentral()
-    google()
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.versions)
+    alias(libs.plugins.gradle.pluginPublish)
+    alias(libs.plugins.jetbrains.dokka)
+    alias(libs.plugins.jetbrains.changelog)
+    alias(libs.plugins.kotlinx.kover)
 }
 
 val functionalTestSourceSet: SourceSet = sourceSets.create("functionalTest") {
@@ -221,7 +217,7 @@ tasks {
                     "Built-Date" to Date(),
                     "Built-JDK" to System.getProperty("java.version"),
                     "Built-Gradle" to gradle.gradleVersion,
-                    "Built-Kotlin" to Deps.kotlinVersion
+                    "Built-Kotlin" to libs.versions.kotlin
                 )
             )
         }
@@ -229,6 +225,8 @@ tasks {
 
     named<DependencyUpdatesTask>("dependencyUpdates") {
         revision = "release"
+
+        gradleReleaseChannel = GradleReleaseChannel.CURRENT.id
 
         rejectVersionIf {
             listOf("alpha", "beta", "rc", "cr", "m", "preview")
@@ -244,7 +242,7 @@ tasks {
 
     withType<KotlinCompile> {
         kotlinOptions {
-            freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
+            freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
             jvmTarget = "1.8"
         }
     }
@@ -294,36 +292,35 @@ tasks {
     }
 }
 
+@Suppress("UnstableApiUsage")
 dependencies {
-    compileOnly(Deps.androidGradlePlugin)
-    compileOnly(Deps.kotlinMultiplatformPlugin)
-
-    val kotlinReflect = kotlin("reflect", Deps.kotlinVersion)
+    compileOnly(libs.android.gradlePlugin)
+    compileOnly(libs.kotlin.multiplatformPlugin)
     // Necessary to bump a transitive dependency.
-    compileOnly(kotlinReflect)
+    compileOnly(libs.kotlin.reflect)
 
-    implementation(kotlin("stdlib-jdk8", Deps.kotlinVersion))
-    implementation(Deps.mavenModel)
-    implementation(Deps.mavenArtifact)
-    implementation(Deps.kotlinSerialization)
-    implementation(Deps.apacheCommonsCsv)
+    implementation(libs.kotlin.stdlib.jdk8)
+    implementation(libs.maven.model)
+    implementation(libs.maven.artifact)
+    implementation(libs.kotlin.serialization)
+    implementation(libs.apache.commonsCsv)
 
-    ktlint(Deps.ktlint)
+    ktlint(libs.ktlint)
 
-    testImplementation(Deps.jUnit) {
+    testImplementation(libs.jUnit) {
         exclude(group = "org.hamcrest")
     }
-    testImplementation(Deps.hamcrest)
-    testImplementation(kotlinReflect)
-    testImplementation(Deps.mockitoKotlin)
+    testImplementation(libs.hamcrest)
+    testImplementation(libs.kotlin.reflect)
+    testImplementation(libs.mockito.kotlin)
 
-    "functionalTestImplementation"(Deps.jUnit) {
+    "functionalTestImplementation"(libs.jUnit) {
         exclude(group = "org.hamcrest")
     }
-    "functionalTestImplementation"(Deps.kotlinMultiplatformPlugin)
-    "functionalTestImplementation"(Deps.hamcrest)
+    "functionalTestImplementation"(libs.kotlin.multiplatformPlugin)
+    "functionalTestImplementation"(libs.hamcrest)
     "functionalTestImplementation"(gradleTestKit())
-    "functionalTestImplementation"(kotlinReflect)
-    "functionalTestImplementation"(Deps.xmlUnitCore)
-    "functionalTestImplementation"(Deps.xmlUnitMatchers)
+    "functionalTestImplementation"(libs.kotlin.reflect)
+    "functionalTestImplementation"(libs.xmlunit.core)
+    "functionalTestImplementation"(libs.xmlunit.matchers)
 }
