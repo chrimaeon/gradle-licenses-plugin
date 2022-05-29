@@ -6,7 +6,6 @@
 
 package com.cmgapps.license
 
-import com.android.builder.model.ProductFlavor
 import com.cmgapps.license.helper.LICENSE_MAP
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
@@ -394,7 +393,7 @@ abstract class AndroidLicensesTask : LicensesTask() {
     lateinit var buildType: String
 
     @Internal
-    lateinit var productFlavors: List<ProductFlavor>
+    lateinit var productFlavors: List<String>
 
     override fun collectDependencies() {
 
@@ -417,16 +416,16 @@ abstract class AndroidLicensesTask : LicensesTask() {
 
             productFlavors.forEach { flavor ->
                 // Works for productFlavors and productFlavors with dimensions
-                if (variant.capitalize().contains(flavor.name.capitalize())) {
-                    project.configurations.find { it.name == "${flavor.name}Compile" }?.let {
+                if (variant.capitalize().contains(flavor.capitalize())) {
+                    project.configurations.find { it.name == "${flavor}Compile" }?.let {
                         configurations.add(it)
                     }
 
-                    project.configurations.find { it.name == "${flavor.name}Api" }?.let {
+                    project.configurations.find { it.name == "${flavor}Api" }?.let {
                         configurations.add(it)
                     }
 
-                    project.configurations.find { it.name == "${flavor.name}Implementation" }?.let {
+                    project.configurations.find { it.name == "${flavor}Implementation" }?.let {
                         configurations.add(it)
                     }
                 }

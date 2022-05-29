@@ -67,7 +67,7 @@ class LicensePluginMultiplatformShould {
         buildFile + """
             buildscript {
               repositories {
-                jcenter()
+                mavenCentral()
                 google()
               }
               dependencies {

@@ -7,12 +7,12 @@
     <!-- The Basics -->
     <modelVersion>4.0.0</modelVersion>
     <groupId>group</groupId>
-    <artifactId>multilicenses</artifactId>
+    <artifactId>zet</artifactId>
     <version>1.0.0</version>
     <packaging>aar</packaging>
 
     <!-- More Project Information -->
-    <name>Multi License</name>
+    <name>Zet</name>
     <description>Fake dependency description</description>
     <url>https://github.com/user/repo</url>
     <inceptionYear>2017</inceptionYear>
@@ -20,10 +20,6 @@
         <license>
             <name>Apache-2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-        <license>
-            <name>BSD-2-Clause</name>
-            <url>https://opensource.org/licenses/BSD-2-Clause</url>
         </license>
     </licenses>
     <developers>

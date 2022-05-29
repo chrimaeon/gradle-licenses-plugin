@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Better support for Android Variants
 
 ### Changed
 

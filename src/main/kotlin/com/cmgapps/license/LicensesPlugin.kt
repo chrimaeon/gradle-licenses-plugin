@@ -74,17 +74,50 @@ class LicensesPlugin : Plugin<Project> {
 
         @JvmStatic
         private fun configureAndroidProject(project: Project, extension: LicensesExtension) {
-            getAndroidVariants(project)?.all { androidVariant ->
-                val taskName = "license" + androidVariant.name.capitalize() + "Report"
+            // check for AGP 7.0+ 'androidComponent' extension
+            if (findClass("com.android.build.api.variant.AndroidComponentsExtension") != null) {
+                configureAgp7Project(project, extension)
+            } else {
+                configureApg4Project(project, extension)
+            }
+        }
 
+        @JvmStatic
+        private fun configureAgp7Project(project: Project, extension: LicensesExtension) {
+            project.logger.info("Using AGP 7.0+ AndroidComponentsExtension")
+            project.extensions.getByType(com.android.build.api.variant.AndroidComponentsExtension::class.java)
+                .onVariants { variant ->
+                    val configuration = Action<AndroidLicensesTask> { task ->
+                        task.addBasicConfiguration(extension)
+                        task.variant = variant.name
+                        task.buildType = variant.buildType!!
+                        task.productFlavors = variant.productFlavors.map { it.second }
+                    }
+
+                    project.tasks.register(
+                        "license${variant.name.capitalize()}Report",
+                        AndroidLicensesTask::class.java,
+                        configuration,
+                    )
+                }
+        }
+
+        @JvmStatic
+        private fun configureApg4Project(project: Project, extension: LicensesExtension) {
+            project.logger.info("Using appication/libraryVariants")
+            getAndroidVariants(project)?.all { androidVariant ->
                 val configuration = Action<AndroidLicensesTask> { task ->
                     task.addBasicConfiguration(extension)
                     task.variant = androidVariant.name
                     task.buildType = androidVariant.buildType.name
-                    task.productFlavors = androidVariant.productFlavors
+                    task.productFlavors = androidVariant.productFlavors.map { it.name }
                 }
 
-                project.tasks.register(taskName, AndroidLicensesTask::class.java, configuration)
+                project.tasks.register(
+                    "license${androidVariant.name.capitalize()}Report",
+                    AndroidLicensesTask::class.java,
+                    configuration,
+                )
             }
         }
 
@@ -151,4 +184,10 @@ class LicensesPlugin : Plugin<Project> {
             else -> null
         }
     }
+}
+
+fun findClass(fqName: String) = try {
+    Class.forName(fqName)
+} catch (ex: ClassNotFoundException) {
+    null
 }
