@@ -35,4 +35,6 @@ object Deps {
     const val ktlint = "com.pinterest:ktlint:0.45.1"
     const val kotlinSerialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
     const val mockitoKotlin = "org.mockito.kotlin:mockito-kotlin:4.0.0"
+    const val xmlUnitCore = "org.xmlunit:xmlunit-core:2.9.0"
+    const val xmlUnitMatchers = "org.xmlunit:xmlunit-matchers:2.9.0"
 }

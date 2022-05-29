@@ -9,19 +9,14 @@ package com.cmgapps.license
 import com.cmgapps.license.util.plus
 import org.gradle.testkit.runner.GradleRunner
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.io.TempDir
-import java.io.File
+import org.xmlunit.builder.Input
+import org.xmlunit.matchers.ValidationMatcher.valid
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.regex.Pattern
-import javax.xml.XMLConstants
-import javax.xml.transform.stream.StreamSource
-import javax.xml.validation.SchemaFactory
 
 class XmlValidationShould {
 
@@ -57,28 +52,15 @@ class XmlValidationShould {
             }
         """.trimIndent()
 
-        val result = GradleRunner.create()
+        GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())
             .withArguments(":licenseReport")
             .withPluginClasspath()
             .build()
 
         assertThat(
-            result.output,
-            Matchers.matchesPattern(
-                Pattern.compile(
-                    ".*Wrote XML report to .*$reportFolder/licenses.xml.*",
-                    Pattern.DOTALL
-                )
-            )
+            Input.fromFile("$reportFolder/licenses.xml"),
+            valid(Input.fromURL(URL("https://www.cmgapps.com/xsd/licenses.xsd")))
         )
-
-        val schema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-            .newSchema(URL("https://www.cmgapps.com/xsd/licenses.xsd"))
-
-        val validator = schema.newValidator()
-        assertDoesNotThrow {
-            validator.validate(StreamSource(File("$reportFolder/licenses.xml")))
-        }
     }
 }

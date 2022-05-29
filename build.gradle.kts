@@ -324,4 +324,6 @@ dependencies {
     "functionalTestImplementation"(Deps.hamcrest)
     "functionalTestImplementation"(gradleTestKit())
     "functionalTestImplementation"(kotlinReflect)
+    "functionalTestImplementation"(Deps.xmlUnitCore)
+    "functionalTestImplementation"(Deps.xmlUnitMatchers)
 }
