@@ -267,9 +267,10 @@ tasks {
 
         doLast {
             val content = readmeFile.readText()
-            val oldVersion = """id\("com.cmgapps.licenses"\) version "(.*)"""".toRegex(RegexOption.MULTILINE).find(content)?.let {
-                it.groupValues[1]
-            } ?: error("Cannot find oldVersion")
+            val oldVersion =
+                """id\("com.cmgapps.licenses"\) version "(.*)"""".toRegex(RegexOption.MULTILINE).find(content)?.let {
+                    it.groupValues[1]
+                } ?: error("Cannot find oldVersion")
 
             logger.info("Updating README.md version $oldVersion to $version")
 

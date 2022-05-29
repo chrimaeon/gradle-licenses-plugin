@@ -8,7 +8,6 @@
 
 <xs:schema xmlns:cmg="https://www.cmgapps.com"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           attributeFormDefault="qualified"
            elementFormDefault="qualified"
            targetNamespace="https://www.cmgapps.com">
     <xs:element
