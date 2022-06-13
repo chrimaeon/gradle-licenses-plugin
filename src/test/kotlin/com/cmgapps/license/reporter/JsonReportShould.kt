@@ -6,7 +6,7 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.helper.testLibraries
+import com.cmgapps.license.util.testLibraries
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test

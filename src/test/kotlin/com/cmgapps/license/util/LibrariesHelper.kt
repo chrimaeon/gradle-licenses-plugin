@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.cmgapps.license.helper
+package com.cmgapps.license.util
 
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License

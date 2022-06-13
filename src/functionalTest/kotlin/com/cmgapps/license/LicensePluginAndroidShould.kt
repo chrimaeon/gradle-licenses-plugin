@@ -1,17 +1,7 @@
 /*
  * Copyright (c) 2019. Christian Grach <christian.grach@cmgapps.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.cmgapps.license
@@ -25,13 +15,19 @@ import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.Properties
+import java.util.stream.Stream
 
-const val AGP = "com.android.tools.build:gradle:3.5.3"
+const val AGP_7_x = "com.android.tools.build:gradle:7.2.1"
+const val AGP_4_x = "com.android.tools.build:gradle:4.0.1"
 
 class LicensePluginAndroidShould {
 
@@ -52,11 +48,9 @@ class LicensePluginAndroidShould {
             )
         pluginClasspath = Properties().run {
             load(pluginClasspathResource)
-            getProperty("implementation-classpath")
-                .split(':')
-                .joinToString(", ") {
-                    "'$it'"
-                }
+            getProperty("implementation-classpath").split(':').joinToString(", ") {
+                "'$it'"
+            }
         }
 
         buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
@@ -67,11 +61,11 @@ class LicensePluginAndroidShould {
         buildFile + """
             buildscript {
               repositories {
-                jcenter()
+                mavenCentral()
                 google()
               }
               dependencies {
-                classpath "$AGP"
+                classpath "$AGP_7_x"
                 classpath files($pluginClasspath)
               }
             }
@@ -80,77 +74,104 @@ class LicensePluginAndroidShould {
 
         """.trimIndent()
 
-        gradleRunner = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
+        gradleRunner = GradleRunner.create().withProjectDir(testProjectDir.toFile())
     }
 
-    @Test
-    fun `generate licenses buildType report`() {
-        buildFile + """
-            android {
-              compileSdkVersion 28
-              defaultConfig {
-                applicationId 'com.example'
-              }
-            }
+    @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - taskName = {0}, AGP = {1}")
+    @MethodSource("buildTypesAndAgpVersions")
+    fun `generate licenses buildType report`(taskName: String, agbVersion: String) {
+        buildFile.write(
             """
-            .trimIndent()
+            buildscript {
+              repositories {
+                mavenCentral()
+                google()
+              }
+              dependencies {
+                classpath "$agbVersion"
+                classpath files($pluginClasspath)
+              }
+            }
+            apply plugin: 'com.android.application'
+            apply plugin: 'com.cmgapps.licenses'
 
-        for (taskName in listOf("licenseDebugReport", "licenseReleaseReport")) {
-
-            val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.toFile())
-                .withArguments(":$taskName")
-                .build()
-
-            assertThat(result.task(":$taskName")?.outcome, `is`(TaskOutcome.SUCCESS))
-        }
-    }
-
-    @Test
-    fun `generate licenses variant report`() {
-        buildFile + """
             android {
               compileSdkVersion 28
               defaultConfig {
                 applicationId 'com.example'
               }
-            
-              flavorDimensions "version"
-              productFlavors {
-                demo {
-                  dimension "version"
-                }
-                full {
-                  dimension "version"
-                }
-              }
             }
-        """.trimIndent()
-
-        val tasks = listOf(
-            "licenseDemoDebugReport",
-            "licenseFullDebugReport",
-            "licenseDemoReleaseReport",
-            "licenseFullReleaseReport"
+            """.trimIndent()
         )
 
-        for (taskName in tasks) {
-            val result = gradleRunner.withArguments(":$taskName")
-                .build()
+        val result = gradleRunner.withArguments(":$taskName").build()
 
-            assertThat(result.task(":$taskName")?.outcome, `is`(TaskOutcome.SUCCESS))
-        }
+        assertThat(result.task(":$taskName")?.outcome, `is`(TaskOutcome.SUCCESS))
+    }
+
+    @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - taskName = {0}")
+    @MethodSource("productFlavorsAndCsv")
+    fun `generate licenses variant report`(taskName: String, licensesAsCsvExpected: String) {
+        buildFile + """
+              repositories {
+                maven {
+                  url '$mavenRepoUrl'
+                }
+              }
+              android {
+                compileSdkVersion 28
+                defaultConfig {
+                  applicationId 'com.example'
+                }
+              
+                flavorDimensions "version", "store"
+                productFlavors {
+                  demo {
+                    dimension "version"
+                  }
+                  full {
+                    dimension "version"
+                  }
+                  google {
+                    dimension "store"
+                  }
+                  amazon {
+                    dimension "store"
+                  }
+                }
+              }
+              
+              licenses {
+                reports {
+                  html.enabled = false
+                  csv.enabled = true
+                }
+              }
+              dependencies {
+                implementation 'group:name:1.0.0'
+                demoImplementation 'group:noname:1.0.0'
+                fullImplementation 'group:multilicenses:1.0.0'
+                googleImplementation 'group:foo:1.0.0'
+                amazonImplementation 'group:bar:1.0.0'
+                releaseImplementation 'com.squareup.retrofit2:retrofit:2.3.0'
+                debugImplementation 'group:zet:1.0.0'
+              }
+        """.trimIndent()
+
+        gradleRunner
+            .withArguments(":$taskName")
+            .build()
+
+        assertThat(File("$reportFolder/$taskName/licenses.csv").readText(), `is`(licensesAsCsvExpected))
     }
 
     @Test
     fun `generate Report for selected configuration`() {
         buildFile + """
-            import com.cmgapps.license.OutputType
             repositories {
                 maven {
-                url '$mavenRepoUrl'
-              }
+                  url '$mavenRepoUrl'
+                }
             }
             android {
                 compileSdkVersion 28
@@ -171,18 +192,13 @@ class LicensePluginAndroidShould {
                 releaseImplementation 'com.squareup.retrofit2:retrofit:2.3.0'
             }
         """.trimIndent()
+
         gradleRunner.withArguments(":licenseDebugReport").build()
 
         assertThat(
             File("$reportFolder/licenseDebugReport/licenses.txt").readText().trim(),
             `is`(
-                "Licenses\n" +
-                    "├─ Fake dependency name:1.0.0\n" +
-                    "│  ├─ License: Some license\n" +
-                    "│  └─ URL: http://website.tld/\n" +
-                    "└─ group:noname:1.0.0\n" +
-                    "   ├─ License: Some license\n" +
-                    "   └─ URL: http://website.tld/"
+                "Licenses\n" + "├─ Fake dependency name:1.0.0\n" + "│  ├─ License: Some license\n" + "│  └─ URL: http://website.tld/\n" + "└─ group:noname:1.0.0\n" + "   ├─ License: Some license\n" + "   └─ URL: http://website.tld/"
             )
         )
     }
@@ -193,11 +209,11 @@ class LicensePluginAndroidShould {
             """
             buildscript {
               repositories {
-                jcenter()
+                mavenCentral()
                 google()
               }
               dependencies {
-                classpath "$AGP"
+                classpath "$AGP_7_x"
                 classpath files($pluginClasspath)
               }
             }
@@ -222,11 +238,11 @@ class LicensePluginAndroidShould {
             """
             buildscript {
               repositories {
-                jcenter()
+                mavenCentral()
                 google()
               }
               dependencies {
-                classpath "$AGP"
+                classpath "$AGP_7_x"
                 classpath files($pluginClasspath)
               }
             }
@@ -244,4 +260,113 @@ class LicensePluginAndroidShould {
 
         assertThat(result.task(taskName)?.outcome, `is`(TaskOutcome.SUCCESS))
     }
+
+    companion object {
+        @JvmStatic
+        fun buildTypesAndAgpVersions(): Stream<Arguments> =
+            listOf("licenseDebugReport", "licenseReleaseReport").cartesianProduct(listOf(AGP_4_x, AGP_7_x))
+
+        @JvmStatic
+        fun productFlavorsAndCsv(): Stream<Arguments> = Stream.of(
+            arguments(
+                "licenseDemoGoogleDebugReport",
+                LICENSE_DEMO_GOOGLE_DEBUG_CSV.replace("\n", "\r\n"),
+            ),
+            arguments(
+                "licenseDemoAmazonDebugReport",
+                LICENSE_DEMO_AMAZON_DEBUG_CSV.replace("\n", "\r\n"),
+            ),
+            arguments(
+                "licenseFullGoogleDebugReport",
+                LICENSE_FULL_GOOGLE_DEBUG_CSV.replace("\n", "\r\n"),
+            ),
+            arguments(
+                "licenseFullAmazonDebugReport",
+                LICENSE_FULL_AMAZON_DEBUG_CSV.replace("\n", "\r\n"),
+            ),
+            arguments(
+                "licenseDemoGoogleReleaseReport",
+                LICENSE_DEMO_GOOGLE_RELEASE_CSV.replace("\n", "\r\n"),
+            ),
+            arguments(
+                "licenseDemoAmazonReleaseReport",
+                LICENSE_DEMO_AMAZON_RELEASE_CSV.replace("\n", "\r\n"),
+            ),
+            arguments(
+                "licenseFullGoogleReleaseReport",
+                LICENSE_FULL_GOOGLE_RELEASE_CSV.replace("\n", "\r\n"),
+            ),
+            arguments(
+                "licenseFullAmazonReleaseReport",
+                LICENSE_FULL_AMAZON_RELEASE_CSV.replace("\n", "\r\n"),
+            ),
+        )
+    }
 }
+
+internal fun <S, T> List<S>.cartesianProduct(other: List<T>): Stream<Arguments> = this.flatMap { s1 ->
+    other.map { s2 ->
+        arguments(s1, s2)
+    }
+}.stream()
+
+const val LICENSE_DEMO_GOOGLE_DEBUG_CSV =
+    """Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url
+Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/
+Foo,1.0.0,group:foo:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+Zet,1.0.0,group:zet:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+,1.0.0,group:noname:1.0.0,Fake dependency description,,Some license,http://website.tld/
+"""
+const val LICENSE_DEMO_AMAZON_DEBUG_CSV =
+    """Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url
+Bar,1.0.0,group:bar:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/
+Zet,1.0.0,group:zet:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+,1.0.0,group:noname:1.0.0,Fake dependency description,,Some license,http://website.tld/
+"""
+const val LICENSE_FULL_GOOGLE_DEBUG_CSV =
+    """Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url
+Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/
+Foo,1.0.0,group:foo:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+Multi License,1.0.0,group:multilicenses:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+Multi License,1.0.0,group:multilicenses:1.0.0,Fake dependency description,BSD-2-Clause,BSD-2-Clause,https://opensource.org/licenses/BSD-2-Clause
+Zet,1.0.0,group:zet:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+"""
+const val LICENSE_FULL_AMAZON_DEBUG_CSV =
+    """Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url
+Bar,1.0.0,group:bar:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/
+Multi License,1.0.0,group:multilicenses:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+Multi License,1.0.0,group:multilicenses:1.0.0,Fake dependency description,BSD-2-Clause,BSD-2-Clause,https://opensource.org/licenses/BSD-2-Clause
+Zet,1.0.0,group:zet:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+"""
+const val LICENSE_DEMO_GOOGLE_RELEASE_CSV =
+    """Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url
+Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/
+Foo,1.0.0,group:foo:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+Retrofit,2.3.0,com.squareup.retrofit2:retrofit:2.3.0,,Apache-2.0,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+,1.0.0,group:noname:1.0.0,Fake dependency description,,Some license,http://website.tld/
+"""
+const val LICENSE_DEMO_AMAZON_RELEASE_CSV =
+    """Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url
+Bar,1.0.0,group:bar:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/
+Retrofit,2.3.0,com.squareup.retrofit2:retrofit:2.3.0,,Apache-2.0,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+,1.0.0,group:noname:1.0.0,Fake dependency description,,Some license,http://website.tld/
+"""
+const val LICENSE_FULL_GOOGLE_RELEASE_CSV =
+    """Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url
+Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/
+Foo,1.0.0,group:foo:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+Multi License,1.0.0,group:multilicenses:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+Multi License,1.0.0,group:multilicenses:1.0.0,Fake dependency description,BSD-2-Clause,BSD-2-Clause,https://opensource.org/licenses/BSD-2-Clause
+Retrofit,2.3.0,com.squareup.retrofit2:retrofit:2.3.0,,Apache-2.0,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+"""
+const val LICENSE_FULL_AMAZON_RELEASE_CSV =
+    """Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url
+Bar,1.0.0,group:bar:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/
+Multi License,1.0.0,group:multilicenses:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+Multi License,1.0.0,group:multilicenses:1.0.0,Fake dependency description,BSD-2-Clause,BSD-2-Clause,https://opensource.org/licenses/BSD-2-Clause
+Retrofit,2.3.0,com.squareup.retrofit2:retrofit:2.3.0,,Apache-2.0,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+"""

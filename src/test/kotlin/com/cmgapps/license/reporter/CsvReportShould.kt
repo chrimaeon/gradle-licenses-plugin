@@ -6,11 +6,11 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.helper.testLibraries
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import com.cmgapps.license.model.LicenseId
 import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.util.testLibraries
 import org.apache.maven.artifact.versioning.ComparableVersion
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
