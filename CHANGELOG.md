@@ -5,6 +5,7 @@
 - Better support for Android Variants
 
 ### Changed
+- Internal handling of the license mappings
 
 ### Deprecated
 

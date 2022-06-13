@@ -6,7 +6,6 @@
 
 package com.cmgapps.license
 
-import com.cmgapps.license.helper.LICENSE_MAP
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import com.cmgapps.license.model.LicenseId
@@ -470,8 +469,11 @@ private fun File.prepare() {
     createNewFile()
 }
 
-private fun getLicenseId(licenseUrl: String, licenseName: String): LicenseId = when {
-    LICENSE_MAP.containsKey(licenseUrl) -> LICENSE_MAP[licenseUrl]!!
-    LICENSE_MAP.containsKey(licenseName) -> LICENSE_MAP[licenseName]!!
-    else -> LicenseId.UNKNOWN
+private fun getLicenseId(licenseUrl: String, licenseName: String): LicenseId {
+    val licenseMap = LicenseId.map
+    return when {
+        licenseMap.containsKey(licenseUrl) -> licenseMap[licenseUrl]!!
+        licenseMap.containsKey(licenseName) -> licenseMap[licenseName]!!
+        else -> LicenseId.UNKNOWN
+    }
 }

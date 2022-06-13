@@ -13,6 +13,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import org.apache.commons.csv.CSVFormat
 import org.apache.maven.artifact.versioning.ComparableVersion
 
 @Serializable
@@ -38,35 +39,19 @@ data class MavenCoordinates(
     }
 }
 
-enum class LicenseId {
-    APACHE,
-    CDDL,
-    BSD_2,
-    BSD_3,
-    EPL_2,
-    GPL_2,
-    GPL_3,
-    LGPL_2_1,
-    LGPL_3,
-    MIT,
-    MPL_2,
-    UNKNOWN;
-
-    val spdxLicenseIdentifier: String?
-        get() = when (this) {
-            APACHE -> "Apache-2.0"
-            BSD_2 -> "BSD-2-Clause"
-            BSD_3 -> "BSD-3-Clause"
-            CDDL -> "CDDL-1.0"
-            UNKNOWN -> null
-            EPL_2 -> "EPL-2.0"
-            GPL_2 -> "GPL-2.0-only"
-            GPL_3 -> "GPL-3.0-only"
-            LGPL_2_1 -> "LGPL-2.1-only"
-            LGPL_3 -> "LGPL-3.0-only"
-            MIT -> "MIT"
-            MPL_2 -> "MPL-2.0"
-        }
+enum class LicenseId(val spdxLicenseIdentifier: String?) {
+    APACHE("Apache-2.0"),
+    BSD_2("BSD-2-Clause"),
+    BSD_3("BSD-3-Clause"),
+    CDDL("CDDL-1.0"),
+    EPL_2("EPL-2.0"),
+    GPL_2("GPL-2.0-only"),
+    GPL_3("GPL-3.0-only"),
+    LGPL_2_1("LGPL-2.1-only"),
+    LGPL_3("LGPL-3.0-only"),
+    MIT("MIT"),
+    MPL_2("MPL-2.0"),
+    UNKNOWN(null);
 
     companion object {
         @JvmStatic
@@ -83,6 +68,19 @@ enum class LicenseId {
             "MIT" -> MIT
             "MPL-2.0" -> MPL_2
             else -> UNKNOWN
+        }
+
+        /**
+         * Map License name or URL to license id.
+         *
+         * Based on "popular and widely-used or with strong communities" found here: https://opensource.org/licenses/category.
+         * License text from: https://github.com/github/choosealicense.com/blob/gh-pages/_licenses.
+         */
+        internal val map: Map<String, LicenseId> by lazy {
+            CSVFormat.DEFAULT.parse(this::class.java.getResourceAsStream("/license_map.csv")?.bufferedReader())
+                .associate {
+                    it.get(0) to LicenseId.valueOf(it.get(1))
+                }
         }
     }
 }
