@@ -1,5 +1,5 @@
 [versions]
-kotlin = "1.6.21"
+kotlin = "1.7.0"
 xmlunit = "2.9.0"
 
 [plugins]
@@ -19,7 +19,7 @@ kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref =
 kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 apache-commonsCsv = "org.apache.commons:commons-csv:1.9.0"
 maven-model = "org.apache.maven:maven-model:3.8.5"
-maven-artifact = "org.apache.maven:maven-artifact:3.8.5"
+maven-artifact = "org.apache.maven:maven-artifact:3.8.6"
 jUnit = "org.junit.jupiter:junit-jupiter:5.8.2"
 hamcrest = "org.hamcrest:hamcrest:2.2"
 ktlint = "com.pinterest:ktlint:0.45.2"
