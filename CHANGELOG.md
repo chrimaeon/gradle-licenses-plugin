@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [4.5.0]
+### Added
 - Better support for Android Variants
 
 ### Changed
@@ -22,14 +35,8 @@
 ### Changed
 - HTML and Markdown reports merge licenses with a more sophisticated algorithm
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 - CSV Reporter reports all licenses not only the first one
-
-### Security
 
 ## [4.3.0]
 ### Changed
