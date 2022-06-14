@@ -48,11 +48,12 @@ internal class HtmlReport(
 
                 libraries.toLicensesMap().forEach { (license, libraries) ->
                     ul {
-                        libraries.asSequence().sortedBy { it.name }.forEach { library ->
-                            li {
-                                +(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
+                        libraries.asSequence().sortedBy { it.name ?: it.mavenCoordinates.identifierWithoutVersion }
+                            .forEach { library ->
+                                li {
+                                    +(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
+                                }
                             }
-                        }
                     }
 
                     when (license.id) {

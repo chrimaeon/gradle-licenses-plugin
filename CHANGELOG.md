@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- Sort libraries by name or maven coordinated on HTML report
 
 ### Deprecated
 
