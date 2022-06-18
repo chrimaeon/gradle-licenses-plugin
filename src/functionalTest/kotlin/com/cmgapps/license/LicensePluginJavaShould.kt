@@ -102,7 +102,12 @@ class LicensePluginJavaShould {
                     "<html lang=\"en\">" +
                     "<head>" +
                     "<meta charset=\"UTF-8\">" +
-                    "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                    "<meta name=\"color-scheme\" content=\"dark light\">" +
+                    "<style>" +
+                    "body{font-family:sans-serif;background-color:#eee}" +
+                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
+                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
+                    "</style>" +
                     "<title>Open source licenses</title>" +
                     "</head>" +
                     "<body>" +
@@ -139,7 +144,12 @@ class LicensePluginJavaShould {
                     "<html lang=\"en\">" +
                     "<head>" +
                     "<meta charset=\"UTF-8\">" +
-                    "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                    "<meta name=\"color-scheme\" content=\"dark light\">" +
+                    "<style>" +
+                    "body{font-family:sans-serif;background-color:#eee}" +
+                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
+                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
+                    "</style>" +
                     "<title>Open source licenses</title>" +
                     "</head>" +
                     "<body>" +
@@ -183,7 +193,12 @@ class LicensePluginJavaShould {
                     "<html lang=\"en\">" +
                     "<head>" +
                     "<meta charset=\"UTF-8\">" +
-                    "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                    "<meta name=\"color-scheme\" content=\"dark light\">" +
+                    "<style>" +
+                    "body{font-family:sans-serif;background-color:#eee}" +
+                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
+                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
+                    "</style>" +
                     "<title>Open source licenses</title>" +
                     "</head>" +
                     "<body>" +
@@ -207,6 +222,57 @@ class LicensePluginJavaShould {
             licenses {
                 reports {
                     html.enabled = true
+                }
+            }
+            
+            dependencies {
+              implementation 'group:noname:1.0.0'
+            }
+        """.trimIndent()
+
+        val result = gradleRunner.build()
+
+        assertThat(
+            result.output,
+            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL))
+        )
+        assertThat(
+            File("$reportFolder/licenses.html").readText().trim(),
+            `is`(
+                "<!DOCTYPE html>" +
+                    "<html lang=\"en\">" +
+                    "<head>" +
+                    "<meta charset=\"UTF-8\">" +
+                    "<meta name=\"color-scheme\" content=\"dark light\">" +
+                    "<style>" +
+                    "body{font-family:sans-serif;background-color:#eee}" +
+                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
+                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
+                    "</style>" +
+                    "<title>Open source licenses</title>" +
+                    "</head>" +
+                    "<body>" +
+                    "<h3>Notice for packages:</h3>" +
+                    "<ul>" +
+                    "<li>group:noname</li>" +
+                    "</ul>" +
+                    "<div class=\"license\">" +
+                    "<p>Some license</p>" +
+                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
+                    "</div>" +
+                    "</body>" +
+                    "</html>"
+            )
+        )
+    }
+
+    @Test
+    fun `generate Html report with no dark theme`() {
+        buildFile + """
+            licenses {
+                reports {
+                    html.enabled = true
+                    html.useDarkMode.set(false)
                 }
             }
             
@@ -284,6 +350,7 @@ class LicensePluginJavaShould {
                 reports {
                     html.enabled = true
                     html.stylesheet("body{}")
+                    html.useDarkMode.set(false)
                 }
             }
 

@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- dark mode for HTML report
 
 ### Changed
 - Sort libraries by name or maven coordinated on HTML report

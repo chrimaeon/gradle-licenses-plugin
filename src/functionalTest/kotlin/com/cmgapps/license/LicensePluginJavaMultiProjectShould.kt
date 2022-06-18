@@ -101,7 +101,12 @@ class LicensePluginJavaMultiProjectShould {
                     "<html lang=\"en\">" +
                     "<head>" +
                     "<meta charset=\"UTF-8\">" +
-                    "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                    "<meta name=\"color-scheme\" content=\"dark light\">" +
+                    "<style>" +
+                    "body{font-family:sans-serif;background-color:#eee}" +
+                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
+                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
+                    "</style>" +
                     "<title>Open source licenses</title>" +
                     "</head>" +
                     "<body>" +
@@ -156,7 +161,12 @@ class LicensePluginJavaMultiProjectShould {
                     "<html lang=\"en\">" +
                     "<head>" +
                     "<meta charset=\"UTF-8\">" +
-                    "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                    "<meta name=\"color-scheme\" content=\"dark light\">" +
+                    "<style>" +
+                    "body{font-family:sans-serif;background-color:#eee}" +
+                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
+                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
+                    "</style>" +
                     "<title>Open source licenses</title>" +
                     "</head>" +
                     "<body>" +
@@ -214,7 +224,12 @@ class LicensePluginJavaMultiProjectShould {
                     "<html lang=\"en\">" +
                     "<head>" +
                     "<meta charset=\"UTF-8\">" +
-                    "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                    "<meta name=\"color-scheme\" content=\"dark light\">" +
+                    "<style>" +
+                    "body{font-family:sans-serif;background-color:#eee}" +
+                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
+                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
+                    "</style>" +
                     "<title>Open source licenses</title>" +
                     "</head>" +
                     "<body>" +

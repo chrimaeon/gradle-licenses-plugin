@@ -130,6 +130,17 @@ The plugin can output different formats.
             } 
         }
         ```
+      
+    * On the default CSS style Dark Mode for supported browsers is also enabled by default. It adds a `<meta name="color-scheme" content="dark light">` and a custom css theme.      
+
+      It can be disabled via
+      ```kotlin
+      licenses {
+          reports {
+              html.useDarkMode.set(false)
+          }
+      }
+      ```
 * `JSON`
   generates a JSON file
 * `XML`
