@@ -2,7 +2,20 @@
 
 ## [Unreleased]
 ### Added
-- dark mode for HTML report
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [4.6.0]
+### Added
+- Dark Mode for HTML report
 
 ### Changed
 - Sort libraries by name or maven coordinated on HTML report
@@ -21,14 +34,6 @@
 
 ### Changed
 - Internal handling of the license mappings
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
 
 ## [4.4.0]
 ### Added
