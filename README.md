@@ -18,7 +18,7 @@ This Gradle plugin provides tasks to generate a file with the licenses used from
 
 ```kotlin
 plugins {
-    id("com.cmgapps.licenses") version "4.5.0"
+    id("com.cmgapps.licenses") version "4.6.0"
 }
 ```
 </details>
@@ -28,7 +28,7 @@ plugins {
 
 ```groovy
 plugins {
-    id 'com.cmgapps.licenses' version '4.5.0'
+    id 'com.cmgapps.licenses' version '4.6.0'
 }
 ```
 </details>
@@ -46,7 +46,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath("com.cmgapps:gradle-licenses-plugin:4.5.0")
+        classpath("com.cmgapps:gradle-licenses-plugin:4.6.0")
     }
 }
 
@@ -65,7 +65,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.cmgapps:gradle-licenses-plugin:4.5.0'
+        classpath 'com.cmgapps:gradle-licenses-plugin:4.6.0'
     }
 }
 
@@ -130,6 +130,17 @@ The plugin can output different formats.
             } 
         }
         ```
+      
+    * On the default CSS style Dark Mode for supported browsers is also enabled by default. It adds a `<meta name="color-scheme" content="dark light">` and a custom css theme.      
+
+      It can be disabled via
+      ```kotlin
+      licenses {
+          reports {
+              html.useDarkMode.set(false)
+          }
+      }
+      ```
 * `JSON`
   generates a JSON file
 * `XML`

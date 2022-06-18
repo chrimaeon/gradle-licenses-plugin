@@ -263,6 +263,7 @@ abstract class LicensesTask : DefaultTask() {
                     ReportType.HTML -> HtmlReport(
                         libraries,
                         reports.html._stylesheet.orNull,
+                        reports.html.useDarkMode.get(),
                         logger
                     )
                     ReportType.JSON -> JsonReport(libraries)

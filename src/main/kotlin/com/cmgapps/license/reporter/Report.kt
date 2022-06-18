@@ -72,7 +72,7 @@ open class LicensesReport(internal val type: ReportType, task: Task, internal va
 
 class CustomizableHtmlReport(type: ReportType, task: Task, project: Project) : LicensesReport(type, task, project) {
 
-    internal var _stylesheet: Property<TextResource?> = task.project.objects.property(TextResource::class.java)
+    internal val _stylesheet: Property<TextResource?> = task.project.objects.property(TextResource::class.java)
 
     @Input
     fun stylesheet(css: String) {
@@ -83,6 +83,9 @@ class CustomizableHtmlReport(type: ReportType, task: Task, project: Project) : L
     fun stylesheet(css: File) {
         _stylesheet.set(project.resources.text.fromFile(css))
     }
+
+    @Input
+    val useDarkMode: Property<Boolean> = task.project.objects.property(Boolean::class.java).convention(true)
 
     override fun configure(
         config: (Action<in LicensesReport>)?,

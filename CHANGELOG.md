@@ -13,12 +13,12 @@
 
 ### Security
 
-## [4.5.0]
+## [4.6.0]
 ### Added
-- Better support for Android Variants
+- Dark Mode for HTML report
 
 ### Changed
-- Internal handling of the license mappings
+- Sort libraries by name or maven coordinated on HTML report
 
 ### Deprecated
 
@@ -27,6 +27,13 @@
 ### Fixed
 
 ### Security
+
+## [4.5.0]
+### Added
+- Better support for Android Variants
+
+### Changed
+- Internal handling of the license mappings
 
 ## [4.4.0]
 ### Added

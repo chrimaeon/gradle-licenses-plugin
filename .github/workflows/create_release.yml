@@ -27,6 +27,7 @@ jobs:
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_CHANNEL }}
+          publish: true
           text: "${{ github.ref_name }} on ${{ github.repository }} released! :raised_hands:"
           blocks: |
             [

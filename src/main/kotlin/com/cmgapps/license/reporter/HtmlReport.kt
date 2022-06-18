@@ -17,12 +17,15 @@ import org.gradle.api.resources.TextResource
 internal class HtmlReport(
     libraries: List<Library>,
     private val css: TextResource?,
+    private val useDarkMode: Boolean,
     private val logger: Logger
 ) : Report(libraries) {
 
     companion object {
         private const val DEFAULT_PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
         private const val DEFAULT_BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
+        private const val NIGHT_MODE_CSS =
+            "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}"
         private const val DEFAULT_CSS = "$DEFAULT_BODY_CSS$DEFAULT_PRE_CSS"
         private const val OPEN_SOURCE_LIBRARIES = "Open source licenses"
 
@@ -33,8 +36,11 @@ internal class HtmlReport(
         return html {
             head {
                 meta(mapOf("charset" to "UTF-8"))
+                if (useDarkMode) {
+                    meta(mapOf("name" to "color-scheme", "content" to "dark light"))
+                }
                 style {
-                    +(css?.asString() ?: DEFAULT_CSS)
+                    +(css?.asString() ?: (DEFAULT_CSS + if (useDarkMode) NIGHT_MODE_CSS else ""))
                 }
                 title {
                     +OPEN_SOURCE_LIBRARIES
@@ -48,11 +54,12 @@ internal class HtmlReport(
 
                 libraries.toLicensesMap().forEach { (license, libraries) ->
                     ul {
-                        libraries.asSequence().sortedBy { it.name }.forEach { library ->
-                            li {
-                                +(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
+                        libraries.asSequence().sortedBy { it.name ?: it.mavenCoordinates.identifierWithoutVersion }
+                            .forEach { library ->
+                                li {
+                                    +(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
+                                }
                             }
-                        }
                     }
 
                     when (license.id) {
