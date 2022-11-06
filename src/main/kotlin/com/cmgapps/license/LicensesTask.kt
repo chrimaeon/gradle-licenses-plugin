@@ -103,24 +103,25 @@ abstract class LicensesTask : DefaultTask() {
         project.configurations.remove(pomConfiguration)
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     protected open fun collectDependencies() {
-        val configurations = mutableSetOf<Configuration>()
+        buildSet {
+            getAllProjects().forEach { project ->
+                project.configurations.findByName("compile")?.let {
+                    add(project.configurations.getByName(it.name))
+                }
 
-        _allProjects.forEach { project ->
-            project.configurations.findByName("compile")?.let {
-                configurations.add(project.configurations.getByName(it.name))
-            }
+                project.configurations.findByName("api")?.let {
+                    add(project.configurations.getByName(it.name))
+                }
 
-            project.configurations.findByName("api")?.let {
-                configurations.add(project.configurations.getByName(it.name))
+                project.configurations.findByName("implementation")?.let {
+                    add(project.configurations.getByName(it.name))
+                }
             }
-
-            project.configurations.findByName("implementation")?.let {
-                configurations.add(project.configurations.getByName(it.name))
-            }
+        }.let {
+            addConfigurations(it)
         }
-
-        addConfigurations(configurations)
     }
 
     protected fun addConfigurations(configurations: Set<Configuration>) {
@@ -137,7 +138,6 @@ abstract class LicensesTask : DefaultTask() {
 
     private fun generateLibraries(): List<Library> {
         return pomConfiguration.resolvedConfiguration.lenientConfiguration.artifacts.map {
-
             val model = getPomModel(it.file)
             val licenses = model.findLicenses()
 
@@ -149,7 +149,7 @@ abstract class LicensesTask : DefaultTask() {
                 MavenCoordinates(
                     model.findGroupId().orEmpty(),
                     model.findArtifactId().orEmpty(),
-                    model.findVersion()?.let { version -> ComparableVersion(version) } ?: ComparableVersion(""),
+                    model.findVersion()?.let { version -> ComparableVersion(version) } ?: ComparableVersion("")
                 ),
                 model.name,
                 model.findDescription(),
@@ -178,7 +178,7 @@ abstract class LicensesTask : DefaultTask() {
                     License(
                         getLicenseId(url, name),
                         name = name,
-                        url = url,
+                        url = url
                     )
                 } catch (ignore: Exception) {
                     logger.warn("$name dependency has an invalid license URL; skipping license")
@@ -198,7 +198,6 @@ abstract class LicensesTask : DefaultTask() {
     }
 
     private fun Parent.getModel(): Model {
-
         val dependency = "$groupId:$artifactId:$version@pom"
 
         project.configurations.create(TEMP_POM_CONFIGURATION).dependencies.add(
@@ -221,6 +220,7 @@ abstract class LicensesTask : DefaultTask() {
             } else {
                 parent.getModel().findVersion()
             }
+
         else -> null
     }
 
@@ -253,19 +253,23 @@ abstract class LicensesTask : DefaultTask() {
                     ReportType.CSV -> CsvReport(libraries)
                     ReportType.CUSTOM -> {
                         val customReport = reports.custom.action
-                        if (customReport != null)
+                        if (customReport != null) {
                             CustomReport(
                                 libraries,
                                 customReport
                             )
-                        else null
+                        } else {
+                            null
+                        }
                     }
+
                     ReportType.HTML -> HtmlReport(
                         libraries,
                         reports.html._stylesheet.orNull,
                         reports.html.useDarkMode.get(),
                         logger
                     )
+
                     ReportType.JSON -> JsonReport(libraries)
                     ReportType.MARKDOWN -> MarkdownReport(libraries, logger)
                     ReportType.TEXT -> TextReport(libraries)
@@ -395,44 +399,39 @@ abstract class AndroidLicensesTask : LicensesTask() {
     @Internal
     lateinit var productFlavors: List<String>
 
+    @OptIn(ExperimentalStdlibApi::class)
     override fun collectDependencies() {
-
         super.collectDependencies()
 
-        val configurations = mutableSetOf<Configuration>()
+        buildSet {
+            getAllProjects().forEach { project ->
+                addAll(addConfiguration(project, buildType))
 
-        getAllProjects().forEach { project ->
-            project.configurations.find { it.name == "${buildType}Compile" }?.let {
-                configurations.add(it)
-            }
-
-            project.configurations.find { it.name == "${buildType}Api" }?.let {
-                configurations.add(it)
-            }
-
-            project.configurations.find { it.name == "${buildType}Implementation" }?.let {
-                configurations.add(it)
-            }
-
-            productFlavors.forEach { flavor ->
-                // Works for productFlavors and productFlavors with dimensions
-                if (variant.capitalize().contains(flavor.capitalize())) {
-                    project.configurations.find { it.name == "${flavor}Compile" }?.let {
-                        configurations.add(it)
-                    }
-
-                    project.configurations.find { it.name == "${flavor}Api" }?.let {
-                        configurations.add(it)
-                    }
-
-                    project.configurations.find { it.name == "${flavor}Implementation" }?.let {
-                        configurations.add(it)
+                productFlavors.forEach { flavor ->
+                    // Works for productFlavors and productFlavors with dimensions
+                    if (variant.capitalize().contains(flavor.capitalize())) {
+                        addAll(addConfiguration(project, flavor))
                     }
                 }
             }
+        }.let {
+            addConfigurations(it)
+        }
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun addConfiguration(project: Project, type: String) = buildSet {
+        project.configurations.find { it.name == "${type}Compile" }?.let {
+            add(it)
         }
 
-        addConfigurations(configurations)
+        project.configurations.find { it.name == "${type}Api" }?.let {
+            add(it)
+        }
+
+        project.configurations.find { it.name == "${type}Implementation" }?.let {
+            add(it)
+        }
     }
 }
 
