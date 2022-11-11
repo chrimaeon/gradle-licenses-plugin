@@ -36,7 +36,7 @@ jobs:
         run: ./gradlew dependencies
 
       - name: Build & Test
-        run: ./gradlew check koverHtmlReport koverVerify
+        run: ./gradlew check koverReport koverVerify
 
       - name: Archive Test results
         if: ${{ failure() }}
