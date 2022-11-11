@@ -18,7 +18,7 @@ internal class HtmlReport(
     libraries: List<Library>,
     private val css: TextResource?,
     private val useDarkMode: Boolean,
-    private val logger: Logger
+    private val logger: Logger,
 ) : Report(libraries) {
 
     companion object {

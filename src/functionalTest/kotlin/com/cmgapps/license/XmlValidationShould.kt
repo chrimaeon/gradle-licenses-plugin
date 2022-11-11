@@ -60,7 +60,7 @@ class XmlValidationShould {
 
         assertThat(
             Input.fromFile("$reportFolder/licenses.xml"),
-            valid(Input.fromURL(URL("https://www.cmgapps.com/xsd/licenses.xsd")))
+            valid(Input.fromURL(URL("https://www.cmgapps.com/xsd/licenses.xsd"))),
         )
     }
 }

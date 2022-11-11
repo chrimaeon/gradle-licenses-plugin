@@ -27,9 +27,9 @@ class CsvReportShould {
                 "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
                     "Test lib 1,1.0,test.group:test.artifact:1.0,proper description,Apache-2.0,Apache 2.0,https://www.apache.org/licenses/LICENSE-2.0.txt\r\n" +
                     "Test lib 1,1.0,test.group:test.artifact:1.0,proper description,MIT,MIT License,https://opensource.org/licenses/MIT\r\n" +
-                    "Test lib 2,2.3.4,group.test2:artifact:2.3.4,descriptions of lib 2,Apache-2.0,\"The Apache Software License, Version 2.0\",https://www.apache.org/licenses/LICENSE-2.0.txt\r\n"
+                    "Test lib 2,2.3.4,group.test2:artifact:2.3.4,descriptions of lib 2,Apache-2.0,\"The Apache Software License, Version 2.0\",https://www.apache.org/licenses/LICENSE-2.0.txt\r\n",
 
-            )
+            ),
         )
     }
 
@@ -40,7 +40,8 @@ class CsvReportShould {
             Library(
                 MavenCoordinates("groupC", "articfactA", ComparableVersion("version with a \n in it")),
                 name = "Name with a , in it",
-                description = "description with \r in it", listOf(license)
+                description = "description with \r in it",
+                listOf(license),
             )
         val result = CsvReport(listOf(library)).generate()
 
@@ -48,8 +49,8 @@ class CsvReportShould {
             result,
             `is`(
                 "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
-                    "\"Name with a , in it\",\"version with a \n in it\",\"groupC:articfactA:version with a \n in it\",\"description with \r in it\",,\"License name with a \"\" in it\",just a plain url\r\n"
-            )
+                    "\"Name with a , in it\",\"version with a \n in it\",\"groupC:articfactA:version with a \n in it\",\"description with \r in it\",,\"License name with a \"\" in it\",just a plain url\r\n",
+            ),
         )
     }
 }

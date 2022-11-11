@@ -44,7 +44,7 @@ class LicensePluginAndroidShould {
     fun setUp() {
         val pluginClasspathResource = javaClass.classLoader.getResourceAsStream("plugin-under-test-metadata.properties")
             ?: throw IllegalStateException(
-                "Did not find plugin classpath resource, run `:pluginUnderTestMetadata` task."
+                "Did not find plugin classpath resource, run `:pluginUnderTestMetadata` task.",
             )
         pluginClasspath = Properties().run {
             load(pluginClasspathResource)
@@ -101,7 +101,7 @@ class LicensePluginAndroidShould {
                 applicationId 'com.example'
               }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = gradleRunner.withArguments(":$taskName").build()
@@ -198,8 +198,8 @@ class LicensePluginAndroidShould {
         assertThat(
             File("$reportFolder/licenseDebugReport/licenses.txt").readText().trim(),
             `is`(
-                "Licenses\n" + "├─ Fake dependency name:1.0.0\n" + "│  ├─ License: Some license\n" + "│  └─ URL: http://website.tld/\n" + "└─ group:noname:1.0.0\n" + "   ├─ License: Some license\n" + "   └─ URL: http://website.tld/"
-            )
+                "Licenses\n" + "├─ Fake dependency name:1.0.0\n" + "│  ├─ License: Some license\n" + "│  └─ URL: http://website.tld/\n" + "└─ group:noname:1.0.0\n" + "   ├─ License: Some license\n" + "   └─ URL: http://website.tld/",
+            ),
         )
     }
 
@@ -223,7 +223,7 @@ class LicensePluginAndroidShould {
             android {
               compileSdkVersion 28
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val taskName = ":licenseDebugReport"
@@ -252,7 +252,7 @@ class LicensePluginAndroidShould {
             android {
               compileSdkVersion 28
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val taskName = ":licenseDebugReport"

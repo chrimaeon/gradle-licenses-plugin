@@ -51,7 +51,8 @@ enum class LicenseId(val spdxLicenseIdentifier: String?) {
     LGPL_3("LGPL-3.0-only"),
     MIT("MIT"),
     MPL_2("MPL-2.0"),
-    UNKNOWN(null);
+    UNKNOWN(null),
+    ;
 
     companion object {
         @JvmStatic

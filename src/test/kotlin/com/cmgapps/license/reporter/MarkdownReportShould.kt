@@ -45,8 +45,8 @@ class MarkdownReportShould {
                     |${getFileContent("mit.txt")}
                     |```
                     |
-                """.trimMargin()
-            )
+                """.trimMargin(),
+            ),
         )
     }
 
@@ -61,11 +61,11 @@ class MarkdownReportShould {
                     name = "Lib with invalid license",
                     description = null,
                     licenses = listOf(
-                        License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo")
+                        License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
                     ),
-                )
+                ),
             ),
-            logger
+            logger,
         ).generate()
         assertThat(
             result,
@@ -79,8 +79,8 @@ class MarkdownReportShould {
                     |http://www.license.foo
                     |```
                     |
-                """.trimMargin()
-            )
+                """.trimMargin(),
+            ),
         )
     }
 
@@ -95,11 +95,11 @@ class MarkdownReportShould {
                     name = "Lib with invalid license",
                     description = null,
                     licenses = listOf(
-                        License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo")
+                        License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
                     ),
-                )
+                ),
             ),
-            logger
+            logger,
         ).generate()
 
         verify(logger).warn(
@@ -108,7 +108,7 @@ class MarkdownReportShould {
                |used by 'test.group:test.artifact:1.0'
                |
                |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
-            """.trimMargin()
+            """.trimMargin(),
         )
     }
 }

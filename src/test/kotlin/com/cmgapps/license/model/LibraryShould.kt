@@ -32,8 +32,8 @@ internal class LibraryShould {
                 MavenCoordinates("lib.group", "my.artifact", ComparableVersion("1.0.0-alpha-4")),
                 name = "Lib name",
                 description = "description",
-                licenses = listOf(License(LicenseId.UNKNOWN, "License name", "https://domain.com"))
-            )
+                licenses = listOf(License(LicenseId.UNKNOWN, "License name", "https://domain.com")),
+            ),
         )
         assertThat(
             jsonString,
@@ -53,8 +53,8 @@ internal class LibraryShould {
                     "\"url\":\"https://domain.com\"" +
                     "}" +
                     "]" +
-                    "}"
-            )
+                    "}",
+            ),
         )
     }
 
@@ -79,7 +79,7 @@ internal class LibraryShould {
                     |    }
                     |  ]
                     |}
-                """.trimMargin()
+                """.trimMargin(),
             )
         assertThat(
             lib,
@@ -88,9 +88,9 @@ internal class LibraryShould {
                     MavenCoordinates("lib.group", "my.artifact", ComparableVersion("1.0.0-alpha-4")),
                     name = "Lib name",
                     description = "description",
-                    licenses = listOf(License(LicenseId.UNKNOWN, "License name", "https://domain.com"))
-                )
-            )
+                    licenses = listOf(License(LicenseId.UNKNOWN, "License name", "https://domain.com")),
+                ),
+            ),
         )
     }
 
@@ -100,7 +100,7 @@ internal class LibraryShould {
             MavenCoordinates("lib.group", "my.artifact", ComparableVersion("1.0.0-alpha-4")),
             name = "Lib name",
             description = "description",
-            licenses = listOf(License(LicenseId.UNKNOWN, "License name", "https://domain.com"))
+            licenses = listOf(License(LicenseId.UNKNOWN, "License name", "https://domain.com")),
         )
         assertThat(json.decodeFromString<Library>(json.encodeToString(lib)), `is`(lib))
     }
@@ -139,7 +139,7 @@ internal class LibraryShould {
                 MavenCoordinates("groupA", "artifactA", ComparableVersion("1.0")),
                 name = "A",
                 description = "desc",
-                licenses = emptyList()
+                licenses = emptyList(),
             ),
             Library(
                 MavenCoordinates("groupA", "artifactC", ComparableVersion("2.0")),
@@ -151,7 +151,7 @@ internal class LibraryShould {
                 MavenCoordinates("groupA", "artifactB", ComparableVersion("0.3-alpha4")),
                 name = "A",
                 description = null,
-                licenses = emptyList()
+                licenses = emptyList(),
             ),
             Library(
                 MavenCoordinates("groupC", "artifactA", ComparableVersion("13")),
@@ -161,9 +161,9 @@ internal class LibraryShould {
                     License(
                         LicenseId.UNKNOWN,
                         "license",
-                        "http://domain.tld"
-                    )
-                )
+                        "http://domain.tld",
+                    ),
+                ),
             ),
         ).sortedWith(Library.NameComparator())
         assertThat(
@@ -179,13 +179,13 @@ internal class LibraryShould {
                     MavenCoordinates("groupA", "artifactA", ComparableVersion("1.0")),
                     name = "A",
                     description = "desc",
-                    licenses = emptyList()
+                    licenses = emptyList(),
                 ),
                 Library(
                     MavenCoordinates("groupA", "artifactB", ComparableVersion("0.3-alpha4")),
                     name = "A",
                     description = null,
-                    licenses = emptyList()
+                    licenses = emptyList(),
                 ),
                 Library(
                     MavenCoordinates("groupB", "artifactA", ComparableVersion("1.0")),
@@ -201,11 +201,11 @@ internal class LibraryShould {
                         License(
                             LicenseId.UNKNOWN,
                             "license",
-                            "http://domain.tld"
-                        )
-                    )
+                            "http://domain.tld",
+                        ),
+                    ),
                 ),
-            )
+            ),
         )
     }
 
@@ -222,7 +222,7 @@ internal class LibraryShould {
                 MavenCoordinates("groupA", "artifactA", ComparableVersion("1.0")),
                 name = "A",
                 description = "desc",
-                licenses = emptyList()
+                licenses = emptyList(),
             ),
             Library(
                 MavenCoordinates("groupA", "artifactC", ComparableVersion("2.0")),
@@ -240,7 +240,7 @@ internal class LibraryShould {
                 MavenCoordinates("groupA", "artifactB", ComparableVersion("0.3-alpha4")),
                 name = "A",
                 description = null,
-                licenses = emptyList()
+                licenses = emptyList(),
             ),
             Library(
                 MavenCoordinates("groupC", "artifactA", ComparableVersion("13")),
@@ -250,9 +250,9 @@ internal class LibraryShould {
                     License(
                         LicenseId.UNKNOWN,
                         "license",
-                        "http://domain.tld"
-                    )
-                )
+                        "http://domain.tld",
+                    ),
+                ),
             ),
         ).sortedWith(Library.MavenCoordinatesComparator())
         assertThat(
@@ -262,13 +262,13 @@ internal class LibraryShould {
                     MavenCoordinates("groupA", "artifactA", ComparableVersion("1.0")),
                     name = "A",
                     description = "desc",
-                    licenses = emptyList()
+                    licenses = emptyList(),
                 ),
                 Library(
                     MavenCoordinates("groupA", "artifactB", ComparableVersion("0.3-alpha4")),
                     name = "A",
                     description = null,
-                    licenses = emptyList()
+                    licenses = emptyList(),
                 ),
                 Library(
                     MavenCoordinates("groupA", "artifactC", ComparableVersion("3.0.1")),
@@ -296,11 +296,11 @@ internal class LibraryShould {
                         License(
                             LicenseId.UNKNOWN,
                             "license",
-                            "http://domain.tld"
-                        )
-                    )
+                            "http://domain.tld",
+                        ),
+                    ),
                 ),
-            )
+            ),
         )
     }
 }

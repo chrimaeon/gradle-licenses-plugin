@@ -31,7 +31,7 @@ class HtmlReportShould {
             testLibraries,
             null,
             false,
-            logger
+            logger,
         ).generate()
 
         assertThat(
@@ -60,8 +60,8 @@ class HtmlReportShould {
                     getFileContent("mit.txt") +
                     "</pre>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 
@@ -73,7 +73,7 @@ class HtmlReportShould {
             testLibraries,
             null,
             true,
-            logger
+            logger,
         ).generate()
 
         assertThat(
@@ -107,8 +107,8 @@ class HtmlReportShould {
                     getFileContent("mit.txt") +
                     "</pre>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 
@@ -123,13 +123,13 @@ class HtmlReportShould {
                     name = "Lib with invalid license",
                     description = null,
                     licenses = listOf(
-                        License(LicenseId.UNKNOWN, name = "foo", url = "https://www.license.foo")
+                        License(LicenseId.UNKNOWN, name = "foo", url = "https://www.license.foo"),
                     ),
-                )
+                ),
             ),
             null,
             false,
-            logger
+            logger,
         ).generate()
 
         verify(logger).warn(
@@ -138,7 +138,7 @@ class HtmlReportShould {
                |used by 'test.group:test.artifact:1.0'
                |
                |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
-            """.trimMargin()
+            """.trimMargin(),
         )
     }
 }

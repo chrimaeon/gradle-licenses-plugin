@@ -34,15 +34,17 @@ class LicensesTaskShould {
         project.repositories.add(
             project.repositories.maven {
                 it.setUrl(mavenRepoUrl)
-            }
+            },
         )
+        project.plugins.apply("java")
+
+        project.configurations.create("api")
         project.configurations.create("compile")
-        project.dependencies.add("compile", "group:name:1.0.0")
+        project.dependencies.add("implementation", "group:name:1.0.0")
     }
 
     @Test
     fun `generate HTML Report`() {
-
         val outputFile = File(reportFolder, "licenses.html")
 
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
@@ -72,14 +74,13 @@ class LicensesTaskShould {
                     "<a href=\"http://website.tld/\">http://website.tld/</a>" +
                     "</div>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 
     @Test
     fun `generate HTML Report wih custom CSS`() {
-
         val outputFile = File(reportFolder, "licenses.html")
 
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
@@ -110,14 +111,13 @@ class LicensesTaskShould {
                     "<a href=\"http://website.tld/\">http://website.tld/</a>" +
                     "</div>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 
     @Test
     fun `generate JSON Report`() {
-
         val outputFile = File(reportFolder, "licenses.json")
 
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
@@ -150,14 +150,13 @@ class LicensesTaskShould {
                         ]
                     }
                 ]
-                """.trimIndent()
-            )
+                """.trimIndent(),
+            ),
         )
     }
 
     @Test
     fun `generate XML Report`() {
-
         val outputFile = File(reportFolder, "licenses.xml")
 
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
@@ -191,8 +190,8 @@ class LicensesTaskShould {
                       </library>
                     </libraries>
                     
-                """.trimIndent()
-            )
+                """.trimIndent(),
+            ),
         )
     }
 
@@ -219,8 +218,8 @@ class LicensesTaskShould {
                     http://website.tld/
                     ```
                     
-                """.trimIndent()
-            )
+                """.trimIndent(),
+            ),
         )
     }
 
@@ -241,8 +240,8 @@ class LicensesTaskShould {
                 "Licenses\n" +
                     "└─ Fake dependency name:1.0.0\n" +
                     "   ├─ License: Some license\n" +
-                    "   └─ URL: http://website.tld/"
-            )
+                    "   └─ URL: http://website.tld/",
+            ),
         )
     }
 
@@ -261,8 +260,8 @@ class LicensesTaskShould {
             outputFile.readText(),
             `is`(
                 "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
-                    "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/\r\n"
-            )
+                    "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/\r\n",
+            ),
         )
     }
 
@@ -315,8 +314,8 @@ class LicensesTaskShould {
                     "<a href=\"http://website.tld/\">http://website.tld/</a>" +
                     "</div>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 
@@ -348,7 +347,7 @@ class LicensesTaskShould {
     fun `sort libraries`() {
         val outputFile = File(reportFolder, "licenses.txt")
 
-        project.dependencies.add("compile", "group:another:2.0.0")
+        project.dependencies.add("api", "group:another:2.0.0")
         project.dependencies.add("compile", "group:other:1.0.0")
         val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
             task.reports {
@@ -374,8 +373,93 @@ class LicensesTaskShould {
                     "│  └─ URL: http://website.tld/\n" +
                     "└─ Fake dependency other:1.0.0\n" +
                     "   ├─ License: Some license\n" +
-                    "   └─ URL: http://website.tld/"
-            )
+                    "   └─ URL: http://website.tld/",
+            ),
+        )
+    }
+
+    @Test
+    fun `handle android project`() {
+        val outputFile = File(reportFolder, "licenses.txt")
+
+        val task = project.tasks.create("licensesReport", AndroidLicensesTask::class.java) { task ->
+            task.buildType = "debug"
+            task.variant = "google"
+            task.productFlavors = listOf("google", "amazon")
+            task.reports {
+                it.html.enabled = false
+                it.csv {
+                    it.enabled = true
+                    it.destination = outputFile
+                }
+            }
+        }
+
+        task.licensesReport()
+
+        assertThat(
+            outputFile.readText(),
+            `is`(
+                "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
+                    "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/\r\n",
+            ),
+        )
+    }
+
+    @Test
+    fun `handle multiplatform project`() {
+        val outputFile = File(reportFolder, "licenses.csv")
+
+        val task = project.tasks.create("licensesReport", KotlinMultiplatformTask::class.java) { task ->
+            task.targetNames = listOf("jvm", "js")
+            task.reports {
+                it.html.enabled = false
+                it.csv {
+                    it.enabled = true
+                    it.destination = outputFile
+                }
+            }
+        }
+
+        task.licensesReport()
+
+        assertThat(
+            outputFile.readText(),
+            `is`(
+                "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
+                    "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/\r\n",
+            ),
+        )
+    }
+
+    @Test
+    fun `handle parent version`() {
+        val outputFile = File(reportFolder, "licenses.csv")
+
+        project.dependencies.add(
+            "implementation",
+            "group:has-parent:1.0.0",
+        )
+
+        val task = project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+            task.reports {
+                it.html.enabled = false
+                it.csv {
+                    it.enabled = true
+                    it.destination = outputFile
+                }
+            }
+        }
+
+        task.licensesReport()
+
+        assertThat(
+            outputFile.readText(),
+            `is`(
+                "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
+                    "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/\r\n" +
+                    "Has Parent,1.0.0,group:has-parent:1.0.0,,Apache-2.0,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt\r\n",
+            ),
         )
     }
 }

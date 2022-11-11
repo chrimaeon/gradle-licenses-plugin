@@ -13,7 +13,7 @@ internal class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : R
             for (library in libraries) {
                 library(
                     id = library.mavenCoordinates.toString(),
-                    version = library.mavenCoordinates.version.toString()
+                    version = library.mavenCoordinates.version.toString(),
                 ) {
                     name {
                         +(library.name ?: library.mavenCoordinates.toString())

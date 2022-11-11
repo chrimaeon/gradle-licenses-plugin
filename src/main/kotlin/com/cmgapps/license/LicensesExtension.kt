@@ -59,5 +59,5 @@ enum class OutputType {
     TEXT,
     MD,
     CSV,
-    CUSTOM
+    CUSTOM,
 }

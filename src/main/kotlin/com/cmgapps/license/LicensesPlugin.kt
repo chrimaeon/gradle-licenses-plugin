@@ -58,7 +58,7 @@ class LicensesPlugin : Plugin<Project> {
             "com.android.application",
             "com.android.library",
             "com.android.feature",
-            "com.android.dynamic-feature"
+            "com.android.dynamic-feature",
         )
 
         @JvmStatic
@@ -138,7 +138,7 @@ class LicensesPlugin : Plugin<Project> {
                 project.tasks.register(
                     "licenseMultiplatform${target.name.capitalize()}Report",
                     KotlinMultiplatformTask::class.java,
-                    configuration
+                    configuration,
                 )
             }
 
@@ -159,7 +159,7 @@ class LicensesPlugin : Plugin<Project> {
             project.tasks.register(
                 "licenseMultiplatformReport",
                 KotlinMultiplatformTask::class.java,
-                configuration
+                configuration,
             )
         }
 
