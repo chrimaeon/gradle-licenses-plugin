@@ -56,6 +56,7 @@ idea {
 }
 
 java {
+    withSourcesJar()
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
@@ -95,11 +96,6 @@ gradlePlugin {
     testSourceSets(functionalTestSourceSet)
 }
 
-val sourcesJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("sources")
-    from(sourceSets.main.get().allSource)
-}
-
 val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
     from(tasks.dokkaJavadoc)
@@ -108,10 +104,6 @@ val javadocJar by tasks.registering(Jar::class) {
 publishing {
     publications {
         register<MavenPublication>("pluginMaven") {
-            // component registered by gradle-plugin plugin
-            artifact(sourcesJar.get())
-            artifact(javadocJar.get())
-
             val pomArtifactId: String by pomProperties
 
             artifactId = pomArtifactId
@@ -158,7 +150,9 @@ publishing {
             val credentials = Properties().apply {
                 val credFile = projectDir.resolve("credentials.properties")
                 if (credFile.exists()) {
-                    load(credFile.inputStream())
+                    credFile.inputStream().use {
+                        load(it)
+                    }
                 }
             }
             credentials {
@@ -175,6 +169,7 @@ signing {
 
 changelog {
     version.set(versionName)
+    header.set(provider { version.get() })
 }
 
 kover {
