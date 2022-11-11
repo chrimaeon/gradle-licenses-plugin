@@ -7,7 +7,10 @@
 import com.cmgapps.gradle.logResults
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.github.benmanes.gradle.versions.updates.gradle.GradleReleaseChannel
-import kotlinx.kover.api.VerificationValueType.COVERED_LINES_PERCENTAGE
+import kotlinx.kover.api.CounterType
+import kotlinx.kover.api.DefaultJacocoEngine
+import kotlinx.kover.api.KoverTaskExtension
+import kotlinx.kover.api.VerificationValueType.COVERED_PERCENTAGE
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
 import java.util.Properties
@@ -17,12 +20,19 @@ plugins {
     `java-gradle-plugin`
     `maven-publish`
     signing
+    @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.kotlin.jvm)
+    @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.kotlin.serialization)
+    @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.versions)
+    @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.gradle.pluginPublish)
+    @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.jetbrains.dokka)
+    @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.jetbrains.changelog)
+    @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.kotlinx.kover)
 }
 
@@ -168,7 +178,17 @@ changelog {
 }
 
 kover {
-    coverageEngine.set(kotlinx.kover.api.CoverageEngine.JACOCO)
+    engine.set(DefaultJacocoEngine)
+    verify {
+        rule {
+            name = "Minimal Line coverage"
+            bound {
+                minValue = 80
+                counter = CounterType.LINE
+                valueType = COVERED_PERCENTAGE
+            }
+        }
+    }
 }
 
 tasks {
@@ -176,6 +196,10 @@ tasks {
         group = "verification"
         testClassesDirs = functionalTestSourceSet.output.classesDirs
         classpath = functionalTestSourceSet.runtimeClasspath
+
+        extensions.configure(KoverTaskExtension::class) {
+            isDisabled.set(true)
+        }
     }
 
     register<JavaExec>("ktlintFormat") {
@@ -217,8 +241,8 @@ tasks {
                     "Built-Date" to Date(),
                     "Built-JDK" to System.getProperty("java.version"),
                     "Built-Gradle" to gradle.gradleVersion,
-                    "Built-Kotlin" to libs.versions.kotlin
-                )
+                    "Built-Kotlin" to libs.versions.kotlin,
+                ),
             )
         }
     }
@@ -253,7 +277,7 @@ tasks {
 
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "7.4.2"
+        gradleVersion = libs.versions.gradle.get()
     }
 
     val updateReadme by registering {
@@ -280,16 +304,6 @@ tasks {
     patchChangelog {
         dependsOn(updateReadme)
     }
-
-    koverVerify {
-        rule {
-            name = "Minimal Line coverage"
-            bound {
-                minValue = 80
-                valueType = COVERED_LINES_PERCENTAGE
-            }
-        }
-    }
 }
 
 @Suppress("UnstableApiUsage")
@@ -313,6 +327,7 @@ dependencies {
     testImplementation(libs.hamcrest)
     testImplementation(libs.kotlin.reflect)
     testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.android.gradlePlugin)
 
     "functionalTestImplementation"(libs.jUnit) {
         exclude(group = "org.hamcrest")
