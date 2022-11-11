@@ -59,8 +59,8 @@ class JsonReportShould {
                         ]
                     }
                 ]
-                """.trimIndent()
-            )
+                """.trimIndent(),
+            ),
         )
     }
 }

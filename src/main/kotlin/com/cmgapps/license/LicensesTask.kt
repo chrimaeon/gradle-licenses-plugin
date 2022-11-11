@@ -130,7 +130,7 @@ abstract class LicensesTask : DefaultTask() {
                 "${dep.group}:${dep.name}:${dep.version}@pom"
             }.forEach { pom ->
                 pomConfiguration.dependencies.add(
-                    project.dependencies.add(POM_CONFIGURATION, pom)
+                    project.dependencies.add(POM_CONFIGURATION, pom),
                 )
             }
         }
@@ -149,11 +149,11 @@ abstract class LicensesTask : DefaultTask() {
                 MavenCoordinates(
                     model.findGroupId().orEmpty(),
                     model.findArtifactId().orEmpty(),
-                    model.findVersion()?.let { version -> ComparableVersion(version) } ?: ComparableVersion("")
+                    model.findVersion()?.let { version -> ComparableVersion(version) } ?: ComparableVersion(""),
                 ),
                 model.name,
                 model.findDescription(),
-                licenses
+                licenses,
             )
         }
             .sortedWith(Library.NameComparator())
@@ -178,7 +178,7 @@ abstract class LicensesTask : DefaultTask() {
                     License(
                         getLicenseId(url, name),
                         name = name,
-                        url = url
+                        url = url,
                     )
                 } catch (ignore: Exception) {
                     logger.warn("$name dependency has an invalid license URL; skipping license")
@@ -201,7 +201,7 @@ abstract class LicensesTask : DefaultTask() {
         val dependency = "$groupId:$artifactId:$version@pom"
 
         project.configurations.create(TEMP_POM_CONFIGURATION).dependencies.add(
-            project.dependencies.add(TEMP_POM_CONFIGURATION, dependency)
+            project.dependencies.add(TEMP_POM_CONFIGURATION, dependency),
         )
 
         val pomFile = project.configurations.getByName(TEMP_POM_CONFIGURATION).incoming
@@ -256,7 +256,7 @@ abstract class LicensesTask : DefaultTask() {
                         if (customReport != null) {
                             CustomReport(
                                 libraries,
-                                customReport
+                                customReport,
                             )
                         } else {
                             null
@@ -267,7 +267,7 @@ abstract class LicensesTask : DefaultTask() {
                         libraries,
                         reports.html._stylesheet.orNull,
                         reports.html.useDarkMode.get(),
-                        logger
+                        logger,
                     )
 
                     ReportType.JSON -> JsonReport(libraries)
@@ -286,7 +286,7 @@ abstract class LicensesTask : DefaultTask() {
             prepare()
             writeText(report.generate())
             logger.lifecycle(
-                "Wrote ${this@writeFileReport.name.uppercase(Locale.US)} report to ${getClickableFileUrl(this)}."
+                "Wrote ${this@writeFileReport.name.uppercase(Locale.US)} report to ${getClickableFileUrl(this)}.",
             )
         }
     }
@@ -363,7 +363,7 @@ abstract class LicensesTask : DefaultTask() {
             markdown,
             text,
             xml,
-            custom
+            custom,
         )
 
         private inner class LicenseReportDelegate<T : LicensesReport>(private val reportType: ReportType) :

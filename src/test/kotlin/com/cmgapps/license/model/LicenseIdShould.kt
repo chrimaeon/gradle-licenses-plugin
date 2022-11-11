@@ -46,8 +46,8 @@ class LicenseIdShould {
                     "LGPL-3.0-only",
                     "MIT",
                     "MPL-2.0",
-                )
-            )
+                ),
+            ),
         )
     }
 
@@ -103,8 +103,8 @@ class LicenseIdShould {
                     "lgpl-3.0.txt",
                     "mit.txt",
                     "mpl-2.0.txt",
-                )
-            )
+                ),
+            ),
         )
     }
 

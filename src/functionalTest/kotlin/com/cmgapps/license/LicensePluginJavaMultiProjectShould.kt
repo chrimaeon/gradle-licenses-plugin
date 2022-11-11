@@ -134,8 +134,8 @@ class LicensePluginJavaMultiProjectShould {
                     getFileContent("apache-2.0.txt") +
                     "</pre>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 
@@ -197,8 +197,8 @@ class LicensePluginJavaMultiProjectShould {
                     getFileContent("apache-2.0.txt") +
                     "</pre>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 
@@ -257,8 +257,8 @@ class LicensePluginJavaMultiProjectShould {
                     "<h3>Notice for packages:</h3>" +
                     "<ul><li>Fake dependency name</li></ul><div class=\"license\"><p>Some license</p><a href=\"http://website.tld/\">http://website.tld/</a></div>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 }

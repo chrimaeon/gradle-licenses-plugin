@@ -35,8 +35,8 @@ class TextReportShould {
                        ├─ License: The Apache Software License, Version 2.0
                        ├─ SPDX-License-Identifier: Apache-2.0
                        └─ URL: https://www.apache.org/licenses/LICENSE-2.0.txt
-                """.trimIndent()
-            )
+                """.trimIndent(),
+            ),
         )
     }
 
@@ -48,15 +48,15 @@ class TextReportShould {
                     MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
                     "Test lib 1",
                     "proper description",
-                    emptyList()
+                    emptyList(),
                 ),
                 Library(
                     MavenCoordinates("group.test2", "artifact", ComparableVersion("2.3.4")),
                     "Test lib 2",
                     "descriptions of lib 2",
-                    emptyList()
-                )
-            )
+                    emptyList(),
+                ),
+            ),
         ).generate()
         assertThat(
             report,
@@ -67,8 +67,8 @@ class TextReportShould {
                     │  └─ License: Undefined
                     └─ Test lib 2:2.3.4
                        └─ License: Undefined
-                """.trimIndent()
-            )
+                """.trimIndent(),
+            ),
         )
     }
 }

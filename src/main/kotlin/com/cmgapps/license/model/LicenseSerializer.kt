@@ -24,7 +24,7 @@ object LicenseSerializer : KSerializer<License> {
         val surrogate = LicenseSurrogate(
             spdxLicenseIdentifier = value.id.spdxLicenseIdentifier,
             name = value.name,
-            url = value.url
+            url = value.url,
         )
 
         encoder.encodeSerializableValue(LicenseSurrogate.serializer(), surrogate)
@@ -35,7 +35,7 @@ object LicenseSerializer : KSerializer<License> {
         return License(
             id = LicenseId.fromSpdxLicenseIdentifier(surrogate.spdxLicenseIdentifier),
             name = surrogate.name,
-            url = surrogate.url
+            url = surrogate.url,
         )
     }
 }

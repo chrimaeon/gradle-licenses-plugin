@@ -24,7 +24,7 @@ internal class CsvReport(libraries: List<Library>) : Report(libraries) {
                         library.description,
                         license.id.spdxLicenseIdentifier,
                         license.name,
-                        license.url
+                        license.url,
                     )
                 }
             }

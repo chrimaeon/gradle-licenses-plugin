@@ -172,5 +172,5 @@ enum class ReportType(val extension: String) {
     MARKDOWN("md"),
     TEXT("txt"),
     XML("xml"),
-    CUSTOM("")
+    CUSTOM(""),
 }

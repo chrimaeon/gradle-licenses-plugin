@@ -60,7 +60,7 @@ class LicensePluginJavaShould {
     }
 
     @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - Gradle Version = {0}")
-    @ValueSource(strings = ["6.8", "6.9", "7.0", "7.1", "7.2", "7.3", "7.4"])
+    @ValueSource(strings = ["6.8", "6.9", "7.0", "7.1", "7.2", "7.3", "7.4", "7.5"])
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
         val result = gradleRunner
             .withGradleVersion(version)
@@ -93,7 +93,7 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL))
+            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)),
         )
         assertThat(
             File("$reportFolder/licenses.html").readText().trim(),
@@ -113,8 +113,8 @@ class LicensePluginJavaShould {
                     "<body>" +
                     "<h3>Notice for packages:</h3>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 
@@ -135,7 +135,7 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL))
+            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)),
         )
         assertThat(
             File("$reportFolder/licenses.html").readText().trim(),
@@ -161,8 +161,8 @@ class LicensePluginJavaShould {
                     getFileContent("apache-2.0.txt") +
                     "</pre>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 
@@ -184,7 +184,7 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL))
+            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)),
         )
         assertThat(
             File("$reportFolder/licenses.html").readText().trim(),
@@ -211,8 +211,8 @@ class LicensePluginJavaShould {
                     "<a href=\"http://website.tld/\">http://website.tld/</a>" +
                     "</div>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 
@@ -234,7 +234,7 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL))
+            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)),
         )
         assertThat(
             File("$reportFolder/licenses.html").readText().trim(),
@@ -261,8 +261,8 @@ class LicensePluginJavaShould {
                     "<a href=\"http://website.tld/\">http://website.tld/</a>" +
                     "</div>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 
@@ -285,7 +285,7 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL))
+            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)),
         )
         assertThat(
             File("$reportFolder/licenses.html").readText().trim(),
@@ -307,8 +307,8 @@ class LicensePluginJavaShould {
                     "<a href=\"http://website.tld/\">http://website.tld/</a>" +
                     "</div>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 
@@ -330,7 +330,7 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote TEXT report to .*$reportFolder/licenses.txt.*", Pattern.DOTALL))
+            matchesPattern(Pattern.compile(".*Wrote TEXT report to .*$reportFolder/licenses.txt.*", Pattern.DOTALL)),
         )
         assertThat(
             File("$reportFolder/licenses.txt").readText().trim(),
@@ -338,8 +338,8 @@ class LicensePluginJavaShould {
                 "Licenses\n" +
                     "└─ group:noname:1.0.0\n" +
                     "   ├─ License: Some license\n" +
-                    "   └─ URL: http://website.tld/"
-            )
+                    "   └─ URL: http://website.tld/",
+            ),
         )
     }
 
@@ -363,7 +363,7 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL))
+            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)),
         )
         assertThat(
             File("$reportFolder/licenses.html").readText().trim(),
@@ -383,8 +383,8 @@ class LicensePluginJavaShould {
                     "<a href=\"http://website.tld/\">http://website.tld/</a>" +
                     "</div>" +
                     "</body>" +
-                    "</html>"
-            )
+                    "</html>",
+            ),
         )
     }
 
@@ -407,7 +407,7 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote CUSTOM report to .*$reportFolder/licenses.*", Pattern.DOTALL))
+            matchesPattern(Pattern.compile(".*Wrote CUSTOM report to .*$reportFolder/licenses.*", Pattern.DOTALL)),
         )
         assertThat(File("$reportFolder/licenses").readText().trim(), `is`("Fake dependency name"))
     }

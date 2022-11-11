@@ -48,7 +48,7 @@ class LicensePluginMultiplatformShould {
     fun setUp() {
         val pluginClasspathResource = javaClass.classLoader.getResourceAsStream("plugin-under-test-metadata.properties")
             ?: throw IllegalStateException(
-                "Did not find plugin classpath resource, run `:pluginUnderTestMetadata` task."
+                "Did not find plugin classpath resource, run `:pluginUnderTestMetadata` task.",
             )
         val pluginClasspath = Properties().run {
             load(pluginClasspathResource)
@@ -92,7 +92,6 @@ class LicensePluginMultiplatformShould {
 
     @Test
     fun `apply plugin`() {
-
         val taskName = "licenseMultiplatformReport"
 
         buildFile + """
@@ -109,7 +108,6 @@ class LicensePluginMultiplatformShould {
 
     @Test
     fun `generate overall licenses as TXT`() {
-
         val taskName = "licenseMultiplatformReport"
 
         buildFile + """
@@ -155,8 +153,8 @@ class LicensePluginMultiplatformShould {
         assertThat(
             result.output,
             matchesPattern(
-                ".*Wrote TEXT report to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL)
-            )
+                ".*Wrote TEXT report to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL),
+            ),
         )
         assertThat(
             File("$reportFolder/$taskName/licenses.txt").readText().trim(),
@@ -172,14 +170,13 @@ class LicensePluginMultiplatformShould {
                     |│  └─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt
                     |└─ com.google.firebase:firebase-core:10.0.1
                     |   └─ License: Undefined
-                """.trimMargin()
-            )
+                """.trimMargin(),
+            ),
         )
     }
 
     @Test
     fun `generate JVM licenses as TXT`() {
-
         val taskName = "licenseMultiplatformJvmReport"
 
         buildFile + """
@@ -225,8 +222,8 @@ class LicensePluginMultiplatformShould {
         assertThat(
             result.output,
             matchesPattern(
-                ".*Wrote TEXT report to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL)
-            )
+                ".*Wrote TEXT report to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL),
+            ),
         )
         assertThat(
             File("$reportFolder/$taskName/licenses.txt").readText().trim(),
@@ -239,14 +236,13 @@ class LicensePluginMultiplatformShould {
                     |│  └─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt
                     |└─ com.google.firebase:firebase-core:10.0.1
                     |   └─ License: Undefined
-                """.trimMargin()
-            )
+                """.trimMargin(),
+            ),
         )
     }
 
     @Test
     fun `generate native ios licenses`() {
-
         val taskName = "licenseMultiplatformIosArm64Report"
 
         buildFile + """
@@ -281,8 +277,8 @@ class LicensePluginMultiplatformShould {
         assertThat(
             result.output,
             matchesPattern(
-                ".*Wrote TEXT report to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL)
-            )
+                ".*Wrote TEXT report to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL),
+            ),
         )
         assertThat(
             File("$reportFolder/$taskName/licenses.txt").readText().trim(),
@@ -294,14 +290,13 @@ class LicensePluginMultiplatformShould {
                     |│  └─ URL: http://website.tld/
                     |└─ com.google.firebase:firebase-core:10.0.1
                     |   └─ License: Undefined
-                """.trimMargin()
-            )
+                """.trimMargin(),
+            ),
         )
     }
 
     @Test
     fun `generate custom target name`() {
-
         val taskName = "licenseMultiplatformCustomReport"
 
         buildFile + """
@@ -336,8 +331,8 @@ class LicensePluginMultiplatformShould {
         assertThat(
             result.output,
             matchesPattern(
-                ".*Wrote TEXT report to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL)
-            )
+                ".*Wrote TEXT report to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL),
+            ),
         )
         assertThat(
             File("$reportFolder/$taskName/licenses.txt").readText().trim(),
@@ -349,8 +344,8 @@ class LicensePluginMultiplatformShould {
                     |│  └─ URL: http://website.tld/
                     |└─ com.google.firebase:firebase-core:10.0.1
                     |   └─ License: Undefined
-                """.trimMargin()
-            )
+                """.trimMargin(),
+            ),
         )
     }
 }

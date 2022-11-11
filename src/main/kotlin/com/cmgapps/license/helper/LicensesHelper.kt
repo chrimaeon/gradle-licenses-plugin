@@ -53,5 +53,5 @@ fun Logger.logLicenseWarning(license: License, libraries: List<Library>) = this.
         |used by ${libraries.joinToString { "'${it.mavenCoordinates}'" }}
         |
         |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
-    """.trimMargin()
+    """.trimMargin(),
 )

@@ -20,9 +20,9 @@ class MavenCoordinatesShould {
             MavenCoordinates(
                 groupId = "groupId",
                 artifactId = "artifactId",
-                version = ComparableVersion("1.0.0")
+                version = ComparableVersion("1.0.0"),
             ).toString(),
-            `is`("groupId:artifactId:1.0.0")
+            `is`("groupId:artifactId:1.0.0"),
         )
     }
 
@@ -32,9 +32,9 @@ class MavenCoordinatesShould {
             MavenCoordinates(
                 groupId = "groupId",
                 artifactId = "artifactId",
-                version = ComparableVersion("")
+                version = ComparableVersion(""),
             ).toString(),
-            `is`("groupId:artifactId")
+            `is`("groupId:artifactId"),
         )
     }
 
@@ -51,8 +51,8 @@ class MavenCoordinatesShould {
                     groupId = "groupId",
                     artifactId = "artifactId",
                     version = ComparableVersion("2.0"),
-                )
-            )
+                ),
+            ),
         )
     }
 }

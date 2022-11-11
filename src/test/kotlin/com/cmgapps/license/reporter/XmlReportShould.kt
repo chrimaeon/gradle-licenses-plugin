@@ -59,8 +59,8 @@ class XmlReportShould {
                       </library>
                     </libraries>
 
-                """.trimIndent()
-            )
+                """.trimIndent(),
+            ),
         )
     }
 }

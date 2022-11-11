@@ -4,6 +4,8 @@
 ### Added
 
 ### Changed
+- update AGP version
+- update maven model library
 
 ### Deprecated
 
