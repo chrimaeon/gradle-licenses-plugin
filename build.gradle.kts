@@ -175,6 +175,7 @@ signing {
 
 changelog {
     version.set(versionName)
+    header.set(provider { version.get() })
 }
 
 kover {
