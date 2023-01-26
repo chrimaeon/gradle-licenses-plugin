@@ -3,9 +3,6 @@
 ## Unreleased
 
 ### Added
-- EPL v1.0 License - #15
-- Additional URL for LGPL-2.1
-
 
 ### Changed
 
@@ -16,6 +13,12 @@
 ### Fixed
 
 ### Security
+
+## 4.7.0
+
+### Added
+- EPL v1.0 License - #15
+- Additional URL for LGPL-2.1
 
 ## 4.6.1
 
