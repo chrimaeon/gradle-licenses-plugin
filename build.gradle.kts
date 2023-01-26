@@ -50,8 +50,8 @@ val ktlint: Configuration by configurations.creating
 
 idea {
     module {
-        testSourceDirs = testSourceDirs + functionalTestSourceSet.allJava.srcDirs
-        testResourceDirs = testResourceDirs + functionalTestSourceSet.resources.srcDirs
+        testSources.from(functionalTestSourceSet.allJava.srcDirs)
+        testResources.from(functionalTestSourceSet.resources.srcDirs)
     }
 }
 
