@@ -51,6 +51,7 @@ enum class LicenseId(val spdxLicenseIdentifier: String?) {
     LGPL_3("LGPL-3.0-only"),
     MIT("MIT"),
     MPL_2("MPL-2.0"),
+    EPL_1("EPL-1.0"),
     UNKNOWN(null),
     ;
 
@@ -68,6 +69,7 @@ enum class LicenseId(val spdxLicenseIdentifier: String?) {
             "LGPL-3.0-only" -> LGPL_3
             "MIT" -> MIT
             "MPL-2.0" -> MPL_2
+            "EPL-1.0" -> EPL_1
             else -> UNKNOWN
         }
 

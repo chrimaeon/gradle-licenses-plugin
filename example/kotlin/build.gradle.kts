@@ -40,4 +40,5 @@ tasks.register<Copy>("copyLicense") {
 
 dependencies {
     implementation("org.apache.maven:maven-model:3.6.3")
+    implementation("ch.qos.logback:logback-classic:1.4.5")
 }

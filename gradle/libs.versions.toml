@@ -1,12 +1,12 @@
 [versions]
-kotlin = "1.7.21"
-xmlunit = "2.9.0"
-gradle = "7.5.1"
+kotlin = "1.8.0"
+xmlunit = "2.9.1"
+gradle = "7.6"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-versions = "com.github.ben-manes.versions:0.43.0"
+versions = "com.github.ben-manes.versions:0.44.0"
 gradle-pluginPublish = "com.gradle.plugin-publish:1.1.0"
 kotlinx-kover = "org.jetbrains.kotlinx.kover:0.6.1"
 jetbrains-dokka = "org.jetbrains.dokka:1.7.20"
@@ -19,11 +19,11 @@ kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1"
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 apache-commonsCsv = "org.apache.commons:commons-csv:1.9.0"
-maven-model = "org.apache.maven:maven-model:3.8.6"
-maven-artifact = "org.apache.maven:maven-artifact:3.8.6"
-jUnit = "org.junit.jupiter:junit-jupiter:5.9.1"
+maven-model = "org.apache.maven:maven-model:3.8.7"
+maven-artifact = "org.apache.maven:maven-artifact:3.8.7"
+jUnit = "org.junit.jupiter:junit-jupiter:5.9.2"
 hamcrest = "org.hamcrest:hamcrest:2.2"
-ktlint = "com.pinterest:ktlint:0.47.1"
-mockito-kotlin = "org.mockito.kotlin:mockito-kotlin:4.0.0"
+ktlint = "com.pinterest:ktlint:0.48.2"
+mockito-kotlin = "org.mockito.kotlin:mockito-kotlin:4.1.0"
 xmlunit-core = { module = "org.xmlunit:xmlunit-core", version.ref = "xmlunit" }
 xmlunit-matchers = { module = "org.xmlunit:xmlunit-matchers", version.ref = "xmlunit" }
