@@ -198,7 +198,13 @@ class LicensePluginAndroidShould {
         assertThat(
             File("$reportFolder/licenseDebugReport/licenses.txt").readText().trim(),
             `is`(
-                "Licenses\n" + "├─ Fake dependency name:1.0.0\n" + "│  ├─ License: Some license\n" + "│  └─ URL: http://website.tld/\n" + "└─ group:noname:1.0.0\n" + "   ├─ License: Some license\n" + "   └─ URL: http://website.tld/",
+                "Licenses\n" +
+                    "├─ Fake dependency name:1.0.0\n" +
+                    "│  ├─ License: Some license\n" +
+                    "│  └─ URL: http://website.tld/\n" +
+                    "└─ group:noname:1.0.0\n" +
+                    "   ├─ License: Some license\n" +
+                    "   └─ URL: http://website.tld/",
             ),
         )
     }

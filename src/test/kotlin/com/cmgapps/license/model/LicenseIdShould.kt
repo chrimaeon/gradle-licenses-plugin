@@ -46,6 +46,7 @@ class LicenseIdShould {
                     "LGPL-3.0-only",
                     "MIT",
                     "MPL-2.0",
+                    "EPL-1.0",
                 ),
             ),
         )
@@ -70,6 +71,7 @@ class LicenseIdShould {
             "LGPL-3.0-only",
             "MIT",
             "MPL-2.0",
+            "EPL-1.0",
         ],
     )
     fun `map spdx license identifiers to known ids`(value: String) {
@@ -103,6 +105,7 @@ class LicenseIdShould {
                     "lgpl-3.0.txt",
                     "mit.txt",
                     "mpl-2.0.txt",
+                    "epl-1.0.txt",
                 ),
             ),
         )
@@ -143,11 +146,12 @@ class LicenseIdShould {
             Arguments.of(LicenseId.EPL_2, 6),
             Arguments.of(LicenseId.GPL_2, 7),
             Arguments.of(LicenseId.GPL_3, 7),
-            Arguments.of(LicenseId.LGPL_2_1, 7),
+            Arguments.of(LicenseId.LGPL_2_1, 9),
             Arguments.of(LicenseId.LGPL_3, 7),
             Arguments.of(LicenseId.MIT, 4),
             Arguments.of(LicenseId.MPL_2, 6),
             Arguments.of(LicenseId.CDDL, 4),
+            Arguments.of(LicenseId.EPL_1, 9),
         )
     }
 }

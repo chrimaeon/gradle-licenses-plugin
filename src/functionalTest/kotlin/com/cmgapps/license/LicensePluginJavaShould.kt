@@ -60,7 +60,7 @@ class LicensePluginJavaShould {
     }
 
     @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - Gradle Version = {0}")
-    @ValueSource(strings = ["6.8", "6.9", "7.0", "7.1", "7.2", "7.3", "7.4", "7.5"])
+    @ValueSource(strings = ["6.8", "6.9", "7.0", "7.1", "7.2", "7.3", "7.4", "7.5", "7.6"])
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
         val result = gradleRunner
             .withGradleVersion(version)
