@@ -109,32 +109,21 @@ publishing {
             artifactId = pomArtifactId
 
             pom {
+                basePomInfo()
                 name.set(pomName)
                 description.set(pomDescription)
-                url.set(projectUrl)
                 issueManagement {
                     val issuesTrackerUrl: String by pomProperties
                     system.set("github")
                     url.set(issuesTrackerUrl)
                 }
-                developers {
-                    developer {
-                        id.set("cgrach")
-                        name.set("Christian Grach")
-                    }
-                }
-                scm {
-                    val connectionUrl: String by pomProperties
-                    connection.set(connectionUrl)
-                    val developerConnectionUrl: String by pomProperties
-                    developerConnection.set(developerConnectionUrl)
-                    url.set(scmUrl)
-                }
-                licenses {
-                    license {
-                        name.set("Apache License, Version 2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
+            }
+        }
+
+        afterEvaluate {
+            named<MavenPublication>("licensesPluginPluginMarkerMaven") {
+                pom {
+                    basePomInfo()
                 }
             }
         }
@@ -182,6 +171,30 @@ kover {
                 counter = CounterType.LINE
                 valueType = COVERED_PERCENTAGE
             }
+        }
+    }
+}
+
+fun MavenPom.basePomInfo() {
+    url.set(projectUrl)
+
+    developers {
+        developer {
+            id.set("cgrach")
+            name.set("Christian Grach")
+        }
+    }
+    scm {
+        val connectionUrl: String by pomProperties
+        connection.set(connectionUrl)
+        val developerConnectionUrl: String by pomProperties
+        developerConnection.set(developerConnectionUrl)
+        url.set(scmUrl)
+    }
+    licenses {
+        license {
+            name.set("Apache License, Version 2.0")
+            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
         }
     }
 }
