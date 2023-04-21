@@ -1,19 +1,19 @@
 [versions]
 kotlin = "1.8.21"
 xmlunit = "2.9.1"
-gradle = "7.6"
+gradle = "8.0.2"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-versions = "com.github.ben-manes.versions:0.44.0"
+versions = "com.github.ben-manes.versions:0.45.0"
 gradle-pluginPublish = "com.gradle.plugin-publish:1.2.0"
 kotlinx-kover = "org.jetbrains.kotlinx.kover:0.6.1"
 jetbrains-dokka = "org.jetbrains.dokka:1.8.10"
 jetbrains-changelog = "org.jetbrains.changelog:2.0.0"
 
 [libraries]
-android-gradlePlugin = "com.android.tools.build:gradle:7.3.1"
+android-gradlePlugin = "com.android.tools.build:gradle:8.0.0"
 kotlin-multiplatformPlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }

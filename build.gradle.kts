@@ -11,7 +11,6 @@ import kotlinx.kover.api.CounterType
 import kotlinx.kover.api.DefaultJacocoEngine
 import kotlinx.kover.api.KoverTaskExtension
 import kotlinx.kover.api.VerificationValueType.COVERED_PERCENTAGE
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
 import java.util.Properties
 
@@ -55,10 +54,19 @@ idea {
     }
 }
 
+val javaLanguageVersion = JavaLanguageVersion.of("17")
+
 java {
     withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    toolchain {
+        languageVersion.set(javaLanguageVersion)
+    }
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(javaLanguageVersion)
+    }
 }
 
 val pomProperties = Properties().apply {
@@ -77,19 +85,17 @@ val scmUrl: String by pomProperties
 project.group = group
 version = versionName
 
-pluginBundle {
-    website = projectUrl
-    vcsUrl = scmUrl
-    tags = listOf("license-management", "android", "java", "java-library", "licenses")
-}
-
 gradlePlugin {
+    website.set(projectUrl)
+    vcsUrl.set(scmUrl)
+
     plugins {
         create("licensesPlugin") {
             id = "com.cmgapps.licenses"
             implementationClass = "com.cmgapps.license.LicensesPlugin"
             displayName = pomName
             description = pomDescription
+            tags.set(listOf("license-management", "android", "java", "java-library", "licenses"))
         }
     }
 
@@ -270,13 +276,6 @@ tasks {
     withType<Test> {
         useJUnitPlatform()
         afterTest(KotlinClosure2(logger::logResults))
-    }
-
-    withType<KotlinCompile> {
-        kotlinOptions {
-            freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
-            jvmTarget = "1.8"
-        }
     }
 
     dokkaJavadoc {

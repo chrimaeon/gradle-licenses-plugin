@@ -5,8 +5,10 @@
 ### Added
 
 ### Changed
+* Minimum Gradle Version is now **7.2**
 
 ### Deprecated
+* Android Gradle Plugin **4.x**
 
 ### Removed
 

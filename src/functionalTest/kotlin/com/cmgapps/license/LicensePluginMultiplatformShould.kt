@@ -32,7 +32,7 @@ import java.nio.file.Paths
 import java.util.Properties
 import java.util.regex.Pattern
 
-private const val kotlinMultiplatformPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.31"
+private const val kotlinMultiplatformPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20"
 
 class LicensePluginMultiplatformShould {
 
@@ -114,8 +114,8 @@ class LicensePluginMultiplatformShould {
             
             kotlin {
                 jvm()
-                js() {
-                    browser
+                js(IR) {
+                    browser()
                 }
                 
                 sourceSets {
@@ -183,8 +183,8 @@ class LicensePluginMultiplatformShould {
             
             kotlin {
                 jvm()
-                js() {
-                    browser
+                js(IR) {
+                    browser()
                 }
                 
                 sourceSets {

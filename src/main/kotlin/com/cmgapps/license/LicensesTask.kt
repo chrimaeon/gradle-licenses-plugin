@@ -43,15 +43,18 @@ import java.io.PrintStream
 import java.net.URI
 import java.net.URL
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlin.reflect.javaType
 
 abstract class LicensesTask : DefaultTask() {
 
+    private val tempConfigurationNameCounter = AtomicInteger(1)
+
     companion object {
-        private const val POM_CONFIGURATION = "poms"
-        private const val TEMP_POM_CONFIGURATION = "tempPoms"
+        private const val POM_CONFIGURATION = "licensesPoms"
+        private const val TEMP_POM_CONFIGURATION = "licensesTempPoms"
 
         private fun getClickableFileUrl(path: File) =
             URI("file", "", path.toURI().path, null, null).toString()
@@ -95,7 +98,10 @@ abstract class LicensesTask : DefaultTask() {
 
     @TaskAction
     fun licensesReport() {
-        pomConfiguration = project.configurations.create(POM_CONFIGURATION)
+        pomConfiguration = project.configurations.create(POM_CONFIGURATION).apply {
+            isCanBeResolved = true
+            isCanBeConsumed = false
+        }
 
         collectDependencies()
         val libraries = generateLibraries()
@@ -103,7 +109,6 @@ abstract class LicensesTask : DefaultTask() {
         project.configurations.remove(pomConfiguration)
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     protected open fun collectDependencies() {
         buildSet {
             getAllProjects().forEach { project ->
@@ -187,10 +192,10 @@ abstract class LicensesTask : DefaultTask() {
             }
         }
 
-        logger.info("Project $name has no license in POM file.")
+        logger.lifecycle("Project $name has no license in POM file.")
 
         if (parent != null) {
-            logger.info("Checking parent POM file.")
+            logger.lifecycle("Checking parent POM file.")
             return parent.getModel().findLicenses()
         }
 
@@ -200,14 +205,21 @@ abstract class LicensesTask : DefaultTask() {
     private fun Parent.getModel(): Model {
         val dependency = "$groupId:$artifactId:$version@pom"
 
-        project.configurations.create(TEMP_POM_CONFIGURATION).dependencies.add(
-            project.dependencies.add(TEMP_POM_CONFIGURATION, dependency),
-        )
+        val configName = TEMP_POM_CONFIGURATION + tempConfigurationNameCounter.getAndIncrement()
+        val configuration =
+            project.configurations.create(configName)
+                .apply {
+                    isCanBeResolved = true
+                    isCanBeConsumed = false
+                    isTransitive = false
+                }
 
-        val pomFile = project.configurations.getByName(TEMP_POM_CONFIGURATION).incoming
+        project.dependencies.add(configName, dependency)
+
+        val pomFile = configuration.incoming
             .artifacts.artifactFiles.singleFile
 
-        project.configurations.remove(project.configurations.getByName(TEMP_POM_CONFIGURATION))
+        project.configurations.remove(configuration)
 
         return getPomModel(pomFile)
     }
@@ -232,13 +244,23 @@ abstract class LicensesTask : DefaultTask() {
 
     private fun Model.findGroupId(): String? = when {
         groupId != null -> groupId
-        parent != null -> if (parent.groupId != null) parent.groupId else parent.getModel().findGroupId()
+        parent != null -> if (parent.groupId != null) {
+            parent.groupId
+        } else {
+            parent.getModel().findGroupId()
+        }
+
         else -> null
     }
 
     private fun Model.findArtifactId(): String? = when {
         artifactId != null -> artifactId
-        parent != null -> if (parent.artifactId != null) parent.artifactId else parent.getModel().findArtifactId()
+        parent != null -> if (parent.artifactId != null) {
+            parent.artifactId
+        } else {
+            parent.getModel().findArtifactId()
+        }
+
         else -> null
     }
 
@@ -399,7 +421,6 @@ abstract class AndroidLicensesTask : LicensesTask() {
     @Internal
     lateinit var productFlavors: List<String>
 
-    @OptIn(ExperimentalStdlibApi::class)
     override fun collectDependencies() {
         super.collectDependencies()
 
@@ -419,7 +440,6 @@ abstract class AndroidLicensesTask : LicensesTask() {
         }
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     private fun addConfiguration(project: Project, type: String) = buildSet {
         project.configurations.find { it.name == "${type}Compile" }?.let {
             add(it)

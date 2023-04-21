@@ -49,7 +49,7 @@ fun Logger.logResults(desc: TestDescriptor, result: TestResult) {
 
 private fun getFormattedResult(result: TestResult): String {
     return buildString {
-        val isAnsiColorTerm = System.getenv("TERM")?.toLowerCase()?.contains("color") ?: false
+        val isAnsiColorTerm = System.getenv("TERM")?.lowercase()?.contains("color") ?: false
         val (color, text) = when (result.resultType) {
             ResultType.SUCCESS -> ANSI_GREEN to "PASSED"
             ResultType.FAILURE -> ANSI_RED to "FAILED"

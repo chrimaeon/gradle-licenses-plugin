@@ -24,6 +24,7 @@ import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.BaseVariant
 import org.gradle.api.Action
 import org.gradle.api.DomainObjectSet
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -78,15 +79,17 @@ class LicensesPlugin : Plugin<Project> {
             if (findClass("com.android.build.api.variant.AndroidComponentsExtension") != null) {
                 configureAgp7Project(project, extension)
             } else {
-                configureApg4Project(project, extension)
+                throw GradleException("Minimum Android Gradle Plugin Version is 7.0+")
             }
         }
 
         @JvmStatic
         private fun configureAgp7Project(project: Project, extension: LicensesExtension) {
             project.logger.info("Using AGP 7.0+ AndroidComponentsExtension")
-            project.extensions.getByType(com.android.build.api.variant.AndroidComponentsExtension::class.java)
-                .onVariants { variant ->
+            val androidComponentsExtension =
+                project.extensions.getByType(com.android.build.api.variant.AndroidComponentsExtension::class.java)
+            androidComponentsExtension
+                .onVariants(androidComponentsExtension.selector().all()) { variant ->
                     val configuration = Action<AndroidLicensesTask> { task ->
                         task.addBasicConfiguration(extension)
                         task.variant = variant.name
@@ -100,25 +103,6 @@ class LicensesPlugin : Plugin<Project> {
                         configuration,
                     )
                 }
-        }
-
-        @JvmStatic
-        private fun configureApg4Project(project: Project, extension: LicensesExtension) {
-            project.logger.info("Using appication/libraryVariants")
-            getAndroidVariants(project)?.all { androidVariant ->
-                val configuration = Action<AndroidLicensesTask> { task ->
-                    task.addBasicConfiguration(extension)
-                    task.variant = androidVariant.name
-                    task.buildType = androidVariant.buildType.name
-                    task.productFlavors = androidVariant.productFlavors.map { it.name }
-                }
-
-                project.tasks.register(
-                    "license${androidVariant.name.capitalize()}Report",
-                    AndroidLicensesTask::class.java,
-                    configuration,
-                )
-            }
         }
 
         @JvmStatic

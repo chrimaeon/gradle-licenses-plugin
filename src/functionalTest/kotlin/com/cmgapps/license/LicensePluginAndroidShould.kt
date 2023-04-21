@@ -26,8 +26,8 @@ import java.nio.file.Paths
 import java.util.Properties
 import java.util.stream.Stream
 
+const val AGP_8_x = "com.android.tools.build:gradle:8.0.0"
 const val AGP_7_x = "com.android.tools.build:gradle:7.2.1"
-const val AGP_4_x = "com.android.tools.build:gradle:4.0.1"
 
 class LicensePluginAndroidShould {
 
@@ -65,7 +65,7 @@ class LicensePluginAndroidShould {
                 google()
               }
               dependencies {
-                classpath "$AGP_7_x"
+                classpath "$AGP_8_x"
                 classpath files($pluginClasspath)
               }
             }
@@ -79,7 +79,7 @@ class LicensePluginAndroidShould {
 
     @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - taskName = {0}, AGP = {1}")
     @MethodSource("buildTypesAndAgpVersions")
-    fun `generate licenses buildType report`(taskName: String, agbVersion: String) {
+    fun `generate licenses buildType report`(taskName: String, agpVersion: String) {
         buildFile.write(
             """
             buildscript {
@@ -88,7 +88,7 @@ class LicensePluginAndroidShould {
                 google()
               }
               dependencies {
-                classpath "$agbVersion"
+                classpath "$agpVersion"
                 classpath files($pluginClasspath)
               }
             }
@@ -96,6 +96,7 @@ class LicensePluginAndroidShould {
             apply plugin: 'com.cmgapps.licenses'
 
             android {
+              namespace "com.cmgapps"
               compileSdkVersion 28
               defaultConfig {
                 applicationId 'com.example'
@@ -119,6 +120,7 @@ class LicensePluginAndroidShould {
                 }
               }
               android {
+                namespace "com.cmgapps"
                 compileSdkVersion 28
                 defaultConfig {
                   applicationId 'com.example'
@@ -174,6 +176,7 @@ class LicensePluginAndroidShould {
                 }
             }
             android {
+                namespace "com.cmgapps"
                 compileSdkVersion 28
                 defaultConfig {
                     applicationId 'com.example'
@@ -219,7 +222,7 @@ class LicensePluginAndroidShould {
                 google()
               }
               dependencies {
-                classpath "$AGP_7_x"
+                classpath "$AGP_8_x"
                 classpath files($pluginClasspath)
               }
             }
@@ -227,6 +230,7 @@ class LicensePluginAndroidShould {
             apply plugin: 'com.cmgapps.licenses'
 
             android {
+              namespace "com.cmgapps"
               compileSdkVersion 28
             }
             """.trimIndent(),
@@ -248,7 +252,7 @@ class LicensePluginAndroidShould {
                 google()
               }
               dependencies {
-                classpath "$AGP_7_x"
+                classpath "$AGP_8_x"
                 classpath files($pluginClasspath)
               }
             }
@@ -256,6 +260,7 @@ class LicensePluginAndroidShould {
             apply plugin: 'com.cmgapps.licenses'
 
             android {
+              namespace "com.cmgapps"
               compileSdkVersion 28
             }
             """.trimIndent(),
@@ -270,7 +275,7 @@ class LicensePluginAndroidShould {
     companion object {
         @JvmStatic
         fun buildTypesAndAgpVersions(): Stream<Arguments> =
-            listOf("licenseDebugReport", "licenseReleaseReport").cartesianProduct(listOf(AGP_4_x, AGP_7_x))
+            listOf("licenseDebugReport", "licenseReleaseReport").cartesianProduct(listOf(AGP_7_x, AGP_8_x))
 
         @JvmStatic
         fun productFlavorsAndCsv(): Stream<Arguments> = Stream.of(
