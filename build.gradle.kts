@@ -7,10 +7,8 @@
 import com.cmgapps.gradle.logResults
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.github.benmanes.gradle.versions.updates.gradle.GradleReleaseChannel
-import kotlinx.kover.api.CounterType
-import kotlinx.kover.api.DefaultJacocoEngine
-import kotlinx.kover.api.KoverTaskExtension
-import kotlinx.kover.api.VerificationValueType.COVERED_PERCENTAGE
+import kotlinx.kover.gradle.plugin.dsl.AggregationType
+import kotlinx.kover.gradle.plugin.dsl.MetricType
 import java.util.Date
 import java.util.Properties
 
@@ -85,6 +83,7 @@ val scmUrl: String by pomProperties
 project.group = group
 version = versionName
 
+@Suppress("UnstableApiUsage")
 gradlePlugin {
     website.set(projectUrl)
     vcsUrl.set(scmUrl)
@@ -168,14 +167,21 @@ changelog {
 }
 
 kover {
-    engine.set(DefaultJacocoEngine)
-    verify {
-        rule {
-            name = "Minimal Line coverage"
-            bound {
-                minValue = 80
-                counter = CounterType.LINE
-                valueType = COVERED_PERCENTAGE
+    useJacoco()
+    excludeSourceSets {
+        names(functionalTestSourceSet.name)
+    }
+}
+
+koverReport {
+    defaults {
+        verify {
+            rule("Minimal Line coverage") {
+                bound {
+                    minValue = 80
+                    metric = MetricType.LINE
+                    aggregation = AggregationType.COVERED_PERCENTAGE
+                }
             }
         }
     }
@@ -210,10 +216,6 @@ tasks {
         group = "verification"
         testClassesDirs = functionalTestSourceSet.output.classesDirs
         classpath = functionalTestSourceSet.runtimeClasspath
-
-        extensions.configure(KoverTaskExtension::class) {
-            isDisabled.set(true)
-        }
     }
 
     register<JavaExec>("ktlintFormat") {

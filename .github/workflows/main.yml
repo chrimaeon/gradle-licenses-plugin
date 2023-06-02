@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: zulu
-          java-version: 11
+          java-version: 17
       - name: Gradle Cache
         uses: actions/cache@v3
         with:
@@ -36,7 +36,7 @@ jobs:
         run: ./gradlew dependencies
 
       - name: Build & Test
-        run: ./gradlew check koverReport koverVerify
+        run: ./gradlew check koverHtmlReport koverVerify
 
       - name: Archive Test results
         if: ${{ failure() }}
