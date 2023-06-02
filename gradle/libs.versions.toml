@@ -19,7 +19,7 @@ kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 apache-commonsCsv = "org.apache.commons:commons-csv:1.10.0"
-maven-model = "org.apache.maven:maven-model:3.8.7"
+maven-model = "org.apache.maven:maven-model:3.9.2"
 maven-artifact = "org.apache.maven:maven-artifact:3.9.1"
 jUnit = "org.junit.jupiter:junit-jupiter:5.9.3"
 hamcrest = "org.hamcrest:hamcrest:2.2"
