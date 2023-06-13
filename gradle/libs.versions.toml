@@ -1,5 +1,5 @@
 [versions]
-kotlin = "1.8.21"
+kotlin = "1.8.22"
 xmlunit = "2.9.1"
 gradle = "8.0.2"
 
