@@ -23,7 +23,7 @@ maven-model = "org.apache.maven:maven-model:3.9.4"
 maven-artifact = "org.apache.maven:maven-artifact:3.9.4"
 jUnit = "org.junit.jupiter:junit-jupiter:5.9.3"
 hamcrest = "org.hamcrest:hamcrest:2.2"
-ktlint = "com.pinterest:ktlint:0.49.1"
+ktlint = "com.pinterest:ktlint:0.51.0-FINAL"
 mockito-kotlin = "org.mockito.kotlin:mockito-kotlin:5.0.0"
 xmlunit-core = { module = "org.xmlunit:xmlunit-core", version.ref = "xmlunit" }
 xmlunit-matchers = { module = "org.xmlunit:xmlunit-matchers", version.ref = "xmlunit" }
