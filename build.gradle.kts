@@ -33,15 +33,16 @@ plugins {
     alias(libs.plugins.kotlinx.kover)
 }
 
-val functionalTestSourceSet: SourceSet = sourceSets.create("functionalTest") {
-    val sourceSetName = name
-    java {
-        srcDir("src/$sourceSetName/kotlin")
+val functionalTestSourceSet: SourceSet =
+    sourceSets.create("functionalTest") {
+        val sourceSetName = name
+        java {
+            srcDir("src/$sourceSetName/kotlin")
+        }
+        resources {
+            srcDirs(sourceSets.main.get().resources.srcDirs)
+        }
     }
-    resources {
-        srcDirs(sourceSets.main.get().resources.srcDirs)
-    }
-}
 
 val ktlint: Configuration by configurations.creating
 
@@ -67,11 +68,12 @@ kotlin {
     }
 }
 
-val pomProperties = Properties().apply {
-    rootDir.resolve("pom.properties").inputStream().use {
-        load(it)
+val pomProperties =
+    Properties().apply {
+        rootDir.resolve("pom.properties").inputStream().use {
+            load(it)
+        }
     }
-}
 
 val group: String by pomProperties
 val versionName: String by pomProperties
@@ -141,14 +143,15 @@ publishing {
             val snapshotUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
             url = if (versionName.endsWith("SNAPSHOT")) snapshotUrl else releaseUrl
 
-            val credentials = Properties().apply {
-                val credFile = projectDir.resolve("credentials.properties")
-                if (credFile.exists()) {
-                    credFile.inputStream().use {
-                        load(it)
+            val credentials =
+                Properties().apply {
+                    val credFile = projectDir.resolve("credentials.properties")
+                    if (credFile.exists()) {
+                        credFile.inputStream().use {
+                            load(it)
+                        }
                     }
                 }
-            }
             credentials {
                 username = credentials.getProperty("username")
                 password = credentials.getProperty("password")
@@ -223,22 +226,26 @@ tasks {
         description = "Format Kotlin code style."
         mainClass.set("com.pinterest.ktlint.Main")
         classpath = ktlint
-        args = listOf(
-            "src/**/*.kt",
-            "--format",
-        )
+        args =
+            listOf(
+                "src/**/*.kt",
+                "--format",
+            )
     }
+
+    val checkstyleOutputFile = layout.buildDirectory.file("reports/ktlint.xml")
 
     val ktlint by registering(JavaExec::class) {
         group = "Verification"
         description = "Check Kotlin code style."
         mainClass.set("com.pinterest.ktlint.Main")
         classpath = ktlint
-        args = listOf(
-            "src/**/*.kt",
-            "--reporter=plain",
-            "--reporter=checkstyle,output=$buildDir/reports/ktlint.xml",
-        )
+        args =
+            listOf(
+                "src/**/*.kt",
+                "--reporter=plain",
+                "--reporter=checkstyle,output=${checkstyleOutputFile.get()}",
+            )
     }
 
     check {
@@ -281,7 +288,7 @@ tasks {
     }
 
     dokkaJavadoc {
-        outputDirectory.set(buildDir.resolve("javadoc"))
+        outputDirectory.set(layout.buildDirectory.dir("javadoc"))
     }
 
     wrapper {
