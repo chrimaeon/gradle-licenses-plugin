@@ -36,7 +36,7 @@ jobs:
         run: ./gradlew dependencies
 
       - name: Build & Test
-        run: ./gradlew check koverBinaryReport koverVerify
+        run: ./gradlew check koverHtmlReport koverVerify
 
       - name: Archive Test results
         if: ${{ failure() }}
@@ -50,4 +50,4 @@ jobs:
       - name: Upload Codecov
         uses: codecov/codecov-action@v3
         with:
-          files: ./build/kover/bin-reports/test.exec
+          files: ./build/kover/bin-reports/test.exec,./build/kover/bin-reports/functionalTest.exec
