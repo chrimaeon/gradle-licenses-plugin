@@ -22,17 +22,17 @@ import org.mockito.kotlin.verify
 import com.cmgapps.license.model.Library as LibraryModel
 
 class HtmlReportShould {
-
     @Test
     fun `generate HTML report`() {
         val logger: Logger = Logging.getLogger("TestLogger")
 
-        val result = HtmlReport(
-            testLibraries,
-            null,
-            false,
-            logger,
-        ).generate()
+        val result =
+            HtmlReport(
+                testLibraries,
+                null,
+                false,
+                logger,
+            ).generate()
 
         assertThat(
             result,
@@ -41,7 +41,10 @@ class HtmlReportShould {
                     "<html lang=\"en\">" +
                     "<head>" +
                     "<meta charset=\"UTF-8\">" +
-                    "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                    "<style>body{font-family:sans-serif;background-color:#eee}" +
+                    "pre,.license{background-color:#ddd;padding:1em}" +
+                    "pre{white-space:pre-wrap}" +
+                    "</style>" +
                     "<title>Open source licenses</title>" +
                     "</head>" +
                     "<body>" +
@@ -69,12 +72,13 @@ class HtmlReportShould {
     fun `generate HTML report with dark mode`() {
         val logger: Logger = Logging.getLogger("TestLogger")
 
-        val result = HtmlReport(
-            testLibraries,
-            null,
-            true,
-            logger,
-        ).generate()
+        val result =
+            HtmlReport(
+                testLibraries,
+                null,
+                true,
+                logger,
+            ).generate()
 
         assertThat(
             result,
@@ -122,9 +126,10 @@ class HtmlReportShould {
                     MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
                     name = "Lib with invalid license",
                     description = null,
-                    licenses = listOf(
-                        License(LicenseId.UNKNOWN, name = "foo", url = "https://www.license.foo"),
-                    ),
+                    licenses =
+                        listOf(
+                            License(LicenseId.UNKNOWN, name = "foo", url = "https://www.license.foo"),
+                        ),
                 ),
             ),
             null,

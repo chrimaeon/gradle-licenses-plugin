@@ -49,15 +49,13 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.javaType
 
 abstract class LicensesTask : DefaultTask() {
-
     private val tempConfigurationNameCounter = AtomicInteger(1)
 
     companion object {
         private const val POM_CONFIGURATION = "licensesPoms"
         private const val TEMP_POM_CONFIGURATION = "licensesTempPoms"
 
-        private fun getClickableFileUrl(path: File) =
-            URI("file", "", path.toURI().path, null, null).toString()
+        private fun getClickableFileUrl(path: File) = URI("file", "", path.toURI().path, null, null).toString()
     }
 
     @Input
@@ -65,20 +63,21 @@ abstract class LicensesTask : DefaultTask() {
 
     private lateinit var pomConfiguration: Configuration
 
+    @Suppress("ktlint:standard:property-naming")
     private val _allProjects: Set<Project> by lazy {
         val allProjects = project.rootProject.allprojects
 
-        setOf(project) + additionalProjects.map { moduleName ->
-            allProjects.find {
-                it.path == moduleName
-            } ?: throw IllegalArgumentException("$moduleName not found")
-        }.toSet()
+        setOf(project) +
+            additionalProjects.map { moduleName ->
+                allProjects.find {
+                    it.path == moduleName
+                } ?: throw IllegalArgumentException("$moduleName not found")
+            }.toSet()
     }
 
-    @Internal
-    protected fun getAllProjects(): Set<Project> {
-        return _allProjects
-    }
+    @get:Internal
+    protected val allProjects: Set<Project>
+        get() = _allProjects
 
     @Nested
     val reports: LicensesReportsContainer
@@ -98,10 +97,11 @@ abstract class LicensesTask : DefaultTask() {
 
     @TaskAction
     fun licensesReport() {
-        pomConfiguration = project.configurations.create(POM_CONFIGURATION).apply {
-            isCanBeResolved = true
-            isCanBeConsumed = false
-        }
+        pomConfiguration =
+            project.configurations.create(POM_CONFIGURATION).apply {
+                isCanBeResolved = true
+                isCanBeConsumed = false
+            }
 
         collectDependencies()
         val libraries = generateLibraries()
@@ -111,7 +111,7 @@ abstract class LicensesTask : DefaultTask() {
 
     protected open fun collectDependencies() {
         buildSet {
-            getAllProjects().forEach { project ->
+            allProjects.forEach { project ->
                 project.configurations.findByName("compile")?.let {
                     add(project.configurations.getByName(it.name))
                 }
@@ -165,11 +165,12 @@ abstract class LicensesTask : DefaultTask() {
             .toList()
     }
 
-    private fun getPomModel(file: File): Model = MavenXpp3Reader().run {
-        file.inputStream().use {
-            read(it)
+    private fun getPomModel(file: File): Model =
+        MavenXpp3Reader().run {
+            file.inputStream().use {
+                read(it)
+            }
         }
-    }
 
     private fun Model.findLicenses(): List<License> {
         if (licenses.isNotEmpty()) {
@@ -216,53 +217,60 @@ abstract class LicensesTask : DefaultTask() {
 
         project.dependencies.add(configName, dependency)
 
-        val pomFile = configuration.incoming
-            .artifacts.artifactFiles.singleFile
+        val pomFile =
+            configuration.incoming
+                .artifacts.artifactFiles.singleFile
 
         project.configurations.remove(configuration)
 
         return getPomModel(pomFile)
     }
 
-    private fun Model.findVersion(): String? = when {
-        version != null -> version
-        parent != null ->
-            if (parent.version != null) {
-                parent.version
-            } else {
-                parent.getModel().findVersion()
-            }
+    private fun Model.findVersion(): String? =
+        when {
+            version != null -> version
+            parent != null ->
+                if (parent.version != null) {
+                    parent.version
+                } else {
+                    parent.getModel().findVersion()
+                }
 
-        else -> null
-    }
-
-    private fun Model.findDescription(): String? = when {
-        description != null -> description
-        parent != null -> parent.getModel().findDescription()
-        else -> null
-    }
-
-    private fun Model.findGroupId(): String? = when {
-        groupId != null -> groupId
-        parent != null -> if (parent.groupId != null) {
-            parent.groupId
-        } else {
-            parent.getModel().findGroupId()
+            else -> null
         }
 
-        else -> null
-    }
-
-    private fun Model.findArtifactId(): String? = when {
-        artifactId != null -> artifactId
-        parent != null -> if (parent.artifactId != null) {
-            parent.artifactId
-        } else {
-            parent.getModel().findArtifactId()
+    private fun Model.findDescription(): String? =
+        when {
+            description != null -> description
+            parent != null -> parent.getModel().findDescription()
+            else -> null
         }
 
-        else -> null
-    }
+    private fun Model.findGroupId(): String? =
+        when {
+            groupId != null -> groupId
+            parent != null ->
+                if (parent.groupId != null) {
+                    parent.groupId
+                } else {
+                    parent.getModel().findGroupId()
+                }
+
+            else -> null
+        }
+
+    private fun Model.findArtifactId(): String? =
+        when {
+            artifactId != null -> artifactId
+            parent != null ->
+                if (parent.artifactId != null) {
+                    parent.artifactId
+                } else {
+                    parent.getModel().findArtifactId()
+                }
+
+            else -> null
+        }
 
     private fun createReport(libraries: List<Library>) {
         if (libraries.isEmpty()) {
@@ -271,32 +279,34 @@ abstract class LicensesTask : DefaultTask() {
 
         reports.getAll().forEach { licenseReport ->
             if (licenseReport.enabled) {
-                val report = when (licenseReport.type) {
-                    ReportType.CSV -> CsvReport(libraries)
-                    ReportType.CUSTOM -> {
-                        val customReport = reports.custom.action
-                        if (customReport != null) {
-                            CustomReport(
-                                libraries,
-                                customReport,
-                            )
-                        } else {
-                            null
+                val report =
+                    when (licenseReport.type) {
+                        ReportType.CSV -> CsvReport(libraries)
+                        ReportType.CUSTOM -> {
+                            val customReport = reports.custom.action
+                            if (customReport != null) {
+                                CustomReport(
+                                    libraries,
+                                    customReport,
+                                )
+                            } else {
+                                null
+                            }
                         }
+
+                        ReportType.HTML ->
+                            HtmlReport(
+                                libraries,
+                                reports.html.stylesheet.orNull,
+                                reports.html.useDarkMode.get(),
+                                logger,
+                            )
+
+                        ReportType.JSON -> JsonReport(libraries)
+                        ReportType.MARKDOWN -> MarkdownReport(libraries, logger)
+                        ReportType.TEXT -> TextReport(libraries)
+                        ReportType.XML -> XmlReport(libraries)
                     }
-
-                    ReportType.HTML -> HtmlReport(
-                        libraries,
-                        reports.html._stylesheet.orNull,
-                        reports.html.useDarkMode.get(),
-                        logger,
-                    )
-
-                    ReportType.JSON -> JsonReport(libraries)
-                    ReportType.MARKDOWN -> MarkdownReport(libraries, logger)
-                    ReportType.TEXT -> TextReport(libraries)
-                    ReportType.XML -> XmlReport(libraries)
-                }
 
                 report?.let { licenseReport.writeFileReport(it) }
             }
@@ -315,6 +325,7 @@ abstract class LicensesTask : DefaultTask() {
 
     private inner class LicensesReportsContainerImpl : LicensesReportsContainer {
         override val csv: LicensesReport by LicenseReportDelegate(ReportType.CSV)
+
         override fun csv(config: Action<LicensesReport>) {
             csv.configure(config)
         }
@@ -334,6 +345,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         override val json: LicensesReport by LicenseReportDelegate(ReportType.JSON)
+
         override fun json(config: Action<LicensesReport>) {
             json.configure(config)
         }
@@ -343,6 +355,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         override val markdown: LicensesReport by LicenseReportDelegate(ReportType.MARKDOWN)
+
         override fun markdown(config: Action<LicensesReport>) {
             markdown.configure(config)
         }
@@ -352,6 +365,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         override val text: LicensesReport by LicenseReportDelegate(ReportType.TEXT)
+
         override fun text(config: Action<LicensesReport>) {
             text.configure(config)
         }
@@ -361,6 +375,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         override val xml: LicensesReport by LicenseReportDelegate(ReportType.XML)
+
         override fun xml(config: Action<LicensesReport>) {
             xml.configure(config)
         }
@@ -370,6 +385,7 @@ abstract class LicensesTask : DefaultTask() {
         }
 
         override val custom: CustomizableReport by LicenseReportDelegate(ReportType.CUSTOM)
+
         override fun custom(config: Action<CustomizableReport>) {
             custom.configure(configCustom = config)
         }
@@ -378,24 +394,27 @@ abstract class LicensesTask : DefaultTask() {
             project.configure(custom, config)
         }
 
-        override fun getAll(): List<LicensesReport> = listOf(
-            csv,
-            html,
-            json,
-            markdown,
-            text,
-            xml,
-            custom,
-        )
+        override fun getAll(): List<LicensesReport> =
+            listOf(
+                csv,
+                html,
+                json,
+                markdown,
+                text,
+                xml,
+                custom,
+            )
 
         private inner class LicenseReportDelegate<T : LicensesReport>(private val reportType: ReportType) :
             ReadOnlyProperty<Any?, T> {
-
             private lateinit var value: T
 
             @Suppress("UNCHECKED_CAST")
             @OptIn(ExperimentalStdlibApi::class)
-            override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+            override fun getValue(
+                thisRef: Any?,
+                property: KProperty<*>,
+            ): T {
                 return if (::value.isInitialized) {
                     value
                 } else {
@@ -403,7 +422,7 @@ abstract class LicensesTask : DefaultTask() {
                         Class.forName(property.returnType.javaType.typeName)
                             .getConstructor(ReportType::class.java, Task::class.java, Project::class.java)
                             .newInstance(reportType, this@LicensesTask, project) as T
-                        ).also { value = it }
+                    ).also { value = it }
                 }
             }
         }
@@ -411,7 +430,6 @@ abstract class LicensesTask : DefaultTask() {
 }
 
 abstract class AndroidLicensesTask : LicensesTask() {
-
     @Input
     lateinit var variant: String
 
@@ -425,7 +443,7 @@ abstract class AndroidLicensesTask : LicensesTask() {
         super.collectDependencies()
 
         buildSet {
-            getAllProjects().forEach { project ->
+            allProjects.forEach { project ->
                 addAll(addConfiguration(project, buildType))
 
                 productFlavors.forEach { flavor ->
@@ -440,7 +458,10 @@ abstract class AndroidLicensesTask : LicensesTask() {
         }
     }
 
-    private fun addConfiguration(project: Project, type: String) = buildSet {
+    private fun addConfiguration(
+        project: Project,
+        type: String,
+    ) = buildSet {
         project.configurations.find { it.name == "${type}Compile" }?.let {
             add(it)
         }
@@ -456,7 +477,6 @@ abstract class AndroidLicensesTask : LicensesTask() {
 }
 
 abstract class KotlinMultiplatformTask : LicensesTask() {
-
     @get:Internal
     internal lateinit var targetNames: List<String>
 
@@ -478,10 +498,11 @@ abstract class KotlinMultiplatformTask : LicensesTask() {
     }
 }
 
-private fun File.writeText(text: String) = PrintStream(outputStream()).use {
-    it.print(text)
-    it.flush()
-}
+private fun File.writeText(text: String) =
+    PrintStream(outputStream()).use {
+        it.print(text)
+        it.flush()
+    }
 
 private fun File.prepare() {
     delete()
@@ -489,7 +510,10 @@ private fun File.prepare() {
     createNewFile()
 }
 
-private fun getLicenseId(licenseUrl: String, licenseName: String): LicenseId {
+private fun getLicenseId(
+    licenseUrl: String,
+    licenseName: String,
+): LicenseId {
     val licenseMap = LicenseId.map
     return when {
         licenseMap.containsKey(licenseUrl) -> licenseMap[licenseUrl]!!

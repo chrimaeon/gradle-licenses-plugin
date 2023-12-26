@@ -27,9 +27,10 @@ abstract class LicensesExtension(private val project: Project) {
         private set
 
     fun reports(closure: Closure<LicensesReportsContainer>) {
-        reports = Action {
-            project.configure(it, closure)
-        }
+        reports =
+            Action {
+                project.configure(it, closure)
+            }
     }
 
     fun reports(action: Action<in LicensesReportsContainer>) {
@@ -44,10 +45,11 @@ abstract class LicensesExtension(private val project: Project) {
     }
 
     fun additionalProjects(modules: Collection<String>) {
-        additionalProjects = when (modules) {
-            is Set -> modules
-            else -> modules.toSet()
-        }
+        additionalProjects =
+            when (modules) {
+                is Set -> modules
+                else -> modules.toSet()
+            }
     }
 }
 

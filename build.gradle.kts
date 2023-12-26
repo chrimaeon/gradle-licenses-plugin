@@ -335,7 +335,7 @@ dependencies {
     implementation(libs.kotlin.serialization)
     implementation(libs.apache.commonsCsv)
 
-    ktlint(libs.ktlint)
+    ktlint(libs.ktlint.cli)
 
     testImplementation(libs.jUnit) {
         exclude(group = "org.hamcrest")

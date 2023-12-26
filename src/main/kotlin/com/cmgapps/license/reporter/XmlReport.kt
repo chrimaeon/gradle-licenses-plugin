@@ -7,7 +7,6 @@
 package com.cmgapps.license.reporter
 
 internal class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : Report(libraries) {
-
     override fun generate(): String {
         return libraries {
             for (library in libraries) {
@@ -39,15 +38,22 @@ internal class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : R
 }
 
 internal class Libraries : Tag("libraries") {
-
-    fun library(id: String, version: String, init: Library.() -> Unit): Library {
+    fun library(
+        id: String,
+        version: String,
+        init: Library.() -> Unit,
+    ): Library {
         val tag = initTag(Library(), init)
         tag.attributes["id"] = id
         tag.attributes["version"] = version
         return tag
     }
 
-    override fun render(builder: StringBuilder, intent: String, format: Boolean) {
+    override fun render(
+        builder: StringBuilder,
+        intent: String,
+        format: Boolean,
+    ) {
         builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>")
         if (format) {
             builder.append('\n')
@@ -58,15 +64,24 @@ internal class Libraries : Tag("libraries") {
 
 internal class Library : Tag("library") {
     fun name(init: Name.() -> Unit) = initTag(Name(), init)
+
     fun description(init: Description.() -> Unit) = initTag(Description(), init)
+
     fun licenses(init: Licenses.() -> Unit) = initTag(Licenses(), init)
 }
 
 internal class Name : TagWithText("name")
+
 internal class Version : TagWithText("version")
+
 internal class Description : TagWithText("description")
+
 internal class Licenses : Tag("licenses") {
-    fun license(spdxLicenseIdentifier: String? = null, url: String, init: License.() -> Unit) {
+    fun license(
+        spdxLicenseIdentifier: String? = null,
+        url: String,
+        init: License.() -> Unit,
+    ) {
         val tag = initTag(License(), init)
         tag.attributes["url"] = url
         if (spdxLicenseIdentifier != null) {

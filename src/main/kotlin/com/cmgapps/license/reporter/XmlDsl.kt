@@ -17,11 +17,19 @@
 package com.cmgapps.license.reporter
 
 internal interface Element {
-    fun render(builder: StringBuilder, intent: String, format: Boolean)
+    fun render(
+        builder: StringBuilder,
+        intent: String,
+        format: Boolean,
+    )
 }
 
 internal class TextElement(private val text: String) : Element {
-    override fun render(builder: StringBuilder, intent: String, format: Boolean) {
+    override fun render(
+        builder: StringBuilder,
+        intent: String,
+        format: Boolean,
+    ) {
         if (format) {
             builder.append(intent)
         }
@@ -40,13 +48,20 @@ internal abstract class Tag(protected val name: String) : Element {
     val children = arrayListOf<Element>()
     val attributes = hashMapOf<String, String>()
 
-    protected fun <T : Element> initTag(tag: T, init: T.() -> Unit): T {
+    protected fun <T : Element> initTag(
+        tag: T,
+        init: T.() -> Unit,
+    ): T {
         tag.init()
         children.add(tag)
         return tag
     }
 
-    override fun render(builder: StringBuilder, intent: String, format: Boolean) {
+    override fun render(
+        builder: StringBuilder,
+        intent: String,
+        format: Boolean,
+    ) {
         if (format) {
             builder.append(intent)
         }
@@ -79,15 +94,17 @@ internal abstract class Tag(protected val name: String) : Element {
         }
     }
 
-    private fun renderAttributes(): String = buildString {
-        for ((attr, value) in attributes) {
-            append(" $attr=\"$value\"")
+    private fun renderAttributes(): String =
+        buildString {
+            for ((attr, value) in attributes) {
+                append(" $attr=\"$value\"")
+            }
         }
-    }
 
-    fun toString(format: Boolean = true): String = buildString {
-        render(this, "", format)
-    }
+    fun toString(format: Boolean = true): String =
+        buildString {
+            render(this, "", format)
+        }
 
     override fun toString(): String = toString(true)
 }

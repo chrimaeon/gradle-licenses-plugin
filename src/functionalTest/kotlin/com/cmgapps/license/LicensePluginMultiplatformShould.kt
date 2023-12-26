@@ -32,10 +32,9 @@ import java.nio.file.Paths
 import java.util.Properties
 import java.util.regex.Pattern
 
-private const val kotlinMultiplatformPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20"
+private const val KOTLIN_MULTIPLATFORM_PLUGIN = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22"
 
 class LicensePluginMultiplatformShould {
-
     @TempDir
     lateinit var testProjectDir: Path
 
@@ -46,32 +45,35 @@ class LicensePluginMultiplatformShould {
 
     @BeforeEach
     fun setUp() {
-        val pluginClasspathResource = javaClass.classLoader.getResourceAsStream("plugin-under-test-metadata.properties")
-            ?: throw IllegalStateException(
-                "Did not find plugin classpath resource, run `:pluginUnderTestMetadata` task.",
-            )
-        val pluginClasspath = Properties().run {
-            load(pluginClasspathResource)
-            getProperty("implementation-classpath")
-                .split(':')
-                .joinToString(", ") {
-                    "'$it'"
-                }
-        }
+        val pluginClasspathResource =
+            javaClass.classLoader.getResourceAsStream("plugin-under-test-metadata.properties")
+                ?: throw IllegalStateException(
+                    "Did not find plugin classpath resource, run `:pluginUnderTestMetadata` task.",
+                )
+        val pluginClasspath =
+            Properties().run {
+                load(pluginClasspathResource)
+                getProperty("implementation-classpath")
+                    .split(':')
+                    .joinToString(", ") {
+                        "'$it'"
+                    }
+            }
 
         buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
         reportFolder = "$testProjectDir/build/reports/licenses"
         mavenRepoUrl =
             javaClass.getResource("/maven")?.toURI()?.toString() ?: error("""resource folder "/maven" not found!""")
 
-        buildFile + """
+        buildFile +
+            """
             buildscript {
               repositories {
                 mavenCentral()
                 google()
               }
               dependencies {
-                classpath "$kotlinMultiplatformPlugin"
+                classpath "$KOTLIN_MULTIPLATFORM_PLUGIN"
                 classpath files($pluginClasspath)
               }
             }
@@ -84,24 +86,27 @@ class LicensePluginMultiplatformShould {
                 }
             }
 
-        """.trimIndent()
+            """.trimIndent()
 
-        gradleRunner = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
+        gradleRunner =
+            GradleRunner.create()
+                .withProjectDir(testProjectDir.toFile())
     }
 
     @Test
     fun `apply plugin`() {
         val taskName = "licenseMultiplatformReport"
 
-        buildFile + """
+        buildFile +
+            """
             kotlin {
                 jvm()
             }
-        """.trimIndent()
-        val result = gradleRunner
-            .withArguments(":$taskName")
-            .build()
+            """.trimIndent()
+        val result =
+            gradleRunner
+                .withArguments(":$taskName")
+                .build()
 
         assertThat(result.task(":$taskName")?.outcome, `is`(TaskOutcome.SUCCESS))
     }
@@ -110,7 +115,8 @@ class LicensePluginMultiplatformShould {
     fun `generate overall licenses as TXT`() {
         val taskName = "licenseMultiplatformReport"
 
-        buildFile + """
+        buildFile +
+            """
             
             kotlin {
                 jvm()
@@ -145,10 +151,11 @@ class LicensePluginMultiplatformShould {
                 }
             }
             
-        """.trimIndent()
-        val result = gradleRunner
-            .withArguments(":$taskName")
-            .build()
+            """.trimIndent()
+        val result =
+            gradleRunner
+                .withArguments(":$taskName")
+                .build()
 
         assertThat(
             result.output,
@@ -179,7 +186,8 @@ class LicensePluginMultiplatformShould {
     fun `generate JVM licenses as TXT`() {
         val taskName = "licenseMultiplatformJvmReport"
 
-        buildFile + """
+        buildFile +
+            """
             
             kotlin {
                 jvm()
@@ -214,10 +222,11 @@ class LicensePluginMultiplatformShould {
                 }
             }
             
-        """.trimIndent()
-        val result = gradleRunner
-            .withArguments(":$taskName")
-            .build()
+            """.trimIndent()
+        val result =
+            gradleRunner
+                .withArguments(":$taskName")
+                .build()
 
         assertThat(
             result.output,
@@ -245,7 +254,8 @@ class LicensePluginMultiplatformShould {
     fun `generate native ios licenses`() {
         val taskName = "licenseMultiplatformIosArm64Report"
 
-        buildFile + """
+        buildFile +
+            """
             kotlin {
                 iosArm64()
                 
@@ -269,10 +279,11 @@ class LicensePluginMultiplatformShould {
                     text.enabled = true
                 }
             }
-        """.trimIndent()
-        val result = gradleRunner
-            .withArguments(":$taskName")
-            .build()
+            """.trimIndent()
+        val result =
+            gradleRunner
+                .withArguments(":$taskName")
+                .build()
 
         assertThat(
             result.output,
@@ -299,7 +310,8 @@ class LicensePluginMultiplatformShould {
     fun `generate custom target name`() {
         val taskName = "licenseMultiplatformCustomReport"
 
-        buildFile + """
+        buildFile +
+            """
             kotlin {
                 jvm("custom")
                 
@@ -323,10 +335,11 @@ class LicensePluginMultiplatformShould {
                     text.enabled = true
                 }
             }
-        """.trimIndent()
-        val result = gradleRunner
-            .withArguments(":$taskName")
-            .build()
+            """.trimIndent()
+        val result =
+            gradleRunner
+                .withArguments(":$taskName")
+                .build()
 
         assertThat(
             result.output,

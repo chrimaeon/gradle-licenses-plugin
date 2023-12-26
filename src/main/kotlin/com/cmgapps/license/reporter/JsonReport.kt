@@ -21,10 +21,10 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 internal class JsonReport(libraries: List<Library>) : Report(libraries) {
-
-    private val json = Json {
-        prettyPrint = true
-    }
+    private val json =
+        Json {
+            prettyPrint = true
+        }
 
     override fun generate() = json.encodeToString(libraries)
 }

@@ -133,25 +133,29 @@ class LicenseIdShould {
 
     @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - LicenseId = {0}")
     @MethodSource("provideLicenseIdMapping")
-    fun `map licenses to name and url`(id: LicenseId, size: Int) {
+    fun `map licenses to name and url`(
+        id: LicenseId,
+        size: Int,
+    ) {
         assertThat(LicenseId.map.filterValues { it == id }.size, `is`(size))
     }
 
     companion object {
         @JvmStatic
-        private fun provideLicenseIdMapping(): Stream<Arguments> = Stream.of(
-            Arguments.of(LicenseId.APACHE, 12),
-            Arguments.of(LicenseId.BSD_2, 5),
-            Arguments.of(LicenseId.BSD_3, 4),
-            Arguments.of(LicenseId.EPL_2, 6),
-            Arguments.of(LicenseId.GPL_2, 7),
-            Arguments.of(LicenseId.GPL_3, 7),
-            Arguments.of(LicenseId.LGPL_2_1, 9),
-            Arguments.of(LicenseId.LGPL_3, 7),
-            Arguments.of(LicenseId.MIT, 4),
-            Arguments.of(LicenseId.MPL_2, 6),
-            Arguments.of(LicenseId.CDDL, 4),
-            Arguments.of(LicenseId.EPL_1, 9),
-        )
+        private fun provideLicenseIdMapping(): Stream<Arguments> =
+            Stream.of(
+                Arguments.of(LicenseId.APACHE, 12),
+                Arguments.of(LicenseId.BSD_2, 5),
+                Arguments.of(LicenseId.BSD_3, 4),
+                Arguments.of(LicenseId.EPL_2, 6),
+                Arguments.of(LicenseId.GPL_2, 7),
+                Arguments.of(LicenseId.GPL_3, 7),
+                Arguments.of(LicenseId.LGPL_2_1, 9),
+                Arguments.of(LicenseId.LGPL_3, 7),
+                Arguments.of(LicenseId.MIT, 4),
+                Arguments.of(LicenseId.MPL_2, 6),
+                Arguments.of(LicenseId.CDDL, 4),
+                Arguments.of(LicenseId.EPL_1, 9),
+            )
     }
 }

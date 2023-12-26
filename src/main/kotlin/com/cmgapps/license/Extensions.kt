@@ -16,6 +16,7 @@
 
 package com.cmgapps.license
 
-fun String.capitalize() = replaceFirstChar {
-    if (it.isLowerCase()) it.titlecase() else it.toString()
-}
+fun String.capitalize() =
+    replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase() else it.toString()
+    }

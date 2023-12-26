@@ -22,7 +22,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
 class MarkdownReportShould {
-
     @Test
     fun `generate Markdown report`() {
         val logger: Logger = Logging.getLogger("TestLogger")
@@ -54,19 +53,21 @@ class MarkdownReportShould {
     fun `generate Markdown report for libs without matching license`() {
         val logger: Logger = Logging.getLogger("TestLogger")
 
-        val result = MarkdownReport(
-            listOf(
-                Library(
-                    MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
-                    name = "Lib with invalid license",
-                    description = null,
-                    licenses = listOf(
-                        License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
+        val result =
+            MarkdownReport(
+                listOf(
+                    Library(
+                        MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
+                        name = "Lib with invalid license",
+                        description = null,
+                        licenses =
+                            listOf(
+                                License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
+                            ),
                     ),
                 ),
-            ),
-            logger,
-        ).generate()
+                logger,
+            ).generate()
         assertThat(
             result,
             `is`(
@@ -94,9 +95,10 @@ class MarkdownReportShould {
                     MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
                     name = "Lib with invalid license",
                     description = null,
-                    licenses = listOf(
-                        License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
-                    ),
+                    licenses =
+                        listOf(
+                            License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
+                        ),
                 ),
             ),
             logger,

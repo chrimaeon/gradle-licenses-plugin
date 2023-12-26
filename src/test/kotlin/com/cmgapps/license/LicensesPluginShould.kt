@@ -17,7 +17,6 @@ import java.io.File
 import java.nio.file.Path
 
 class LicensesPluginShould {
-
     @TempDir
     lateinit var testProjectDir: Path
 
@@ -27,9 +26,10 @@ class LicensesPluginShould {
     @BeforeEach
     fun setUp() {
         reportFolder = "$testProjectDir/build/reports/licenses/licensesReport"
-        project = ProjectBuilder.builder()
-            .withProjectDir(testProjectDir.toFile())
-            .build()
+        project =
+            ProjectBuilder.builder()
+                .withProjectDir(testProjectDir.toFile())
+                .build()
         val mavenRepoUrl = javaClass.getResource("/maven")!!.toURI().toString()
         project.repositories.add(
             project.repositories.maven {

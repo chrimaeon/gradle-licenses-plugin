@@ -13,7 +13,6 @@ import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
 
 class MavenCoordinatesShould {
-
     @Test
     fun `add version to toString`() {
         assertThat(

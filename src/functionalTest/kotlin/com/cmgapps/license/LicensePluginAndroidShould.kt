@@ -26,11 +26,10 @@ import java.nio.file.Paths
 import java.util.Properties
 import java.util.stream.Stream
 
-const val AGP_8_x = "com.android.tools.build:gradle:8.0.0"
-const val AGP_7_x = "com.android.tools.build:gradle:7.2.1"
+const val AGP_8_X = "com.android.tools.build:gradle:8.0.0"
+const val AGP_7_X = "com.android.tools.build:gradle:7.2.1"
 
 class LicensePluginAndroidShould {
-
     @TempDir
     lateinit var testProjectDir: Path
 
@@ -42,44 +41,50 @@ class LicensePluginAndroidShould {
 
     @BeforeEach
     fun setUp() {
-        val pluginClasspathResource = javaClass.classLoader.getResourceAsStream("plugin-under-test-metadata.properties")
-            ?: throw IllegalStateException(
-                "Did not find plugin classpath resource, run `:pluginUnderTestMetadata` task.",
-            )
-        pluginClasspath = Properties().run {
-            load(pluginClasspathResource)
-            getProperty("implementation-classpath").split(':').joinToString(", ") {
-                "'$it'"
+        val pluginClasspathResource =
+            javaClass.classLoader.getResourceAsStream("plugin-under-test-metadata.properties")
+                ?: throw IllegalStateException(
+                    "Did not find plugin classpath resource, run `:pluginUnderTestMetadata` task.",
+                )
+        pluginClasspath =
+            Properties().run {
+                load(pluginClasspathResource)
+                getProperty("implementation-classpath").split(':').joinToString(", ") {
+                    "'$it'"
+                }
             }
-        }
 
         buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
         reportFolder = "$testProjectDir/build/reports/licenses"
         mavenRepoUrl =
             javaClass.getResource("/maven")?.toURI()?.toString() ?: error("""resource folder "/maven" not found!""")
 
-        buildFile + """
+        buildFile +
+            """
             buildscript {
               repositories {
                 mavenCentral()
                 google()
               }
               dependencies {
-                classpath "$AGP_8_x"
+                classpath "$AGP_8_X"
                 classpath files($pluginClasspath)
               }
             }
             apply plugin: 'com.android.application'
             apply plugin: 'com.cmgapps.licenses'
 
-        """.trimIndent()
+            """.trimIndent()
 
         gradleRunner = GradleRunner.create().withProjectDir(testProjectDir.toFile())
     }
 
     @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - taskName = {0}, AGP = {1}")
     @MethodSource("buildTypesAndAgpVersions")
-    fun `generate licenses buildType report`(taskName: String, agpVersion: String) {
+    fun `generate licenses buildType report`(
+        taskName: String,
+        agpVersion: String,
+    ) {
         buildFile.write(
             """
             buildscript {
@@ -112,53 +117,57 @@ class LicensePluginAndroidShould {
 
     @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - taskName = {0}")
     @MethodSource("productFlavorsAndCsv")
-    fun `generate licenses variant report`(taskName: String, licensesAsCsvExpected: String) {
-        buildFile + """
-              repositories {
-                maven {
-                  url '$mavenRepoUrl'
+    fun `generate licenses variant report`(
+        taskName: String,
+        licensesAsCsvExpected: String,
+    ) {
+        buildFile +
+            """
+            repositories {
+              maven {
+                url '$mavenRepoUrl'
+              }
+            }
+            android {
+              namespace "com.cmgapps"
+              compileSdkVersion 28
+              defaultConfig {
+                applicationId 'com.example'
+              }
+            
+              flavorDimensions "version", "store"
+              productFlavors {
+                demo {
+                  dimension "version"
+                }
+                full {
+                  dimension "version"
+                }
+                google {
+                  dimension "store"
+                }
+                amazon {
+                  dimension "store"
                 }
               }
-              android {
-                namespace "com.cmgapps"
-                compileSdkVersion 28
-                defaultConfig {
-                  applicationId 'com.example'
-                }
-              
-                flavorDimensions "version", "store"
-                productFlavors {
-                  demo {
-                    dimension "version"
-                  }
-                  full {
-                    dimension "version"
-                  }
-                  google {
-                    dimension "store"
-                  }
-                  amazon {
-                    dimension "store"
-                  }
-                }
+            }
+            
+            licenses {
+              reports {
+                html.enabled = false
+                csv.enabled = true
               }
-              
-              licenses {
-                reports {
-                  html.enabled = false
-                  csv.enabled = true
-                }
-              }
-              dependencies {
-                implementation 'group:name:1.0.0'
-                demoImplementation 'group:noname:1.0.0'
-                fullImplementation 'group:multilicenses:1.0.0'
-                googleImplementation 'group:foo:1.0.0'
-                amazonImplementation 'group:bar:1.0.0'
-                releaseImplementation 'com.squareup.retrofit2:retrofit:2.3.0'
-                debugImplementation 'group:zet:1.0.0'
-              }
-        """.trimIndent()
+            }
+            dependencies {
+              implementation 'group:name:1.0.0'
+              demoImplementation 'group:noname:1.0.0'
+              fullImplementation 'group:multilicenses:1.0.0'
+              googleImplementation 'group:foo:1.0.0'
+              amazonImplementation 'group:bar:1.0.0'
+              releaseImplementation 'com.squareup.retrofit2:retrofit:2.3.0'
+              debugImplementation 'group:zet:1.0.0'
+            }
+            """.trimIndent()
 
         gradleRunner
             .withArguments(":$taskName")
@@ -169,7 +178,8 @@ class LicensePluginAndroidShould {
 
     @Test
     fun `generate Report for selected configuration`() {
-        buildFile + """
+        buildFile +
+            """
             repositories {
                 maven {
                   url '$mavenRepoUrl'
@@ -194,7 +204,7 @@ class LicensePluginAndroidShould {
                 debugImplementation 'group:noname:1.0.0'
                 releaseImplementation 'com.squareup.retrofit2:retrofit:2.3.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
         gradleRunner.withArguments(":licenseDebugReport").build()
 
@@ -222,7 +232,7 @@ class LicensePluginAndroidShould {
                 google()
               }
               dependencies {
-                classpath "$AGP_8_x"
+                classpath "$AGP_8_X"
                 classpath files($pluginClasspath)
               }
             }
@@ -252,7 +262,7 @@ class LicensePluginAndroidShould {
                 google()
               }
               dependencies {
-                classpath "$AGP_8_x"
+                classpath "$AGP_8_X"
                 classpath files($pluginClasspath)
               }
             }
@@ -275,51 +285,53 @@ class LicensePluginAndroidShould {
     companion object {
         @JvmStatic
         fun buildTypesAndAgpVersions(): Stream<Arguments> =
-            listOf("licenseDebugReport", "licenseReleaseReport").cartesianProduct(listOf(AGP_7_x, AGP_8_x))
+            listOf("licenseDebugReport", "licenseReleaseReport").cartesianProduct(listOf(AGP_7_X, AGP_8_X))
 
         @JvmStatic
-        fun productFlavorsAndCsv(): Stream<Arguments> = Stream.of(
-            arguments(
-                "licenseDemoGoogleDebugReport",
-                LICENSE_DEMO_GOOGLE_DEBUG_CSV.replace("\n", "\r\n"),
-            ),
-            arguments(
-                "licenseDemoAmazonDebugReport",
-                LICENSE_DEMO_AMAZON_DEBUG_CSV.replace("\n", "\r\n"),
-            ),
-            arguments(
-                "licenseFullGoogleDebugReport",
-                LICENSE_FULL_GOOGLE_DEBUG_CSV.replace("\n", "\r\n"),
-            ),
-            arguments(
-                "licenseFullAmazonDebugReport",
-                LICENSE_FULL_AMAZON_DEBUG_CSV.replace("\n", "\r\n"),
-            ),
-            arguments(
-                "licenseDemoGoogleReleaseReport",
-                LICENSE_DEMO_GOOGLE_RELEASE_CSV.replace("\n", "\r\n"),
-            ),
-            arguments(
-                "licenseDemoAmazonReleaseReport",
-                LICENSE_DEMO_AMAZON_RELEASE_CSV.replace("\n", "\r\n"),
-            ),
-            arguments(
-                "licenseFullGoogleReleaseReport",
-                LICENSE_FULL_GOOGLE_RELEASE_CSV.replace("\n", "\r\n"),
-            ),
-            arguments(
-                "licenseFullAmazonReleaseReport",
-                LICENSE_FULL_AMAZON_RELEASE_CSV.replace("\n", "\r\n"),
-            ),
-        )
+        fun productFlavorsAndCsv(): Stream<Arguments> =
+            Stream.of(
+                arguments(
+                    "licenseDemoGoogleDebugReport",
+                    LICENSE_DEMO_GOOGLE_DEBUG_CSV.replace("\n", "\r\n"),
+                ),
+                arguments(
+                    "licenseDemoAmazonDebugReport",
+                    LICENSE_DEMO_AMAZON_DEBUG_CSV.replace("\n", "\r\n"),
+                ),
+                arguments(
+                    "licenseFullGoogleDebugReport",
+                    LICENSE_FULL_GOOGLE_DEBUG_CSV.replace("\n", "\r\n"),
+                ),
+                arguments(
+                    "licenseFullAmazonDebugReport",
+                    LICENSE_FULL_AMAZON_DEBUG_CSV.replace("\n", "\r\n"),
+                ),
+                arguments(
+                    "licenseDemoGoogleReleaseReport",
+                    LICENSE_DEMO_GOOGLE_RELEASE_CSV.replace("\n", "\r\n"),
+                ),
+                arguments(
+                    "licenseDemoAmazonReleaseReport",
+                    LICENSE_DEMO_AMAZON_RELEASE_CSV.replace("\n", "\r\n"),
+                ),
+                arguments(
+                    "licenseFullGoogleReleaseReport",
+                    LICENSE_FULL_GOOGLE_RELEASE_CSV.replace("\n", "\r\n"),
+                ),
+                arguments(
+                    "licenseFullAmazonReleaseReport",
+                    LICENSE_FULL_AMAZON_RELEASE_CSV.replace("\n", "\r\n"),
+                ),
+            )
     }
 }
 
-internal fun <S, T> List<S>.cartesianProduct(other: List<T>): Stream<Arguments> = this.flatMap { s1 ->
-    other.map { s2 ->
-        arguments(s1, s2)
-    }
-}.stream()
+internal fun <S, T> List<S>.cartesianProduct(other: List<T>): Stream<Arguments> =
+    this.flatMap { s1 ->
+        other.map { s2 ->
+            arguments(s1, s2)
+        }
+    }.stream()
 
 const val LICENSE_DEMO_GOOGLE_DEBUG_CSV =
     """Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url

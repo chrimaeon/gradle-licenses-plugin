@@ -17,27 +17,28 @@ internal class MarkdownReport(
     libraries: List<Library>,
     private val logger: Logger,
 ) : Report(libraries) {
-    override fun generate() = buildString {
-        append("# Open source licenses\n")
-        append("## Notice for packages")
-        libraries.toLicensesMap().forEach { (license, libraries) ->
-            libraries.asSequence().sortedBy { it.name }.forEach { library ->
-                append('\n')
-                append("* ")
-                append(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
-            }
-
-            append("\n```\n")
-            when (license.id) {
-                LicenseId.UNKNOWN -> {
-                    logger.logLicenseWarning(license, libraries)
-                    append(license.name)
-                    append("\n")
-                    append(license.url)
+    override fun generate() =
+        buildString {
+            append("# Open source licenses\n")
+            append("## Notice for packages")
+            libraries.toLicensesMap().forEach { (license, libraries) ->
+                libraries.asSequence().sortedBy { it.name }.forEach { library ->
+                    append('\n')
+                    append("* ")
+                    append(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
                 }
-                else -> append(license.id.text)
+
+                append("\n```\n")
+                when (license.id) {
+                    LicenseId.UNKNOWN -> {
+                        logger.logLicenseWarning(license, libraries)
+                        append(license.name)
+                        append("\n")
+                        append(license.url)
+                    }
+                    else -> append(license.id.text)
+                }
+                append("\n```\n")
             }
-            append("\n```\n")
         }
-    }
 }

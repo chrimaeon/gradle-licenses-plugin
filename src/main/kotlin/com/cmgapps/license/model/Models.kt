@@ -22,20 +22,19 @@ data class MavenCoordinates(
     val artifactId: String,
     @Serializable(ComparableVersionSerializer::class) val version: ComparableVersion,
 ) : Comparable<MavenCoordinates> {
-
     override fun compareTo(other: MavenCoordinates): Int = COMPARATOR.compare(this, other)
 
     val identifierWithoutVersion = "$groupId:$artifactId"
 
-    override fun toString(): String =
-        identifierWithoutVersion + if (version.toString().isNotEmpty()) ":$version" else ""
+    override fun toString(): String = identifierWithoutVersion + if (version.toString().isNotEmpty()) ":$version" else ""
 
     companion object {
         @JvmStatic
-        private val COMPARATOR = Comparator
-            .comparing(MavenCoordinates::groupId)
-            .thenComparing(MavenCoordinates::artifactId)
-            .thenComparing(MavenCoordinates::version, reverseOrder())
+        private val COMPARATOR =
+            Comparator
+                .comparing(MavenCoordinates::groupId)
+                .thenComparing(MavenCoordinates::artifactId)
+                .thenComparing(MavenCoordinates::version, reverseOrder())
     }
 }
 
@@ -57,21 +56,22 @@ enum class LicenseId(val spdxLicenseIdentifier: String?) {
 
     companion object {
         @JvmStatic
-        fun fromSpdxLicenseIdentifier(spdxLicenseIdentifier: String?): LicenseId = when (spdxLicenseIdentifier) {
-            "Apache-2.0" -> APACHE
-            "BSD-2-Clause" -> BSD_2
-            "BSD-3-Clause" -> BSD_3
-            "CDDL-1.0" -> CDDL
-            "EPL-2.0" -> EPL_2
-            "GPL-2.0-only" -> GPL_2
-            "GPL-3.0-only" -> GPL_3
-            "LGPL-2.1-only" -> LGPL_2_1
-            "LGPL-3.0-only" -> LGPL_3
-            "MIT" -> MIT
-            "MPL-2.0" -> MPL_2
-            "EPL-1.0" -> EPL_1
-            else -> UNKNOWN
-        }
+        fun fromSpdxLicenseIdentifier(spdxLicenseIdentifier: String?): LicenseId =
+            when (spdxLicenseIdentifier) {
+                "Apache-2.0" -> APACHE
+                "BSD-2-Clause" -> BSD_2
+                "BSD-3-Clause" -> BSD_3
+                "CDDL-1.0" -> CDDL
+                "EPL-2.0" -> EPL_2
+                "GPL-2.0-only" -> GPL_2
+                "GPL-3.0-only" -> GPL_3
+                "LGPL-2.1-only" -> LGPL_2_1
+                "LGPL-3.0-only" -> LGPL_3
+                "MIT" -> MIT
+                "MPL-2.0" -> MPL_2
+                "EPL-1.0" -> EPL_1
+                else -> UNKNOWN
+            }
 
         /**
          * Map License name or URL to license id.
@@ -90,7 +90,6 @@ enum class LicenseId(val spdxLicenseIdentifier: String?) {
 
 @Serializable(with = LicenseSerializer::class)
 data class License(val id: LicenseId, val name: String, val url: String) {
-
     override fun hashCode(): Int {
         return id.hashCode()
     }
@@ -136,7 +135,10 @@ object ComparableVersionSerializer : KSerializer<ComparableVersion> {
         return ComparableVersion(decoder.decodeString())
     }
 
-    override fun serialize(encoder: Encoder, value: ComparableVersion) {
+    override fun serialize(
+        encoder: Encoder,
+        value: ComparableVersion,
+    ) {
         encoder.encodeString(value.toString())
     }
 }

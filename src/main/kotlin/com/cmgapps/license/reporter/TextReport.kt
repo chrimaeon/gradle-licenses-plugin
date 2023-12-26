@@ -10,26 +10,30 @@ import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 
 internal class TextReport(libraries: List<Library>) : Report(libraries) {
-    override fun generate() = buildString {
-        append("Licenses\n")
-        val libLength = libraries.size
-        libraries.forEachIndexed { libIndex, library ->
-            appendPrefix(libIndex, libLength)
-            if (library.name == null) {
-                append(library.mavenCoordinates.toString())
-            } else {
-                append(library.name)
-                append(':')
-                append(library.mavenCoordinates.version)
-            }
-            appendLicenses(libIndex, libLength, library.licenses)
-            if (libIndex < libLength - 1) {
-                append('\n')
+    override fun generate() =
+        buildString {
+            append("Licenses\n")
+            val libLength = libraries.size
+            libraries.forEachIndexed { libIndex, library ->
+                appendPrefix(libIndex, libLength)
+                if (library.name == null) {
+                    append(library.mavenCoordinates.toString())
+                } else {
+                    append(library.name)
+                    append(':')
+                    append(library.mavenCoordinates.version)
+                }
+                appendLicenses(libIndex, libLength, library.licenses)
+                if (libIndex < libLength - 1) {
+                    append('\n')
+                }
             }
         }
-    }
 
-    private fun StringBuilder.appendPrefix(index: Int, length: Int) {
+    private fun StringBuilder.appendPrefix(
+        index: Int,
+        length: Int,
+    ) {
         if (index < length - 1) {
             append("$ITEM_PREFIX ")
         } else {
@@ -37,7 +41,11 @@ internal class TextReport(libraries: List<Library>) : Report(libraries) {
         }
     }
 
-    private fun StringBuilder.appendLicenses(libIndex: Int, libLength: Int, licenses: List<License>) {
+    private fun StringBuilder.appendLicenses(
+        libIndex: Int,
+        libLength: Int,
+        licenses: List<License>,
+    ) {
         val licensesLength = licenses.size
 
         if (licenses.isEmpty()) {

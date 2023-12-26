@@ -12,7 +12,6 @@ import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
 
 class JsonReportShould {
-
     @Test
     fun generateReport() {
         val report = JsonReport(testLibraries).generate()

@@ -53,8 +53,9 @@ open class LicensesReport(internal val type: ReportType, task: Task, internal va
 
     init {
         val extension = if (type.extension.isBlank()) "" else ".${type.extension}"
-        destination =
-            task.project.buildDir.resolve("reports/licenses").resolve(task.name).resolve("licenses$extension")
+        _destination.set(
+            task.project.layout.buildDirectory.file("reports/licenses/${task.name}/licenses$extension"),
+        )
     }
 
     internal open fun configure(
@@ -71,17 +72,16 @@ open class LicensesReport(internal val type: ReportType, task: Task, internal va
 }
 
 class CustomizableHtmlReport(type: ReportType, task: Task, project: Project) : LicensesReport(type, task, project) {
-
-    internal val _stylesheet: Property<TextResource?> = task.project.objects.property(TextResource::class.java)
+    internal val stylesheet: Property<TextResource?> = task.project.objects.property(TextResource::class.java)
 
     @Input
     fun stylesheet(css: String) {
-        _stylesheet.set(project.resources.text.fromString(css))
+        stylesheet.set(project.resources.text.fromString(css))
     }
 
     @Input
     fun stylesheet(css: File) {
-        _stylesheet.set(project.resources.text.fromFile(css))
+        stylesheet.set(project.resources.text.fromFile(css))
     }
 
     @Input
@@ -123,42 +123,49 @@ interface LicensesReportsContainer {
     val csv: LicensesReport
 
     fun csv(config: Action<LicensesReport>)
+
     fun csv(config: Closure<LicensesReport>)
 
     @get:Internal
     val html: CustomizableHtmlReport
 
     fun html(config: Action<CustomizableHtmlReport>)
+
     fun html(config: Closure<CustomizableHtmlReport>)
 
     @get:Internal
     val json: LicensesReport
 
     fun json(config: Action<LicensesReport>)
+
     fun json(config: Closure<LicensesReport>)
 
     @get:Internal
     val markdown: LicensesReport
 
     fun markdown(config: Action<LicensesReport>)
+
     fun markdown(config: Closure<LicensesReport>)
 
     @get:Internal
     val text: LicensesReport
 
     fun text(config: Action<LicensesReport>)
+
     fun text(config: Closure<LicensesReport>)
 
     @get:Internal
     val xml: LicensesReport
 
     fun xml(config: Action<LicensesReport>)
+
     fun xml(config: Closure<LicensesReport>)
 
     @get:Internal
     val custom: CustomizableReport
 
     fun custom(config: Action<CustomizableReport>)
+
     fun custom(config: Closure<CustomizableReport>)
 
     @Internal

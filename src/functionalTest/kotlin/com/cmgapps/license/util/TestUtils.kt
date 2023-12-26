@@ -19,14 +19,17 @@ package com.cmgapps.license.util
 import org.gradle.testkit.runner.GradleRunner
 import java.io.File
 
-fun Any.getFileContent(fileName: String) = javaClass.getResource("/licenses/$fileName")?.readText()
-    ?: error("""resource file "/licenses/$fileName" not found! """)
+fun Any.getFileContent(fileName: String) =
+    javaClass.getResource("/licenses/$fileName")?.readText()
+        ?: error("""resource file "/licenses/$fileName" not found! """)
 
 operator fun File.plus(text: String) = appendText(text)
+
 infix fun File.write(text: String) = writeText(text)
 
-fun GradleRunner.withJaCoCo(): GradleRunner = also {
-    javaClass.classLoader.getResourceAsStream("testkit/testkit-gradle.properties")?.use { input ->
-        File(projectDir, "gradle.properties").outputStream().use { input.copyTo(it) }
-    } ?: throw IllegalStateException("Resource not found: testkit/testkit-gradle.properties")
-}
+fun GradleRunner.withJaCoCo(): GradleRunner =
+    also {
+        javaClass.classLoader.getResourceAsStream("testkit/testkit-gradle.properties")?.use { input ->
+            File(projectDir, "gradle.properties").outputStream().use { input.copyTo(it) }
+        } ?: throw IllegalStateException("Resource not found: testkit/testkit-gradle.properties")
+    }

@@ -30,7 +30,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class LicensePluginJavaMultiProjectShould {
-
     @TempDir
     lateinit var testProjectDir: Path
 
@@ -44,32 +43,37 @@ class LicensePluginJavaMultiProjectShould {
     fun setUp() {
         Files.createFile(Paths.get(testProjectDir.toString(), "settings.gradle"))
             .toFile() + "include ':module1', ':module2', ':modules:submodule'"
-        module1File = Paths.get(testProjectDir.toString(), "module1").toFile().run {
-            mkdirs()
-            Files.createFile(Paths.get(this.absolutePath, "build.gradle")).toFile()
-        }
+        module1File =
+            Paths.get(testProjectDir.toString(), "module1").toFile().run {
+                mkdirs()
+                Files.createFile(Paths.get(this.absolutePath, "build.gradle")).toFile()
+            }
 
-        module2File = Paths.get(testProjectDir.toString(), "module2").toFile().run {
-            mkdirs()
-            Files.createFile(Paths.get(this.absolutePath, "build.gradle")).toFile()
-        }
+        module2File =
+            Paths.get(testProjectDir.toString(), "module2").toFile().run {
+                mkdirs()
+                Files.createFile(Paths.get(this.absolutePath, "build.gradle")).toFile()
+            }
 
-        module3File = Paths.get(testProjectDir.toString(), "modules").resolve("submodule").toFile().run {
-            mkdirs()
-            Files.createFile(Paths.get(this.absolutePath, "build.gradle")).toFile()
-        }
+        module3File =
+            Paths.get(testProjectDir.toString(), "modules").resolve("submodule").toFile().run {
+                mkdirs()
+                Files.createFile(Paths.get(this.absolutePath, "build.gradle")).toFile()
+            }
 
         mavenRepoUrl =
             javaClass.getResource("/maven")?.toURI()?.toString() ?: error("""resource folder "/maven" not found!""")
-        gradleRunner = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":module1:licenseReport")
-            .withPluginClasspath()
+        gradleRunner =
+            GradleRunner.create()
+                .withProjectDir(testProjectDir.toFile())
+                .withArguments(":module1:licenseReport")
+                .withPluginClasspath()
     }
 
     @Test
     fun `collect dependencies from additional module`() {
-        module1File + """
+        module1File +
+            """
             plugins {
                 id("java")
                 id("com.cmgapps.licenses")
@@ -83,9 +87,10 @@ class LicensePluginJavaMultiProjectShould {
                     html.enabled = true
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        module2File + """
+        module2File +
+            """
             plugins {
                 id("java-library")
             }
@@ -95,9 +100,10 @@ class LicensePluginJavaMultiProjectShould {
             dependencies {
                 implementation 'group:name:1.0.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        module3File + """
+        module3File +
+            """
             plugins {
                 id("java-library")
             }
@@ -107,7 +113,7 @@ class LicensePluginJavaMultiProjectShould {
             dependencies {
                 implementation 'com.squareup.retrofit2:retrofit:2.3.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
         gradleRunner.build()
 
@@ -123,13 +129,19 @@ class LicensePluginJavaMultiProjectShould {
                     "<style>" +
                     "body{font-family:sans-serif;background-color:#eee}" +
                     "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
-                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
+                    "@media(prefers-color-scheme: dark){" +
+                    "body{background-color: #303030}" +
+                    "pre,.license {background-color: #242424}" +
+                    "}" +
                     "</style>" +
                     "<title>Open source licenses</title>" +
                     "</head>" +
                     "<body>" +
                     "<h3>Notice for packages:</h3>" +
-                    "<ul><li>Fake dependency name</li></ul><div class=\"license\"><p>Some license</p><a href=\"http://website.tld/\">http://website.tld/</a></div>" +
+                    "<ul><li>Fake dependency name</li></ul>" +
+                    "<div class=\"license\"><p>Some license</p>" +
+                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
+                    "</div>" +
                     "<ul><li>Retrofit</li></ul><pre>" +
                     getFileContent("apache-2.0.txt") +
                     "</pre>" +
@@ -141,7 +153,8 @@ class LicensePluginJavaMultiProjectShould {
 
     @Test
     fun `merge dependencies of modules`() {
-        module1File + """
+        module1File +
+            """
             plugins {
                 id("java-library")
                 id("com.cmgapps.licenses")
@@ -158,9 +171,10 @@ class LicensePluginJavaMultiProjectShould {
             dependencies {
                 implementation 'com.squareup.retrofit2:retrofit:2.3.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        module2File + """
+        module2File +
+            """
             plugins {
                 id("java-library")
             }
@@ -170,7 +184,7 @@ class LicensePluginJavaMultiProjectShould {
             dependencies {
                 implementation 'group:name:1.0.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
         gradleRunner.build()
 
@@ -186,13 +200,19 @@ class LicensePluginJavaMultiProjectShould {
                     "<style>" +
                     "body{font-family:sans-serif;background-color:#eee}" +
                     "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
-                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
+                    "@media(prefers-color-scheme: dark){" +
+                    "body{background-color: #303030}" +
+                    "pre,.license {background-color: #242424}" +
+                    "}" +
                     "</style>" +
                     "<title>Open source licenses</title>" +
                     "</head>" +
                     "<body>" +
                     "<h3>Notice for packages:</h3>" +
-                    "<ul><li>Fake dependency name</li></ul><div class=\"license\"><p>Some license</p><a href=\"http://website.tld/\">http://website.tld/</a></div>" +
+                    "<ul><li>Fake dependency name</li></ul>" +
+                    "<div class=\"license\"><p>Some license</p>" +
+                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
+                    "</div>" +
                     "<ul><li>Retrofit</li></ul><pre>" +
                     getFileContent("apache-2.0.txt") +
                     "</pre>" +
@@ -204,7 +224,8 @@ class LicensePluginJavaMultiProjectShould {
 
     @Test
     fun `not add already added dependencies`() {
-        module1File + """
+        module1File +
+            """
             plugins {
                 id("java")
                 id("com.cmgapps.licenses")
@@ -221,9 +242,10 @@ class LicensePluginJavaMultiProjectShould {
             dependencies {
                 implementation 'group:name:1.0.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        module2File + """
+        module2File +
+            """
             plugins {
                 id("java-library")
             }
@@ -233,7 +255,7 @@ class LicensePluginJavaMultiProjectShould {
             dependencies {
                 implementation 'group:name:1.0.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
         gradleRunner.build()
 
@@ -249,13 +271,19 @@ class LicensePluginJavaMultiProjectShould {
                     "<style>" +
                     "body{font-family:sans-serif;background-color:#eee}" +
                     "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
-                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
+                    "@media(prefers-color-scheme: dark){" +
+                    "body{background-color: #303030}" +
+                    "pre,.license {background-color: #242424}" +
+                    "}" +
                     "</style>" +
                     "<title>Open source licenses</title>" +
                     "</head>" +
                     "<body>" +
                     "<h3>Notice for packages:</h3>" +
-                    "<ul><li>Fake dependency name</li></ul><div class=\"license\"><p>Some license</p><a href=\"http://website.tld/\">http://website.tld/</a></div>" +
+                    "<ul><li>Fake dependency name</li></ul>" +
+                    "<div class=\"license\"><p>Some license</p>" +
+                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
+                    "</div>" +
                     "</body>" +
                     "</html>",
             ),

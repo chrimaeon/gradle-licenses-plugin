@@ -20,7 +20,6 @@ internal class HtmlReport(
     private val useDarkMode: Boolean,
     private val logger: Logger,
 ) : Report(libraries) {
-
     companion object {
         private const val DEFAULT_PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
         private const val DEFAULT_BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
@@ -83,7 +82,6 @@ internal class HtmlReport(
 }
 
 internal class HTML : TagWithText("html") {
-
     init {
         attributes["lang"] = "en"
     }
@@ -92,7 +90,11 @@ internal class HTML : TagWithText("html") {
 
     fun body(init: Body.() -> Unit) = initTag(Body(), init)
 
-    override fun render(builder: StringBuilder, intent: String, format: Boolean) {
+    override fun render(
+        builder: StringBuilder,
+        intent: String,
+        format: Boolean,
+    ) {
         builder.append("<!DOCTYPE html>")
         if (format) {
             builder.append('\n')
@@ -103,6 +105,7 @@ internal class HTML : TagWithText("html") {
 
 internal class Head : TagWithText("head") {
     fun title(init: Title.() -> Unit) = initTag(Title(), init)
+
     fun meta(attrs: Map<String, String>) {
         val meta = initTag(Meta()) {}
         meta.attributes.putAll(attrs)
@@ -112,9 +115,13 @@ internal class Head : TagWithText("head") {
 }
 
 internal class Title : TagWithText("title")
-internal class Meta : Tag("meta") {
 
-    override fun render(builder: StringBuilder, intent: String, format: Boolean) {
+internal class Meta : Tag("meta") {
+    override fun render(
+        builder: StringBuilder,
+        intent: String,
+        format: Boolean,
+    ) {
         if (format) {
             builder.append(intent)
         }
@@ -134,15 +141,25 @@ internal class Style : TagWithText("style")
 
 internal abstract class BodyTag(name: String) : TagWithText(name) {
     fun pre(init: Pre.() -> Unit) = initTag(Pre(), init)
+
     fun h3(init: H3.() -> Unit) = initTag(H3(), init)
+
     fun ul(init: Ul.() -> Unit) = initTag(Ul(), init)
+
     fun li(init: Li.() -> Unit) = initTag(Li(), init)
-    fun a(href: String, init: A.() -> Unit) {
+
+    fun a(
+        href: String,
+        init: A.() -> Unit,
+    ) {
         val a = initTag(A(), init)
         a.href = href
     }
 
-    fun div(`class`: String, init: Div.() -> Unit) {
+    fun div(
+        `class`: String,
+        init: Div.() -> Unit,
+    ) {
         val div = initTag(Div(), init)
         div.`class` = `class`
     }
@@ -151,10 +168,15 @@ internal abstract class BodyTag(name: String) : TagWithText(name) {
 }
 
 internal class Body : BodyTag("body")
+
 internal class Pre : BodyTag("pre")
+
 internal class H3 : BodyTag("h3")
+
 internal class Ul : BodyTag("ul")
+
 internal class Li : BodyTag("li")
+
 internal class A : BodyTag("a") {
     var href: String
         get() = attributes["href"]!!

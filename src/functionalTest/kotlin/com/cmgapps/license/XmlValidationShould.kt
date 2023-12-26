@@ -19,7 +19,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class XmlValidationShould {
-
     @TempDir
     lateinit var testProjectDir: Path
 
@@ -27,7 +26,8 @@ class XmlValidationShould {
     fun validateSchema() {
         val reportFolder = "$testProjectDir/build/reports/licenses/licenseReport"
         val mavenRepoUrl = javaClass.getResource("/maven")!!.toString()
-        Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile() + """
+        Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile() +
+            """
             plugins {
                id("java")
                id("com.cmgapps.licenses")
@@ -50,7 +50,7 @@ class XmlValidationShould {
               implementation 'group:multilicenses:1.0.0'
               implementation 'group:name:1.0.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
         GradleRunner.create()
             .withProjectDir(testProjectDir.toFile())

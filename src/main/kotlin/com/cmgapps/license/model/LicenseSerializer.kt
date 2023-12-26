@@ -17,15 +17,18 @@ import kotlinx.serialization.encoding.Encoder
 private class LicenseSurrogate(val spdxLicenseIdentifier: String?, val name: String, val url: String)
 
 object LicenseSerializer : KSerializer<License> {
-
     override val descriptor: SerialDescriptor = LicenseSurrogate.serializer().descriptor
 
-    override fun serialize(encoder: Encoder, value: License) {
-        val surrogate = LicenseSurrogate(
-            spdxLicenseIdentifier = value.id.spdxLicenseIdentifier,
-            name = value.name,
-            url = value.url,
-        )
+    override fun serialize(
+        encoder: Encoder,
+        value: License,
+    ) {
+        val surrogate =
+            LicenseSurrogate(
+                spdxLicenseIdentifier = value.id.spdxLicenseIdentifier,
+                name = value.name,
+                url = value.url,
+            )
 
         encoder.encodeSerializableValue(LicenseSurrogate.serializer(), surrogate)
     }
