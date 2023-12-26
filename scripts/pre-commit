@@ -1,8 +1,7 @@
 #!/bin/sh
+set -eo pipefail
 
 # ln -s -f ../../scripts/pre-commit .git/hooks/pre-commit
-
-set -e
 
 command -v ktlint >/dev/null 2>&1 || { echo >&2 "ktlint not found.\nAborting."; exit 2; }
 
@@ -10,7 +9,8 @@ FILES=$(git diff --cached --name-only | grep -i -E "\.kts?" || true)
 
 if [ -n "$FILES" ]
 then
-    ktlint $FILES
+    ktlint -F $FILES
+    git add $FILES
 else
     echo "No file for ktlint"
 fi

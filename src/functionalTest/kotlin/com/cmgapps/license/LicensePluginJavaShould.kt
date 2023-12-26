@@ -25,7 +25,6 @@ import java.nio.file.Paths
 import java.util.regex.Pattern
 
 class LicensePluginJavaShould {
-
     @TempDir
     lateinit var testProjectDir: Path
 
@@ -39,7 +38,8 @@ class LicensePluginJavaShould {
         buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
         reportFolder = "$testProjectDir/build/reports/licenses/licenseReport"
         mavenRepoUrl = javaClass.getResource("/maven")!!.toURI().toString()
-        buildFile + """
+        buildFile +
+            """
             plugins {
                id("java")
                id("com.cmgapps.licenses")
@@ -51,20 +51,22 @@ class LicensePluginJavaShould {
                 }
             }
 
-        """.trimIndent()
+            """.trimIndent()
 
-        gradleRunner = GradleRunner.create()
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments(":licenseReport", "--info", "--stacktrace")
-            .withPluginClasspath()
+        gradleRunner =
+            GradleRunner.create()
+                .withProjectDir(testProjectDir.toFile())
+                .withArguments(":licenseReport", "--info", "--stacktrace")
+                .withPluginClasspath()
     }
 
     @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - Gradle Version = {0}")
-    @ValueSource(strings = ["7.2", "7.3", "7.4", "7.5", "7.6"])
+    @ValueSource(strings = ["7.2", "7.3", "7.4", "7.5", "7.6", "8.0", "8.1", "8.2", "8.3", "8.4", "8.5"])
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
-        val result = gradleRunner
-            .withGradleVersion(version)
-            .build()
+        val result =
+            gradleRunner
+                .withGradleVersion(version)
+                .build()
 
         assertThat("Gradle version $version", result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
     }
@@ -78,7 +80,8 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate report with no open source dependencies`() {
-        buildFile + """
+        buildFile +
+            """
             licenses {
                 reports {
                     html.enabled = true
@@ -87,7 +90,7 @@ class LicensePluginJavaShould {
             dependencies {
               implementation 'com.google.firebase:firebase-core:10.0.1'
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = gradleRunner.build()
 
@@ -120,7 +123,8 @@ class LicensePluginJavaShould {
 
     @Test
     fun `java library with parent pom dependency`() {
-        buildFile + """
+        buildFile +
+            """
             licenses {
                 reports {
                     html.enabled = true
@@ -130,7 +134,7 @@ class LicensePluginJavaShould {
             dependencies {
               implementation 'com.squareup.retrofit2:retrofit:2.3.0'
             }
-        """.trimIndent()
+            """.trimIndent()
         val result = gradleRunner.build()
 
         assertThat(
@@ -168,7 +172,8 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate Report with custom license`() {
-        buildFile + """
+        buildFile +
+            """
             licenses {
                 reports {
                     html.enabled = true
@@ -178,7 +183,7 @@ class LicensePluginJavaShould {
             dependencies {
               implementation 'group:name:1.0.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = gradleRunner.build()
 
@@ -218,7 +223,8 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate Report with lib with no name`() {
-        buildFile + """
+        buildFile +
+            """
             licenses {
                 reports {
                     html.enabled = true
@@ -228,7 +234,7 @@ class LicensePluginJavaShould {
             dependencies {
               implementation 'group:noname:1.0.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = gradleRunner.build()
 
@@ -268,7 +274,8 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate Html report with no dark theme`() {
-        buildFile + """
+        buildFile +
+            """
             licenses {
                 reports {
                     html.enabled = true
@@ -279,13 +286,18 @@ class LicensePluginJavaShould {
             dependencies {
               implementation 'group:noname:1.0.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = gradleRunner.build()
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)),
+            matchesPattern(
+                Pattern.compile(
+                    ".*Wrote HTML report to .*$reportFolder/licenses.html.*",
+                    Pattern.DOTALL,
+                ),
+            ),
         )
         assertThat(
             File("$reportFolder/licenses.html").readText().trim(),
@@ -294,7 +306,10 @@ class LicensePluginJavaShould {
                     "<html lang=\"en\">" +
                     "<head>" +
                     "<meta charset=\"UTF-8\">" +
-                    "<style>body{font-family:sans-serif;background-color:#eee}pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}</style>" +
+                    "<style>body{font-family:sans-serif;background-color:#eee}" +
+                    "pre,.license{background-color:#ddd;padding:1em}" +
+                    "pre{white-space:pre-wrap}" +
+                    "</style>" +
                     "<title>Open source licenses</title>" +
                     "</head>" +
                     "<body>" +
@@ -314,7 +329,8 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate TXT Report`() {
-        buildFile + """
+        buildFile +
+            """
             licenses {
                 reports {
                     text.enabled = true
@@ -324,7 +340,7 @@ class LicensePluginJavaShould {
             dependencies {
               implementation 'group:noname:1.0.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = gradleRunner.build()
 
@@ -345,7 +361,8 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate Report with different html styles`() {
-        buildFile + """
+        buildFile +
+            """
             licenses {
                 reports {
                     html.enabled = true
@@ -357,7 +374,7 @@ class LicensePluginJavaShould {
             dependencies {
               implementation 'group:name:1.0.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = gradleRunner.build()
 
@@ -390,7 +407,8 @@ class LicensePluginJavaShould {
 
     @Test
     fun `generate custom report`() {
-        buildFile + """
+        buildFile +
+            """
             licenses {
                 reports {
                     custom.enabled = true
@@ -401,7 +419,7 @@ class LicensePluginJavaShould {
             dependencies {
               implementation 'group:name:1.0.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = gradleRunner.withDebug(true).build()
 
@@ -414,7 +432,8 @@ class LicensePluginJavaShould {
 
     @Test
     fun `handle DSL`() {
-        buildFile + """
+        buildFile +
+            """
             licenses {
                 reports {
                     csv {
@@ -446,7 +465,7 @@ class LicensePluginJavaShould {
             dependencies {
               implementation 'group:name:1.0.0'
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = gradleRunner.withDebug(true).build()
 
