@@ -50,4 +50,4 @@ jobs:
       - name: Upload Codecov
         uses: codecov/codecov-action@v3
         with:
-          files: ./build/kover/raw-reports/test.exec
+          files: ./build/kover/bin-reports/test.exec
