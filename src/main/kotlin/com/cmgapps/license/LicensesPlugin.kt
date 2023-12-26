@@ -16,14 +16,7 @@
 
 package com.cmgapps.license
 
-import com.android.build.gradle.AppExtension
-import com.android.build.gradle.AppPlugin
-import com.android.build.gradle.DynamicFeaturePlugin
-import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.LibraryPlugin
-import com.android.build.gradle.api.BaseVariant
 import org.gradle.api.Action
-import org.gradle.api.DomainObjectSet
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -170,20 +163,6 @@ class LicensesPlugin : Plugin<Project> {
             group = TASK_GROUP
             reports(extension.reports)
         }
-
-        @Suppress("DEPRECATION")
-        @JvmStatic
-        private fun getAndroidVariants(project: Project): DomainObjectSet<out BaseVariant>? =
-            when {
-                project.plugins.hasPlugin(AppPlugin::class.java) ||
-                    project.plugins.hasPlugin(DynamicFeaturePlugin::class.java) ->
-                    project.extensions.getByType(AppExtension::class.java).applicationVariants
-
-                project.plugins.hasPlugin(LibraryPlugin::class.java) ->
-                    project.extensions.getByType(LibraryExtension::class.java).libraryVariants
-
-                else -> null
-            }
     }
 }
 
