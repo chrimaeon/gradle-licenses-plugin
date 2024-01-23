@@ -7,7 +7,7 @@ maven = "3.9.6"
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-versions = "com.github.ben-manes.versions:0.50.0"
+versions = "com.github.ben-manes.versions:0.51.0"
 gradle-pluginPublish = "com.gradle.plugin-publish:1.2.1"
 kotlinx-kover = "org.jetbrains.kotlinx.kover:0.7.5"
 jetbrains-dokka = "org.jetbrains.dokka:1.9.10"
