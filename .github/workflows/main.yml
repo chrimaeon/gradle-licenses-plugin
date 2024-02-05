@@ -48,6 +48,6 @@ jobs:
             build/test-results/*
 
       - name: Upload Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           files: ./build/kover/bin-reports/test.exec,./build/kover/bin-reports/functionalTest.exec
