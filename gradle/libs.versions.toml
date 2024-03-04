@@ -24,7 +24,7 @@ maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven" }
 maven-artifact = { module = "org.apache.maven:maven-artifact", version.ref = "maven" }
 jUnit = "org.junit.jupiter:junit-jupiter:5.10.1"
 hamcrest = "org.hamcrest:hamcrest:2.2"
-ktlint-cli = "com.pinterest.ktlint:ktlint-cli:1.1.0"
+ktlint-cli = "com.pinterest.ktlint:ktlint-cli:1.2.1"
 mockito-kotlin = "org.mockito.kotlin:mockito-kotlin:5.2.1"
 xmlunit-core = { module = "org.xmlunit:xmlunit-core", version.ref = "xmlunit" }
 xmlunit-matchers = { module = "org.xmlunit:xmlunit-matchers", version.ref = "xmlunit" }
