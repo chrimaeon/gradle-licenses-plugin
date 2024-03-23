@@ -63,7 +63,7 @@ abstract class LicensesTask : DefaultTask() {
 
     private lateinit var pomConfiguration: Configuration
 
-    @Suppress("ktlint:standard:property-naming")
+    @Suppress("ktlint:standard:backing-property-naming")
     private val _allProjects: Set<Project> by lazy {
         val allProjects = project.rootProject.allprojects
 
