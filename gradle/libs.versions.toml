@@ -10,7 +10,7 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 versions = "com.github.ben-manes.versions:0.51.0"
 gradle-pluginPublish = "com.gradle.plugin-publish:1.2.1"
 kotlinx-kover = "org.jetbrains.kotlinx.kover:0.7.6"
-jetbrains-dokka = "org.jetbrains.dokka:1.9.10"
+jetbrains-dokka = "org.jetbrains.dokka:1.9.20"
 jetbrains-changelog = "org.jetbrains.changelog:2.2.0"
 
 [libraries]
