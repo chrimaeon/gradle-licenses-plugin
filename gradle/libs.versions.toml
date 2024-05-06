@@ -19,7 +19,7 @@ kotlin-multiplatformPlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plug
 kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
-apache-commonsCsv = "org.apache.commons:commons-csv:1.10.0"
+apache-commonsCsv = "org.apache.commons:commons-csv:1.11.0"
 maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven" }
 maven-artifact = { module = "org.apache.maven:maven-artifact", version.ref = "maven" }
 jUnit = "org.junit.jupiter:junit-jupiter:5.10.2"
