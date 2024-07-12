@@ -41,7 +41,8 @@ class LicensePluginJavaMultiProjectShould {
 
     @BeforeEach
     fun setUp() {
-        Files.createFile(Paths.get(testProjectDir.toString(), "settings.gradle"))
+        Files
+            .createFile(Paths.get(testProjectDir.toString(), "settings.gradle"))
             .toFile() + "include ':module1', ':module2', ':modules:submodule'"
         module1File =
             Paths.get(testProjectDir.toString(), "module1").toFile().run {
@@ -64,7 +65,8 @@ class LicensePluginJavaMultiProjectShould {
         mavenRepoUrl =
             javaClass.getResource("/maven")?.toURI()?.toString() ?: error("""resource folder "/maven" not found!""")
         gradleRunner =
-            GradleRunner.create()
+            GradleRunner
+                .create()
                 .withProjectDir(testProjectDir.toFile())
                 .withArguments(":module1:licenseReport")
                 .withPluginClasspath()
@@ -119,7 +121,8 @@ class LicensePluginJavaMultiProjectShould {
 
         assertThat(
             File("$testProjectDir/module1/build/reports/licenses/licenseReport/licenses.html")
-                .readText().trim(),
+                .readText()
+                .trim(),
             `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
@@ -190,7 +193,8 @@ class LicensePluginJavaMultiProjectShould {
 
         assertThat(
             File("$testProjectDir/module1/build/reports/licenses/licenseReport/licenses.html")
-                .readText().trim(),
+                .readText()
+                .trim(),
             `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
@@ -261,7 +265,8 @@ class LicensePluginJavaMultiProjectShould {
 
         assertThat(
             File("$testProjectDir/module1/build/reports/licenses/licenseReport/licenses.html")
-                .readText().trim(),
+                .readText()
+                .trim(),
             `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +

@@ -6,9 +6,11 @@
 
 package com.cmgapps.license.reporter
 
-internal class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : Report(libraries) {
-    override fun generate(): String {
-        return libraries {
+internal class XmlReport(
+    libraries: List<com.cmgapps.license.model.Library>,
+) : Report(libraries) {
+    override fun generate(): String =
+        libraries {
             for (library in libraries) {
                 library(
                     id = library.mavenCoordinates.toString(),
@@ -34,7 +36,6 @@ internal class XmlReport(libraries: List<com.cmgapps.license.model.Library>) : R
                 }
             }
         }.toString()
-    }
 }
 
 internal class Libraries : Tag("libraries") {

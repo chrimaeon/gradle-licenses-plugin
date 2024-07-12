@@ -11,10 +11,18 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
 import java.io.StringWriter
 
-internal class CsvReport(libraries: List<Library>) : Report(libraries) {
+internal class CsvReport(
+    libraries: List<Library>,
+) : Report(libraries) {
     override fun generate(): String =
         StringWriter().use { writer ->
-            CSVPrinter(writer, CSVFormat.RFC4180.builder().setHeader(*HEADER).build()).use { printer ->
+            CSVPrinter(
+                writer,
+                CSVFormat.RFC4180
+                    .builder()
+                    .setHeader(*HEADER)
+                    .build(),
+            ).use { printer ->
                 libraries.forEach { library ->
                     library.licenses.forEach { license ->
                         printer.printRecord(

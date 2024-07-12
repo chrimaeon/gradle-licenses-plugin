@@ -29,11 +29,17 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import java.io.File
 
-abstract class Report(protected val libraries: List<Library>) {
+abstract class Report(
+    protected val libraries: List<Library>,
+) {
     abstract fun generate(): String
 }
 
-open class LicensesReport(internal val type: ReportType, task: Task, internal val project: Project) {
+open class LicensesReport(
+    internal val type: ReportType,
+    task: Task,
+    internal val project: Project,
+) {
     @get:Internal
     internal val name: String = type.name
 
@@ -44,7 +50,10 @@ open class LicensesReport(internal val type: ReportType, task: Task, internal va
         get() = _destination.get().asFile
         set(value) = _destination.set(value)
 
-    private val _enabled: Property<Boolean> = task.project.objects.property(Boolean::class.java).convention(false)
+    private val _enabled: Property<Boolean> =
+        task.project.objects
+            .property(Boolean::class.java)
+            .convention(false)
 
     @get:Input
     var enabled: Boolean
@@ -54,7 +63,8 @@ open class LicensesReport(internal val type: ReportType, task: Task, internal va
     init {
         val extension = if (type.extension.isBlank()) "" else ".${type.extension}"
         _destination.set(
-            task.project.layout.buildDirectory.file("reports/licenses/${task.name}/licenses$extension"),
+            task.project.layout.buildDirectory
+                .file("reports/licenses/${task.name}/licenses$extension"),
         )
     }
 
@@ -66,12 +76,14 @@ open class LicensesReport(internal val type: ReportType, task: Task, internal va
         config?.execute(this)
     }
 
-    override fun toString(): String {
-        return "LicenseReport{name:$name,enabled:$enabled,destination:$destination}}"
-    }
+    override fun toString(): String = "LicenseReport{name:$name,enabled:$enabled,destination:$destination}}"
 }
 
-class CustomizableHtmlReport(type: ReportType, task: Task, project: Project) : LicensesReport(type, task, project) {
+class CustomizableHtmlReport(
+    type: ReportType,
+    task: Task,
+    project: Project,
+) : LicensesReport(type, task, project) {
     internal val stylesheet: Property<TextResource?> = task.project.objects.property(TextResource::class.java)
 
     @Input
@@ -85,7 +97,10 @@ class CustomizableHtmlReport(type: ReportType, task: Task, project: Project) : L
     }
 
     @Input
-    val useDarkMode: Property<Boolean> = task.project.objects.property(Boolean::class.java).convention(true)
+    val useDarkMode: Property<Boolean> =
+        task.project.objects
+            .property(Boolean::class.java)
+            .convention(true)
 
     override fun configure(
         config: (Action<in LicensesReport>)?,
@@ -97,7 +112,11 @@ class CustomizableHtmlReport(type: ReportType, task: Task, project: Project) : L
     }
 }
 
-class CustomizableReport(type: ReportType, task: Task, project: Project) : LicensesReport(type, task, project) {
+class CustomizableReport(
+    type: ReportType,
+    task: Task,
+    project: Project,
+) : LicensesReport(type, task, project) {
     @get:Internal
     internal var action: CustomReportAction? = null
         private set
@@ -172,7 +191,9 @@ interface LicensesReportsContainer {
     fun getAll(): List<LicensesReport>
 }
 
-enum class ReportType(val extension: String) {
+enum class ReportType(
+    val extension: String,
+) {
     CSV("csv"),
     HTML("html"),
     JSON("json"),

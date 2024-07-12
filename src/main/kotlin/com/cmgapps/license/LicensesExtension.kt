@@ -22,7 +22,9 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 
 @Suppress("unused")
-abstract class LicensesExtension(private val project: Project) {
+abstract class LicensesExtension(
+    private val project: Project,
+) {
     var reports: Action<in LicensesReportsContainer> = Action { }
         private set
 

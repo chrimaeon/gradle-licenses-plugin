@@ -27,7 +27,8 @@ class LicensesPluginShould {
     fun setUp() {
         reportFolder = "$testProjectDir/build/reports/licenses/licensesReport"
         project =
-            ProjectBuilder.builder()
+            ProjectBuilder
+                .builder()
                 .withProjectDir(testProjectDir.toFile())
                 .build()
         val mavenRepoUrl = javaClass.getResource("/maven")!!.toURI().toString()
@@ -57,7 +58,10 @@ class LicensesPluginShould {
             }
         }
 
-        project.tasks.withType(LicensesTask::class.java).getByName("licenseReport").licensesReport()
+        project.tasks
+            .withType(LicensesTask::class.java)
+            .getByName("licenseReport")
+            .licensesReport()
 
         assertThat(
             outputfile.readText(),

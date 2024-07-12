@@ -14,7 +14,11 @@ import kotlinx.serialization.encoding.Encoder
 
 @kotlinx.serialization.Serializable
 @SerialName("license")
-private class LicenseSurrogate(val spdxLicenseIdentifier: String?, val name: String, val url: String)
+private class LicenseSurrogate(
+    val spdxLicenseIdentifier: String?,
+    val name: String,
+    val url: String,
+)
 
 object LicenseSerializer : KSerializer<License> {
     override val descriptor: SerialDescriptor = LicenseSurrogate.serializer().descriptor

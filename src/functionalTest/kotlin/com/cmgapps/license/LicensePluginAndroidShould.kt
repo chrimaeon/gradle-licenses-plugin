@@ -327,11 +327,12 @@ class LicensePluginAndroidShould {
 }
 
 internal fun <S, T> List<S>.cartesianProduct(other: List<T>): Stream<Arguments> =
-    this.flatMap { s1 ->
-        other.map { s2 ->
-            arguments(s1, s2)
-        }
-    }.stream()
+    this
+        .flatMap { s1 ->
+            other.map { s2 ->
+                arguments(s1, s2)
+            }
+        }.stream()
 
 const val LICENSE_DEMO_GOOGLE_DEBUG_CSV =
     """Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url

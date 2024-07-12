@@ -8,7 +8,7 @@ import com.cmgapps.gradle.logResults
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.github.benmanes.gradle.versions.updates.gradle.GradleReleaseChannel
 import kotlinx.kover.gradle.plugin.dsl.AggregationType
-import kotlinx.kover.gradle.plugin.dsl.MetricType
+import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
 import java.util.Date
 import java.util.Properties
 
@@ -19,17 +19,11 @@ plugins {
     signing
     @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.kotlin.jvm)
-    @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.kotlin.serialization)
-    @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.versions)
-    @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.gradle.pluginPublish)
-    @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.jetbrains.dokka)
-    @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.jetbrains.changelog)
-    @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.kotlinx.kover)
 }
 
@@ -40,7 +34,11 @@ val functionalTestSourceSet: SourceSet =
             srcDir("src/$sourceSetName/kotlin")
         }
         resources {
-            srcDirs(sourceSets.main.get().resources.srcDirs)
+            srcDirs(
+                sourceSets.main
+                    .get()
+                    .resources.srcDirs,
+            )
         }
     }
 
@@ -171,19 +169,19 @@ changelog {
 
 kover {
     useJacoco()
-    excludeSourceSets {
-        names(functionalTestSourceSet.name)
+    currentProject {
+        sources {
+            excludedSourceSets.addAll(functionalTestSourceSet.name)
+        }
     }
-}
 
-koverReport {
-    defaults {
+    reports {
         verify {
             rule("Minimal Line coverage") {
                 bound {
                     minValue = 80
-                    metric = MetricType.LINE
-                    aggregation = AggregationType.COVERED_PERCENTAGE
+                    coverageUnits = CoverageUnit.LINE
+                    aggregationForGroup = AggregationType.COVERED_PERCENTAGE
                 }
             }
         }
@@ -260,11 +258,11 @@ tasks {
                     "Implementation-Version" to versionName,
                     "Implementation-Vendor" to "CMG Mobile Apps",
                     "Created-By" to """${System.getProperty("java.version")} (${System.getProperty("java.vendor")})""",
-                    "Built-By" to System.getProperty("user.name"),
-                    "Built-Date" to Date(),
-                    "Built-JDK" to System.getProperty("java.version"),
-                    "Built-Gradle" to gradle.gradleVersion,
-                    "Built-Kotlin" to libs.versions.kotlin,
+                    "Build-By" to System.getProperty("user.name"),
+                    "Build-Date" to Date(),
+                    "Build-JDK" to System.getProperty("java.version"),
+                    "Build-Gradle" to gradle.gradleVersion,
+                    "Build-Kotlin" to libs.versions.kotlin,
                 ),
             )
         }
@@ -326,10 +324,7 @@ tasks {
 dependencies {
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.kotlin.multiplatformPlugin)
-    // Necessary to bump a transitive dependency.
-    compileOnly(libs.kotlin.reflect)
 
-    implementation(libs.kotlin.stdlib.jdk8)
     implementation(libs.maven.model)
     implementation(libs.maven.artifact)
     implementation(libs.kotlin.serialization)
@@ -341,7 +336,6 @@ dependencies {
         exclude(group = "org.hamcrest")
     }
     testImplementation(libs.hamcrest)
-    testImplementation(libs.kotlin.reflect)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.android.gradlePlugin)
 
@@ -351,7 +345,6 @@ dependencies {
     "functionalTestImplementation"(libs.kotlin.multiplatformPlugin)
     "functionalTestImplementation"(libs.hamcrest)
     "functionalTestImplementation"(gradleTestKit())
-    "functionalTestImplementation"(libs.kotlin.reflect)
     "functionalTestImplementation"(libs.xmlunit.core)
     "functionalTestImplementation"(libs.xmlunit.matchers)
 }

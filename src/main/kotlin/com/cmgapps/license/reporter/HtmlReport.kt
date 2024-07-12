@@ -31,8 +31,8 @@ internal class HtmlReport(
         private const val NOTICE_LIBRARIES = "Notice for packages:"
     }
 
-    override fun generate(): String {
-        return html {
+    override fun generate(): String =
+        html {
             head {
                 meta(mapOf("charset" to "UTF-8"))
                 if (useDarkMode) {
@@ -53,7 +53,9 @@ internal class HtmlReport(
 
                 libraries.toLicensesMap().forEach { (license, libraries) ->
                     ul {
-                        libraries.asSequence().sortedBy { it.name ?: it.mavenCoordinates.identifierWithoutVersion }
+                        libraries
+                            .asSequence()
+                            .sortedBy { it.name ?: it.mavenCoordinates.identifierWithoutVersion }
                             .forEach { library ->
                                 li {
                                     +(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
@@ -78,7 +80,6 @@ internal class HtmlReport(
                 }
             }
         }.toString(false)
-    }
 }
 
 internal class HTML : TagWithText("html") {
@@ -139,7 +140,9 @@ internal class Meta : Tag("meta") {
 
 internal class Style : TagWithText("style")
 
-internal abstract class BodyTag(name: String) : TagWithText(name) {
+internal abstract class BodyTag(
+    name: String,
+) : TagWithText(name) {
     fun pre(init: Pre.() -> Unit) = initTag(Pre(), init)
 
     fun h3(init: H3.() -> Unit) = initTag(H3(), init)

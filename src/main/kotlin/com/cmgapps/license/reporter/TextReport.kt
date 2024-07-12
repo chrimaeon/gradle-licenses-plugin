@@ -9,7 +9,9 @@ package com.cmgapps.license.reporter
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 
-internal class TextReport(libraries: List<Library>) : Report(libraries) {
+internal class TextReport(
+    libraries: List<Library>,
+) : Report(libraries) {
     override fun generate() =
         buildString {
             append("Licenses\n")

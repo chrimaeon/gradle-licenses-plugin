@@ -52,7 +52,8 @@ class XmlValidationShould {
             }
             """.trimIndent()
 
-        GradleRunner.create()
+        GradleRunner
+            .create()
             .withProjectDir(testProjectDir.toFile())
             .withArguments(":licenseReport")
             .withPluginClasspath()

@@ -68,11 +68,12 @@ abstract class LicensesTask : DefaultTask() {
         val allProjects = project.rootProject.allprojects
 
         setOf(project) +
-            additionalProjects.map { moduleName ->
-                allProjects.find {
-                    it.path == moduleName
-                } ?: throw IllegalArgumentException("$moduleName not found")
-            }.toSet()
+            additionalProjects
+                .map { moduleName ->
+                    allProjects.find {
+                        it.path == moduleName
+                    } ?: throw IllegalArgumentException("$moduleName not found")
+                }.toSet()
     }
 
     @get:Internal
@@ -131,39 +132,40 @@ abstract class LicensesTask : DefaultTask() {
 
     protected fun addConfigurations(configurations: Set<Configuration>) {
         configurations.forEach { configuration ->
-            configuration.incoming.dependencies.withType(ExternalDependency::class.java).map { dep ->
-                "${dep.group}:${dep.name}:${dep.version}@pom"
-            }.forEach { pom ->
-                pomConfiguration.dependencies.add(
-                    project.dependencies.add(POM_CONFIGURATION, pom),
+            configuration.incoming.dependencies
+                .withType(ExternalDependency::class.java)
+                .map { dep ->
+                    "${dep.group}:${dep.name}:${dep.version}@pom"
+                }.forEach { pom ->
+                    pomConfiguration.dependencies.add(
+                        project.dependencies.add(POM_CONFIGURATION, pom),
+                    )
+                }
+        }
+    }
+
+    private fun generateLibraries(): List<Library> =
+        pomConfiguration.resolvedConfiguration.lenientConfiguration.artifacts
+            .map {
+                val model = getPomModel(it.file)
+                val licenses = model.findLicenses()
+
+                if (licenses.isEmpty()) {
+                    logger.warn("${model.name} dependency does not have a license.")
+                }
+
+                Library(
+                    MavenCoordinates(
+                        model.findGroupId().orEmpty(),
+                        model.findArtifactId().orEmpty(),
+                        model.findVersion()?.let { version -> ComparableVersion(version) } ?: ComparableVersion(""),
+                    ),
+                    model.name,
+                    model.findDescription(),
+                    licenses,
                 )
-            }
-        }
-    }
-
-    private fun generateLibraries(): List<Library> {
-        return pomConfiguration.resolvedConfiguration.lenientConfiguration.artifacts.map {
-            val model = getPomModel(it.file)
-            val licenses = model.findLicenses()
-
-            if (licenses.isEmpty()) {
-                logger.warn("${model.name} dependency does not have a license.")
-            }
-
-            Library(
-                MavenCoordinates(
-                    model.findGroupId().orEmpty(),
-                    model.findArtifactId().orEmpty(),
-                    model.findVersion()?.let { version -> ComparableVersion(version) } ?: ComparableVersion(""),
-                ),
-                model.name,
-                model.findDescription(),
-                licenses,
-            )
-        }
-            .sortedWith(Library.NameComparator())
+            }.sortedWith(Library.NameComparator())
             .toList()
-    }
 
     private fun getPomModel(file: File): Model =
         MavenXpp3Reader().run {
@@ -208,7 +210,8 @@ abstract class LicensesTask : DefaultTask() {
 
         val configName = TEMP_POM_CONFIGURATION + tempConfigurationNameCounter.getAndIncrement()
         val configuration =
-            project.configurations.create(configName)
+            project.configurations
+                .create(configName)
                 .apply {
                     isCanBeResolved = true
                     isCanBeConsumed = false
@@ -405,8 +408,9 @@ abstract class LicensesTask : DefaultTask() {
                 custom,
             )
 
-        private inner class LicenseReportDelegate<T : LicensesReport>(private val reportType: ReportType) :
-            ReadOnlyProperty<Any?, T> {
+        private inner class LicenseReportDelegate<T : LicensesReport>(
+            private val reportType: ReportType,
+        ) : ReadOnlyProperty<Any?, T> {
             private lateinit var value: T
 
             @Suppress("UNCHECKED_CAST")
@@ -414,17 +418,17 @@ abstract class LicensesTask : DefaultTask() {
             override fun getValue(
                 thisRef: Any?,
                 property: KProperty<*>,
-            ): T {
-                return if (::value.isInitialized) {
+            ): T =
+                if (::value.isInitialized) {
                     value
                 } else {
                     (
-                        Class.forName(property.returnType.javaType.typeName)
+                        Class
+                            .forName(property.returnType.javaType.typeName)
                             .getConstructor(ReportType::class.java, Task::class.java, Project::class.java)
                             .newInstance(reportType, this@LicensesTask, project) as T
                     ).also { value = it }
                 }
-            }
         }
     }
 }

@@ -54,7 +54,8 @@ class LicensePluginJavaShould {
             """.trimIndent()
 
         gradleRunner =
-            GradleRunner.create()
+            GradleRunner
+                .create()
                 .withProjectDir(testProjectDir.toFile())
                 .withArguments(":licenseReport", "--info", "--stacktrace")
                 .withPluginClasspath()

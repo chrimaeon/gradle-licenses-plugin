@@ -38,7 +38,9 @@ data class MavenCoordinates(
     }
 }
 
-enum class LicenseId(val spdxLicenseIdentifier: String?) {
+enum class LicenseId(
+    val spdxLicenseIdentifier: String?,
+) {
     APACHE("Apache-2.0"),
     BSD_2("BSD-2-Clause"),
     BSD_3("BSD-3-Clause"),
@@ -80,7 +82,8 @@ enum class LicenseId(val spdxLicenseIdentifier: String?) {
          * License text from: https://github.com/github/choosealicense.com/blob/gh-pages/_licenses.
          */
         internal val map: Map<String, LicenseId> by lazy {
-            CSVFormat.DEFAULT.parse(this::class.java.getResourceAsStream("/license_map.csv")?.bufferedReader())
+            CSVFormat.DEFAULT
+                .parse(this::class.java.getResourceAsStream("/license_map.csv")?.bufferedReader())
                 .associate {
                     it.get(0) to LicenseId.valueOf(it.get(1))
                 }
@@ -89,10 +92,12 @@ enum class LicenseId(val spdxLicenseIdentifier: String?) {
 }
 
 @Serializable(with = LicenseSerializer::class)
-data class License(val id: LicenseId, val name: String, val url: String) {
-    override fun hashCode(): Int {
-        return id.hashCode()
-    }
+data class License(
+    val id: LicenseId,
+    val name: String,
+    val url: String,
+) {
+    override fun hashCode(): Int = id.hashCode()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -117,10 +122,11 @@ data class Library(
         @Suppress("FunctionName")
         @JvmStatic
         fun NameComparator(): Comparator<Library> =
-            Comparator.comparing<Library, String> {
-                it.name
-                    ?: it.mavenCoordinates.identifierWithoutVersion
-            }.thenComparing({ it.mavenCoordinates.version }, reverseOrder())
+            Comparator
+                .comparing<Library, String> {
+                    it.name
+                        ?: it.mavenCoordinates.identifierWithoutVersion
+                }.thenComparing({ it.mavenCoordinates.version }, reverseOrder())
 
         @Suppress("FunctionName")
         @JvmStatic
@@ -131,9 +137,7 @@ data class Library(
 object ComparableVersionSerializer : KSerializer<ComparableVersion> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ComparableVersion", PrimitiveKind.STRING)
 
-    override fun deserialize(decoder: Decoder): ComparableVersion {
-        return ComparableVersion(decoder.decodeString())
-    }
+    override fun deserialize(decoder: Decoder): ComparableVersion = ComparableVersion(decoder.decodeString())
 
     override fun serialize(
         encoder: Encoder,

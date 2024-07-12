@@ -89,7 +89,8 @@ class LicensePluginMultiplatformShould {
             """.trimIndent()
 
         gradleRunner =
-            GradleRunner.create()
+            GradleRunner
+                .create()
                 .withProjectDir(testProjectDir.toFile())
     }
 

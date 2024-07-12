@@ -24,7 +24,9 @@ internal interface Element {
     )
 }
 
-internal class TextElement(private val text: String) : Element {
+internal class TextElement(
+    private val text: String,
+) : Element {
     override fun render(
         builder: StringBuilder,
         intent: String,
@@ -44,7 +46,9 @@ internal class TextElement(private val text: String) : Element {
 internal annotation class HtmlTagMarker
 
 @HtmlTagMarker
-internal abstract class Tag(protected val name: String) : Element {
+internal abstract class Tag(
+    protected val name: String,
+) : Element {
     val children = arrayListOf<Element>()
     val attributes = hashMapOf<String, String>()
 
@@ -109,7 +113,9 @@ internal abstract class Tag(protected val name: String) : Element {
     override fun toString(): String = toString(true)
 }
 
-internal abstract class TagWithText(name: String) : Tag(name) {
+internal abstract class TagWithText(
+    name: String,
+) : Tag(name) {
     operator fun String.unaryPlus() {
         children.add(TextElement(this))
     }

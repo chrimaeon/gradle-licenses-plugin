@@ -27,7 +27,8 @@ class LicensesTaskShould {
     fun setUp() {
         reportFolder = "$testProjectDir/build/reports/licenses/licensesReport"
         project =
-            ProjectBuilder.builder()
+            ProjectBuilder
+                .builder()
                 .withProjectDir(testProjectDir.toFile())
                 .build()
         val mavenRepoUrl = javaClass.getResource("/maven")!!.toURI().toString()

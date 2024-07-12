@@ -20,7 +20,9 @@ import com.cmgapps.license.model.Library
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-internal class JsonReport(libraries: List<Library>) : Report(libraries) {
+internal class JsonReport(
+    libraries: List<Library>,
+) : Report(libraries) {
     private val json =
         Json {
             prettyPrint = true
