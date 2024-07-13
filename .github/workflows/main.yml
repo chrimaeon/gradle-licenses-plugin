@@ -30,7 +30,7 @@ jobs:
       - name: Gradle Wrapper Cache
         uses: actions/cache@v4
         with:
-          path: ~/.gradle/wrapper
+          path: gradle/wrapper
           key: gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
       - name: Download dependencies
         run: ./gradlew dependencies
