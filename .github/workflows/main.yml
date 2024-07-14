@@ -35,7 +35,7 @@ jobs:
       - name: Download dependencies
         run: ./gradlew dependencies
 
-      - name: Build & Test
+      - name: Build & Test Plugin
         run: ./gradlew check koverHtmlReport koverVerify
 
       - name: Archive Test results
@@ -51,3 +51,19 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           files: ./build/kover/bin-reports/test.exec,./build/kover/bin-reports/functionalTest.exec
+
+      - name: Run Android Example
+        working-directory: example/android
+        run: ../../gradlew licenseDebugReport
+
+      - name: Check Groovy Example
+        working-directory: example/groovy
+        run: ../../gradlew licenseReport
+
+      - name: Check Kotlin Example
+        working-directory: example/kotlin
+        run: ../../gradlew licenseReport
+
+      - name: Check Multiplatform Example
+        working-directory: example/multiplatform
+        run: ../../gradlew licenseMultiplatformReport
