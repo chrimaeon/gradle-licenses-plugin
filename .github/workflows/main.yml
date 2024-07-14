@@ -51,6 +51,7 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           files: ./build/kover/bin-reports/test.exec,./build/kover/bin-reports/functionalTest.exec
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Run Android Example
         working-directory: example/android
