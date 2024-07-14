@@ -16,12 +16,16 @@
 
 package com.cmgapps.license
 
+import org.apache.maven.artifact.versioning.ComparableVersion
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
+
+private const val MIN_KOTLIN_VERSION = "1.6.0"
 
 @Suppress("unused")
 class LicensesPlugin : Plugin<Project> {
@@ -114,6 +118,12 @@ class LicensesPlugin : Plugin<Project> {
             project: Project,
             extension: LicensesExtension,
         ) {
+            val kotlinVersion = ComparableVersion(project.getKotlinPluginVersion())
+
+            if (kotlinVersion < ComparableVersion(MIN_KOTLIN_VERSION)) {
+                throw GradleException("Using Multiplatform Gradle Plugin v$kotlinVersion not supported")
+            }
+
             val kotlinMultiplatformExtension = project.extensions.getByName("kotlin") as KotlinMultiplatformExtension
 
             kotlinMultiplatformExtension.targets.all { target ->
