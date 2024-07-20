@@ -137,27 +137,23 @@ publishing {
 nexusPublishing {
     repositories {
         sonatype {
-            val credentials =
-                Properties().apply {
-                    val credFile = projectDir.resolve("credentials.properties")
-                    if (credFile.exists()) {
-                        credFile.inputStream().use {
-                            load(it)
+            if (System.getenv("CI") == null) {
+                val credentials =
+                    Properties().apply {
+                        val credFile = projectDir.resolve("credentials.properties")
+                        if (credFile.exists()) {
+                            credFile.inputStream().use {
+                                load(it)
+                            }
                         }
                     }
-                }
-            val username: String by credentials
-            val password: String by credentials
+                val username: String by credentials
+                val password: String by credentials
 
-            this.username = username
-            this.password = password
+                this.username = username
+                this.password = password
+            }
         }
-    }
-}
-
-nexusPublishing {
-    repositories {
-        sonatype()
     }
 }
 
