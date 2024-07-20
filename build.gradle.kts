@@ -132,14 +132,11 @@ publishing {
             }
         }
     }
+}
 
+nexusPublishing {
     repositories {
-        maven {
-            name = "sonatype"
-            val releaseUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-            url = if (versionName.endsWith("SNAPSHOT")) snapshotUrl else releaseUrl
-
+        sonatype {
             val credentials =
                 Properties().apply {
                     val credFile = projectDir.resolve("credentials.properties")
@@ -149,10 +146,11 @@ publishing {
                         }
                     }
                 }
-            credentials {
-                username = credentials.getProperty("username")
-                password = credentials.getProperty("password")
-            }
+            val username: String by credentials
+            val password: String by credentials
+
+            this.username = username
+            this.password = password
         }
     }
 }
