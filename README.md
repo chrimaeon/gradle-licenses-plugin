@@ -1,7 +1,7 @@
 # Gradle Licenses Plugin [![Build & Test](https://github.com/chrimaeon/gradle-licenses-plugin/actions/workflows/main.yml/badge.svg)](https://github.com/chrimaeon/gradle-licenses-plugin/actions/workflows/main.yml) [![codecov](https://codecov.io/gh/chrimaeon/gradle-licenses-plugin/branch/master/graph/badge.svg?token=XY0G488B3B)](https://codecov.io/gh/chrimaeon/gradle-licenses-plugin)
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg?style=for-the-badge)](http://www.apache.org/licenses/LICENSE-2.0)
-[![Gradle Plugin](https://img.shields.io/badge/Gradle-6.8%2B-%2302303A.svg?style=for-the-badge&logo=Gradle)](https://gradle.org/)
+[![Gradle Plugin](https://img.shields.io/badge/Gradle-7.2%2B-%2302303A.svg?style=for-the-badge&logo=Gradle)](https://gradle.org/)
 [![MavenCentral](https://img.shields.io/maven-central/v/com.cmgapps/gradle-licenses-plugin?style=for-the-badge&logo=Apache%20Maven)](https://repo1.maven.org/maven2/com/cmgapps/gradle-licenses-plugin/)
 [![gradlePluginPortal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/cmgapps/licenses/com.cmgapps.licenses.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin%20Portal&style=for-the-badge&logo=Gradle)](https://plugins.gradle.org/plugin/com.cmgapps.licenses)
 
