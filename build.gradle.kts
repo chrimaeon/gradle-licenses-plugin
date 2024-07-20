@@ -15,9 +15,8 @@ import java.util.Properties
 plugins {
     idea
     `java-gradle-plugin`
-    `maven-publish`
     signing
-    @Suppress("DSL_SCOPE_VIOLATION")
+    alias(libs.plugins.nexus.publish)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.versions)
@@ -155,6 +154,12 @@ publishing {
                 password = credentials.getProperty("password")
             }
         }
+    }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype()
     }
 }
 
