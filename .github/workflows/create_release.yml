@@ -23,7 +23,7 @@ jobs:
           body_file: ./RELEASE_NOTES.md
           publish: true
       - name: Notify Slack
-        uses: chrimaeon/github-slack-action@v1
+        uses: chrimaeon/github-slack-action@v2
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_CHANNEL }}
