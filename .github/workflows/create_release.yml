@@ -15,7 +15,7 @@ jobs:
         run: ./gradlew --quiet getChangelog --no-header > ./RELEASE_NOTES.md
       - name: Create Release
         id: create_release
-        uses: chrimaeon/github-create-release-action@v1
+        uses: chrimaeon/github-create-release-action@v2
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
