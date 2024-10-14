@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.0.20"
+kotlin = "2.0.21"
 xmlunit = "2.10.0"
 gradle = "8.9"
 maven = "3.9.9"
