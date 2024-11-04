@@ -15,7 +15,7 @@ jetbrains-changelog = "org.jetbrains.changelog:2.2.1"
 nexus-publish = "io.github.gradle-nexus.publish-plugin:2.0.0"
 
 [libraries]
-android-gradlePlugin = "com.android.tools.build:gradle:8.6.1"
+android-gradlePlugin = "com.android.tools.build:gradle:8.7.2"
 kotlin-multiplatformPlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
 apache-commonsCsv = "org.apache.commons:commons-csv:1.12.0"
