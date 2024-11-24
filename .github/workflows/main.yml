@@ -48,7 +48,7 @@ jobs:
             build/test-results/*
 
       - name: Upload Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: ./build/reports/kover/report.xml
           token: ${{ secrets.CODECOV_TOKEN }}
