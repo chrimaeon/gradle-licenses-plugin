@@ -36,9 +36,9 @@ import org.gradle.api.reporting.Reporting
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.namedDomainObjectSet
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
-import org.gradle.util.internal.ConfigureUtil
 import java.io.File
 import java.net.URL
 import java.util.concurrent.atomic.AtomicInteger
@@ -90,10 +90,7 @@ internal class LicenseReportContainerImpl(
         matching { element -> element.required.get() }
 
     override fun configure(cl: Closure<*>?): ReportContainer<LicensesSingleFileReport> {
-        ConfigureUtil.configureSelf(
-            cl,
-            this,
-        )
+        cl?.invoke(this)
         return this
     }
 
