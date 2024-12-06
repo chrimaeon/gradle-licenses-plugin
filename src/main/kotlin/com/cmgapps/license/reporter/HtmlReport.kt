@@ -9,78 +9,101 @@ package com.cmgapps.license.reporter
 import com.cmgapps.license.helper.logLicenseWarning
 import com.cmgapps.license.helper.text
 import com.cmgapps.license.helper.toLicensesMap
-import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.LicenseId
+import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.logging.Logger
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.resources.TextResource
+import org.gradle.kotlin.dsl.property
+import java.io.OutputStream
+import javax.inject.Inject
 
-internal class HtmlReport(
-    libraries: List<Library>,
-    private val css: TextResource?,
-    private val useDarkMode: Boolean,
-    private val logger: Logger,
-) : Report(libraries) {
-    companion object {
-        private const val DEFAULT_PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
-        private const val DEFAULT_BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
-        private const val NIGHT_MODE_CSS =
-            "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}"
-        private const val DEFAULT_CSS = "$DEFAULT_BODY_CSS$DEFAULT_PRE_CSS"
-        private const val OPEN_SOURCE_LIBRARIES = "Open source licenses"
+abstract class HtmlReport
+    @Inject
+    constructor(
+        project: Project,
+        task: Task,
+        private val logger: Logger,
+        objects: ObjectFactory,
+    ) : LicensesSingleFileReport(project, task, ReportType.HTML) {
+        companion object {
+            private const val DEFAULT_PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
+            private const val DEFAULT_BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
+            private const val NIGHT_MODE_CSS =
+                "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}"
+            private const val DEFAULT_CSS = "$DEFAULT_BODY_CSS$DEFAULT_PRE_CSS"
+            private const val OPEN_SOURCE_LIBRARIES = "Open source licenses"
 
-        private const val NOTICE_LIBRARIES = "Notice for packages:"
-    }
+            private const val NOTICE_LIBRARIES = "Notice for packages:"
+        }
 
-    override fun generate(): String =
-        html {
-            head {
-                meta(mapOf("charset" to "UTF-8"))
-                if (useDarkMode) {
-                    meta(mapOf("name" to "color-scheme", "content" to "dark light"))
-                }
-                style {
-                    +(css?.asString() ?: (DEFAULT_CSS + if (useDarkMode) NIGHT_MODE_CSS else ""))
-                }
-                title {
-                    +OPEN_SOURCE_LIBRARIES
-                }
-            }
+        init {
+            required.set(true)
+        }
 
-            body {
-                h3 {
-                    +NOTICE_LIBRARIES
-                }
+        val css = objects.property<TextResource>()
+        val useDarkMode = objects.property<Boolean>().convention(true)
 
-                libraries.toLicensesMap().forEach { (license, libraries) ->
-                    ul {
-                        libraries
-                            .asSequence()
-                            .sortedBy { it.name ?: it.mavenCoordinates.identifierWithoutVersion }
-                            .forEach { library ->
-                                li {
-                                    +(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
-                                }
+        override fun writeLicenses(outputStream: OutputStream) {
+            outputStream.bufferedWriter().use { writer ->
+                val useDarkMode = useDarkMode.get()
+                val css = if (this.css.isPresent) css.get() else null
+
+                writer.write(
+                    html {
+                        head {
+                            meta(mapOf("charset" to "UTF-8"))
+                            if (useDarkMode) {
+                                meta(mapOf("name" to "color-scheme", "content" to "dark light"))
                             }
-                    }
+                            style {
+                                +(css?.asString() ?: (DEFAULT_CSS + if (useDarkMode) NIGHT_MODE_CSS else ""))
+                            }
+                            title {
+                                +OPEN_SOURCE_LIBRARIES
+                            }
+                        }
 
-                    when (license.id) {
-                        LicenseId.UNKNOWN -> {
-                            logger.logLicenseWarning(license, libraries)
-                            div("license") {
-                                p {
-                                    +license.name
+                        body {
+                            h3 {
+                                +NOTICE_LIBRARIES
+                            }
+
+                            libraries.toLicensesMap().forEach { (license, libraries) ->
+                                ul {
+                                    libraries
+                                        .asSequence()
+                                        .sortedBy { it.name ?: it.mavenCoordinates.identifierWithoutVersion }
+                                        .forEach { library ->
+                                            li {
+                                                +(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
+                                            }
+                                        }
                                 }
-                                a(license.url) {
-                                    +license.url
+
+                                when (license.id) {
+                                    LicenseId.UNKNOWN -> {
+                                        logger.logLicenseWarning(license, libraries)
+                                        div("license") {
+                                            p {
+                                                +license.name
+                                            }
+                                            a(license.url) {
+                                                +license.url
+                                            }
+                                        }
+                                    }
+
+                                    else -> pre { +(license.id.text) }
                                 }
                             }
                         }
-                        else -> pre { +(license.id.text) }
-                    }
-                }
+                    }.toString(false),
+                )
             }
-        }.toString(false)
-}
+        }
+    }
 
 internal class HTML : TagWithText("html") {
     init {
@@ -182,7 +205,7 @@ internal class Li : BodyTag("li")
 
 internal class A : BodyTag("a") {
     var href: String
-        get() = attributes["href"]!!
+        get() = attributes.get("href") ?: throw IllegalStateException("href is missing")
         set(value) {
             attributes["href"] = value
         }
@@ -190,7 +213,7 @@ internal class A : BodyTag("a") {
 
 internal class Div : BodyTag("div") {
     var `class`: String
-        get() = attributes["class"]!!
+        get() = attributes.getOrDefault("class", "")
         set(value) {
             attributes["class"] = value
         }

@@ -6,36 +6,47 @@
 
 package com.cmgapps.license.reporter
 
+import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import com.cmgapps.license.model.LicenseId
 import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.util.OutputStreamExtension
+import com.cmgapps.license.util.TestStream
+import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.getFileContent
 import com.cmgapps.license.util.testLibraries
 import org.apache.maven.artifact.versioning.ComparableVersion
+import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+import org.gradle.api.provider.Property
+import org.gradle.kotlin.dsl.property
+import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import java.io.ByteArrayOutputStream
 import com.cmgapps.license.model.Library as LibraryModel
 
+@ExtendWith(OutputStreamExtension::class)
 class HtmlReportShould {
-    @Test
-    fun `generate HTML report`() {
-        val logger: Logger = Logging.getLogger("TestLogger")
+    @TestStream
+    lateinit var outputStream: ByteArrayOutputStream
 
-        val result =
-            HtmlReport(
-                testLibraries,
-                null,
-                false,
-                logger,
-            ).generate()
+    @Test
+    fun `generate HTML report without dark mode`() {
+        TestHtmlReport(
+            testLibraries,
+        ).apply {
+            useDarkMode.set(false)
+        }.writeLicenses(outputStream)
 
         assertThat(
-            result,
+            outputStream.asString(),
             `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
@@ -70,18 +81,12 @@ class HtmlReportShould {
 
     @Test
     fun `generate HTML report with dark mode`() {
-        val logger: Logger = Logging.getLogger("TestLogger")
-
-        val result =
-            HtmlReport(
-                testLibraries,
-                null,
-                true,
-                logger,
-            ).generate()
+        TestHtmlReport(
+            testLibraries,
+        ).writeLicenses(outputStream)
 
         assertThat(
-            result,
+            outputStream.asString(),
             `is`(
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
@@ -120,7 +125,7 @@ class HtmlReportShould {
     fun `report library without matching license`() {
         val logger = mock<Logger>()
 
-        HtmlReport(
+        TestHtmlReport(
             listOf(
                 LibraryModel(
                     MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
@@ -132,10 +137,8 @@ class HtmlReportShould {
                         ),
                 ),
             ),
-            null,
-            false,
-            logger,
-        ).generate()
+            logger = logger,
+        ).writeLicenses(outputStream)
 
         verify(logger).warn(
             """
@@ -146,4 +149,31 @@ class HtmlReportShould {
             """.trimMargin(),
         )
     }
+}
+
+private class TestHtmlReport(
+    override var libraries: List<Library>,
+    logger: Logger = Logging.getLogger("TestHtmlReport"),
+    project: Project = ProjectBuilder.builder().build(),
+) : HtmlReport(
+        logger = logger,
+        objects =
+            project
+                .objects,
+        project = project,
+        task = project.task("licenseReport"),
+    ) {
+    override fun getRequired(): Property<Boolean> =
+        ProjectBuilder
+            .builder()
+            .build()
+            .objects
+            .property()
+
+    override fun getOutputLocation(): RegularFileProperty =
+        ProjectBuilder
+            .builder()
+            .build()
+            .objects
+            .fileProperty()
 }

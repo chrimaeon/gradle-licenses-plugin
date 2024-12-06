@@ -5,7 +5,9 @@
 ### Added
 
 ### Changed
-
+- `text` report renamed to `plainText`
+- `destination` is now `outputLocation`
+- Extension values are now `org.gradle.api.provider.Property`
 ### Deprecated
 
 ### Removed

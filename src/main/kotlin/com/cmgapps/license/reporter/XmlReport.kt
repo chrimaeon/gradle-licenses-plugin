@@ -6,37 +6,53 @@
 
 package com.cmgapps.license.reporter
 
-internal class XmlReport(
-    libraries: List<com.cmgapps.license.model.Library>,
-) : Report(libraries) {
-    override fun generate(): String =
-        libraries {
-            for (library in libraries) {
-                library(
-                    id = library.mavenCoordinates.toString(),
-                    version = library.mavenCoordinates.version.toString(),
-                ) {
-                    name {
-                        +(library.name ?: library.mavenCoordinates.toString())
-                    }
+import org.gradle.api.Project
+import org.gradle.api.Task
+import java.io.OutputStream
+import javax.inject.Inject
 
-                    description {
-                        +(library.description ?: "")
-                    }
-
-                    licenses {
-                        for (license in library.licenses) {
-                            license(spdxLicenseIdentifier = license.id.spdxLicenseIdentifier, url = license.url) {
+abstract class XmlReport
+    @Inject
+    constructor(
+        project: Project,
+        task: Task,
+    ) : LicensesSingleFileReport(project, task, ReportType.XML) {
+        override fun writeLicenses(outputStream: OutputStream) {
+            outputStream.bufferedWriter().use {
+                it.write(
+                    libraries {
+                        for (library in libraries) {
+                            library(
+                                id = library.mavenCoordinates.toString(),
+                                version = library.mavenCoordinates.version.toString(),
+                            ) {
                                 name {
-                                    +license.name
+                                    +(library.name ?: library.mavenCoordinates.toString())
+                                }
+
+                                description {
+                                    +(library.description ?: "")
+                                }
+
+                                licenses {
+                                    for (license in library.licenses) {
+                                        license(
+                                            spdxLicenseIdentifier = license.id.spdxLicenseIdentifier,
+                                            url = license.url,
+                                        ) {
+                                            name {
+                                                +license.name
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                }
+                    }.toString(),
+                )
             }
-        }.toString()
-}
+        }
+    }
 
 internal class Libraries : Tag("libraries") {
     fun library(

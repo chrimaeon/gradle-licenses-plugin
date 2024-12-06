@@ -13,10 +13,9 @@ import java.util.Date
 import java.util.Properties
 
 plugins {
+    `kotlin-dsl`
     idea
     `java-gradle-plugin`
-    signing
-    alias(libs.plugins.nexus.publish)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.versions)
@@ -103,62 +102,6 @@ gradlePlugin {
 val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
     from(tasks.dokkaJavadoc)
-}
-
-publishing {
-    publications {
-        register<MavenPublication>("pluginMaven") {
-            val pomArtifactId: String by pomProperties
-
-            artifactId = pomArtifactId
-
-            pom {
-                basePomInfo()
-                name.set(pomName)
-                description.set(pomDescription)
-                issueManagement {
-                    val issuesTrackerUrl: String by pomProperties
-                    system.set("github")
-                    url.set(issuesTrackerUrl)
-                }
-            }
-        }
-
-        afterEvaluate {
-            named<MavenPublication>("licensesPluginPluginMarkerMaven") {
-                pom {
-                    basePomInfo()
-                }
-            }
-        }
-    }
-}
-
-nexusPublishing {
-    repositories {
-        sonatype {
-            if (System.getenv("CI") == null) {
-                val credentials =
-                    Properties().apply {
-                        val credFile = projectDir.resolve("credentials.properties")
-                        if (credFile.exists()) {
-                            credFile.inputStream().use {
-                                load(it)
-                            }
-                        }
-                    }
-                val username: String by credentials
-                val password: String by credentials
-
-                this.username = username
-                this.password = password
-            }
-        }
-    }
-}
-
-signing {
-    sign(publishing.publications["pluginMaven"])
 }
 
 changelog {

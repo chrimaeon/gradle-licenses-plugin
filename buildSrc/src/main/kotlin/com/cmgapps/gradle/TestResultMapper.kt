@@ -51,8 +51,8 @@ fun Logger.logResults(
     }
 }
 
-private fun getFormattedResult(result: TestResult): String {
-    return buildString {
+private fun getFormattedResult(result: TestResult): String =
+    buildString {
         val isAnsiColorTerm = System.getenv("TERM")?.lowercase()?.contains("color") ?: false
         val (color, text) =
             when (result.resultType) {
@@ -73,4 +73,3 @@ private fun getFormattedResult(result: TestResult): String {
             append("0m")
         }
     }
-}

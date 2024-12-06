@@ -16,11 +16,18 @@
 
 package com.cmgapps.license
 
+import com.cmgapps.license.reporter.CustomReport
+import com.cmgapps.license.reporter.HtmlReport
+import com.cmgapps.license.reporter.ReportType
 import org.apache.maven.artifact.versioning.ComparableVersion
-import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.ExtensionAware
+import org.gradle.api.reporting.SingleFileReport
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
@@ -29,19 +36,26 @@ private const val MIN_KOTLIN_VERSION = "1.6.0"
 
 @Suppress("unused")
 class LicensesPlugin : Plugin<Project> {
-    override fun apply(project: Project) {
-        project.extensions.create("licenses", LicensesExtension::class.java, project).also { extension ->
-            project.plugins.withId("java") {
-                configureJavaProject(project, extension)
+    override fun apply(target: Project) {
+        with(target) {
+            val licenseExtension = extensions.create<LicensesExtension>("licenses")
+
+            val licenseReportExtension =
+                (extensions.getByName("licenses") as ExtensionAware).extensions.create<LicenseReportsExtension>(
+                    "reports",
+                )
+
+            plugins.withId("java") {
+                configureJavaProject(project, licenseExtension, licenseReportExtension)
             }
 
-            project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
-                configureMultiplatformProject(project, extension)
+            plugins.withId("org.jetbrains.kotlin.multiplatform") {
+                configureMultiplatformProject(project, licenseExtension, licenseReportExtension)
             }
 
             ANDROID_IDS.forEach { id ->
-                project.plugins.withId(id) {
-                    configureAndroidProject(project, extension)
+                plugins.withId(id) {
+                    configureAndroidProject(project, licenseExtension, licenseReportExtension)
                 }
             }
         }
@@ -62,26 +76,25 @@ class LicensesPlugin : Plugin<Project> {
         @JvmStatic
         private fun configureJavaProject(
             project: Project,
-            extension: LicensesExtension,
+            licenseExtension: LicensesExtension,
+            licenseReportExtension: LicenseReportsExtension,
         ) {
-            val taskName = "licenseReport"
-
-            val configuration =
-                Action<LicensesTask> { task ->
-                    task.addBasicConfiguration(extension)
-                }
-
-            project.tasks.register(taskName, LicensesTask::class.java, configuration)
+            project.tasks.register<LicensesTask>(
+                "licenseReport",
+            ) {
+                addBasicConfiguration(licenseExtension, licenseReportExtension)
+            }
         }
 
         @JvmStatic
         private fun configureAndroidProject(
             project: Project,
             extension: LicensesExtension,
+            reportExtension: LicenseReportsExtension,
         ) {
             // check for AGP 7.0+ 'androidComponent' extension
             if (findClass("com.android.build.api.variant.AndroidComponentsExtension") != null) {
-                configureAgp7Project(project, extension)
+                configureAgp7Project(project, extension, reportExtension)
             } else {
                 throw GradleException("Minimum Android Gradle Plugin Version is 7.0+")
             }
@@ -91,25 +104,22 @@ class LicensesPlugin : Plugin<Project> {
         private fun configureAgp7Project(
             project: Project,
             extension: LicensesExtension,
+            reportExtension: LicenseReportsExtension,
         ) {
             project.logger.info("Using AGP 7.0+ AndroidComponentsExtension")
             val androidComponentsExtension =
                 project.extensions.getByType(com.android.build.api.variant.AndroidComponentsExtension::class.java)
             androidComponentsExtension
                 .onVariants(androidComponentsExtension.selector().all()) { variant ->
-                    val configuration =
-                        Action<AndroidLicensesTask> { task ->
-                            task.addBasicConfiguration(extension)
-                            task.variant = variant.name
-                            task.buildType = variant.buildType!!
-                            task.productFlavors = variant.productFlavors.map { it.second }
-                        }
 
-                    project.tasks.register(
-                        "license${variant.name.capitalize()}Report",
-                        AndroidLicensesTask::class.java,
-                        configuration,
-                    )
+                    project.tasks.register<AndroidLicensesTask>(
+                        "license${variant.name.uppercaseFirstChar()}Report",
+                    ) {
+                        addBasicConfiguration(extension, reportExtension)
+                        this.variant = variant.name
+                        this.buildType = variant.buildType!!
+                        this.productFlavors = variant.productFlavors.map { it.second }
+                    }
                 }
         }
 
@@ -117,6 +127,7 @@ class LicensesPlugin : Plugin<Project> {
         private fun configureMultiplatformProject(
             project: Project,
             extension: LicensesExtension,
+            reportExtension: LicenseReportsExtension,
         ) {
             val kotlinVersion = ComparableVersion(project.getKotlinPluginVersion())
 
@@ -126,52 +137,120 @@ class LicensesPlugin : Plugin<Project> {
 
             val kotlinMultiplatformExtension = project.extensions.getByName("kotlin") as KotlinMultiplatformExtension
 
-            kotlinMultiplatformExtension.targets.all { target ->
-                if (target.platformType == KotlinPlatformType.common) {
+            kotlinMultiplatformExtension.targets.all {
+                val targetName = this.name
+                if (this.platformType == KotlinPlatformType.common) {
                     return@all
                 }
 
-                val configuration =
-                    Action<KotlinMultiplatformTask> { task ->
-                        task.addBasicConfiguration(extension)
-                        task.targetNames = listOf("common", target.name)
-                    }
-
-                project.tasks.register(
-                    "licenseMultiplatform${target.name.capitalize()}Report",
-                    KotlinMultiplatformTask::class.java,
-                    configuration,
-                )
+                project.tasks.register<KotlinMultiplatformTask>(
+                    "licenseMultiplatform${targetName.uppercaseFirstChar()}Report",
+                ) {
+                    this.addBasicConfiguration(extension, reportExtension)
+                    this.targetNames = listOf("common", targetName)
+                }
             }
 
             val targetNames = mutableListOf("common")
-            kotlinMultiplatformExtension.targets.all { target ->
-                if (target.platformType == KotlinPlatformType.common) {
+            kotlinMultiplatformExtension.targets.all {
+                if (platformType == KotlinPlatformType.common) {
                     return@all
                 }
 
-                targetNames.add(target.name)
+                targetNames.add(name)
             }
 
-            val configuration =
-                Action<KotlinMultiplatformTask> { task ->
-                    task.addBasicConfiguration(extension)
-                    task.targetNames = targetNames
-                }
-
-            project.tasks.register(
+            project.tasks.register<KotlinMultiplatformTask>(
                 "licenseMultiplatformReport",
-                KotlinMultiplatformTask::class.java,
-                configuration,
-            )
+            ) {
+                addBasicConfiguration(extension, reportExtension)
+                this.targetNames = targetNames
+            }
         }
 
         @JvmStatic
-        private fun LicensesTask.addBasicConfiguration(extension: LicensesExtension) {
+        private fun LicensesTask.addBasicConfiguration(
+            extension: LicensesExtension,
+            reportExtension: LicenseReportsExtension,
+        ) {
+            val name = this.name
             additionalProjects = extension.additionalProjects
             description = TASK_DESC
             group = TASK_GROUP
-            reports(extension.reports)
+            reports.forEach { report ->
+                when (report.name) {
+                    ReportType.HTML.name -> {
+                        report as HtmlReport
+                        val reporter =
+                            reportExtension.html.apply {
+                                this.outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.html"))
+                            }
+                        report.configureReports(reporter)
+                        report.css.set(reporter.css)
+                        report.useDarkMode.set(reporter.useDarkMode)
+                    }
+
+                    ReportType.CSV.name -> {
+                        val reporter =
+                            reportExtension.csv.apply {
+                                outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.csv"))
+                            }
+                        report.configureReports(reporter)
+                    }
+
+                    ReportType.JSON.name -> {
+                        val reporter =
+                            reportExtension.json.apply {
+                                outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.json"))
+                            }
+                        report.configureReports(reporter)
+                    }
+
+                    ReportType.MARKDOWN.name -> {
+                        val reporter =
+                            reportExtension.markdown.apply {
+                                outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.md"))
+                            }
+                        report.configureReports(reporter)
+                    }
+
+                    ReportType.TEXT.name -> {
+                        val reporter =
+                            reportExtension.plainText.apply {
+                                outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.txt"))
+                            }
+                        report.configureReports(reporter)
+                    }
+
+                    ReportType.XML.name -> {
+                        val reporter =
+                            reportExtension.xml.apply {
+                                outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.xml"))
+                            }
+                        report.configureReports(reporter)
+                    }
+
+                    ReportType.CUSTOM.name -> {
+                        report as CustomReport
+                        val reporter =
+                            reportExtension.custom.apply {
+                                outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses"))
+                            }
+
+                        report.generator.set(reporter.generator)
+
+                        report.configureReports(reporter)
+                    }
+
+                    else -> throw GradleException("Unknown report ${report.name}")
+                }
+            }
+        }
+
+        @JvmStatic
+        private fun SingleFileReport.configureReports(reporter: Reporter) {
+            required.set(reporter.enabled)
+            this.outputLocation.set(reporter.outputFile)
         }
     }
 }

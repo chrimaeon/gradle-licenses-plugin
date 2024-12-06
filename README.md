@@ -99,10 +99,10 @@ Example:
 ```kotlin
 licenses {
     reports {
-        html.enabled = false // html is enabled by default
+        html.enabled.set(false) // html is enabled by default
         xml {
-            enabled = true
-            destination = file("$buildDir/reports/licenses.xml")
+            enabled.set(true)
+            outputFile.set(file("$buildDir/reports/licenses.xml"))
         }
     }
 }
@@ -158,9 +158,9 @@ The plugin can output different formats.
   ```kotlin
     licenses {
         custom {
-            enabled = true
-            destination = buildDir.resolve("reports").resolve("licenses.txt")
-            generate { list -> list.map { it.name }.joinToString() }
+            enabled.set(true)
+            outputFile.set(buildDir.resolve("reports").resolve("licenses.txt"))
+            generateor.set { list -> list.map { it.name }.joinToString() }
         }
     }
     ```
@@ -172,9 +172,10 @@ The plugin can output different formats.
   ```groovy
     licenses {
         custom {
-            enabled = true
-            destination = file("$buildDir/reports/licenses/licenses.txt")
-            generate { list -> list.collect { it.name }.join(', ') }
+            enabled.set(true)
+            outputFile.set(file("$buildDir/reports/licenses/licenses.txt"))
+            def builder = { list -> list.collect { it.name }.join(', ') } as com.cmgapps.license.reporter.CustomReportGenerator
+            generator.set(builder)
         }
    }
    ```
@@ -207,7 +208,7 @@ licenses {
 ## License
 
 ```text
-Copyright (c) 2018. Christian Grach <christian.grach@cmgapps.com>
+Copyright (c) 2018-2024. Christian Grach <christian.grach@cmgapps.com>
 
 SPDX-License-Identifier: Apache-2.0
 ```

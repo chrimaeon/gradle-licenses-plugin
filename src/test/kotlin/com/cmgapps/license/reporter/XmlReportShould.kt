@@ -6,17 +6,32 @@
 
 package com.cmgapps.license.reporter
 
+import com.cmgapps.license.model.Library
+import com.cmgapps.license.util.OutputStreamExtension
+import com.cmgapps.license.util.TestStream
+import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.testLibraries
+import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.kotlin.dsl.property
+import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.io.ByteArrayOutputStream
 
+@ExtendWith(OutputStreamExtension::class)
 class XmlReportShould {
+    @TestStream
+    lateinit var outputStream: ByteArrayOutputStream
+
     @Test
     fun generateReport() {
-        val report = XmlReport(testLibraries).generate()
+        TestXmlReport(testLibraries).writeLicenses(outputStream)
         assertThat(
-            report,
+            outputStream.asString(),
             `is`(
                 """
                 <?xml version="1.0" encoding="UTF-8" ?>
@@ -62,4 +77,23 @@ class XmlReportShould {
             ),
         )
     }
+}
+
+private class TestXmlReport(
+    override var libraries: List<Library>,
+    project: Project = ProjectBuilder.builder().build(),
+) : XmlReport(project, project.task("licenseReport")) {
+    override fun getRequired(): Property<Boolean> =
+        ProjectBuilder
+            .builder()
+            .build()
+            .objects
+            .property()
+
+    override fun getOutputLocation(): RegularFileProperty =
+        ProjectBuilder
+            .builder()
+            .build()
+            .objects
+            .fileProperty()
 }

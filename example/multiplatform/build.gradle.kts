@@ -15,7 +15,7 @@
  */
 
 plugins {
-    kotlin("multiplatform") version "1.6.0"
+    kotlin("multiplatform") version "2.0.21"
     id("com.cmgapps.licenses") version "1.0.0"
 }
 
@@ -56,15 +56,15 @@ kotlin {
 licenses {
     reports {
         csv {
-            enabled = true
-            destination = buildDir.resolve("csv-report").resolve("customdir.csv")
+            enabled.set(true)
+            outputFile.set(buildDir.resolve("csv-report").resolve("customdir.csv"))
         }
-        json.enabled = true
+        json.enabled.set(true)
 
-        custom {
-            enabled = true
-            destination = buildDir.resolve("reports").resolve("licenses.txt")
-            generate { list -> list.map { it.name }.joinToString() }
-        }
+//        custom {
+//            enabled true
+//            destination = buildDir.resolve("reports").resolve("licenses.txt")
+//            generate { list -> list.map { it.name }.joinToString() }
+//        }
     }
 }

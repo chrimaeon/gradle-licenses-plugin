@@ -10,25 +10,37 @@ import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import com.cmgapps.license.model.LicenseId
 import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.util.OutputStreamExtension
+import com.cmgapps.license.util.TestStream
+import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.getFileContent
 import com.cmgapps.license.util.testLibraries
 import org.apache.maven.artifact.versioning.ComparableVersion
+import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+import org.gradle.api.provider.Property
+import org.gradle.kotlin.dsl.property
+import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import java.io.ByteArrayOutputStream
 
+@ExtendWith(OutputStreamExtension::class)
 class MarkdownReportShould {
+    @TestStream
+    lateinit var outputStream: ByteArrayOutputStream
+
     @Test
     fun `generate Markdown report`() {
-        val logger: Logger = Logging.getLogger("TestLogger")
-
-        val result = MarkdownReport(testLibraries, logger).generate()
+        TestMarkdownReport(testLibraries).writeLicenses(outputStream)
         assertThat(
-            result,
+            outputStream.asString(),
             `is`(
                 """
                     |# Open source licenses
@@ -51,25 +63,21 @@ class MarkdownReportShould {
 
     @Test
     fun `generate Markdown report for libs without matching license`() {
-        val logger: Logger = Logging.getLogger("TestLogger")
-
-        val result =
-            MarkdownReport(
-                listOf(
-                    Library(
-                        MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
-                        name = "Lib with invalid license",
-                        description = null,
-                        licenses =
-                            listOf(
-                                License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
-                            ),
-                    ),
+        TestMarkdownReport(
+            listOf(
+                Library(
+                    MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
+                    name = "Lib with invalid license",
+                    description = null,
+                    licenses =
+                        listOf(
+                            License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
+                        ),
                 ),
-                logger,
-            ).generate()
+            ),
+        ).writeLicenses(outputStream)
         assertThat(
-            result,
+            outputStream.asString(),
             `is`(
                 """
                     |# Open source licenses
@@ -89,7 +97,7 @@ class MarkdownReportShould {
     fun `report library without matching license`() {
         val logger = mock<Logger>()
 
-        MarkdownReport(
+        TestMarkdownReport(
             listOf(
                 Library(
                     MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
@@ -102,7 +110,7 @@ class MarkdownReportShould {
                 ),
             ),
             logger,
-        ).generate()
+        ).writeLicenses(outputStream)
 
         verify(logger).warn(
             """
@@ -113,4 +121,24 @@ class MarkdownReportShould {
             """.trimMargin(),
         )
     }
+}
+
+private class TestMarkdownReport(
+    override var libraries: List<Library>,
+    logger: Logger = Logging.getLogger("TestMarkdownReport"),
+    project: Project = ProjectBuilder.builder().build(),
+) : MarkdownReport(project, project.task("licenseReport"), logger) {
+    override fun getRequired(): Property<Boolean> =
+        ProjectBuilder
+            .builder()
+            .build()
+            .objects
+            .property()
+
+    override fun getOutputLocation(): RegularFileProperty =
+        ProjectBuilder
+            .builder()
+            .build()
+            .objects
+            .fileProperty()
 }

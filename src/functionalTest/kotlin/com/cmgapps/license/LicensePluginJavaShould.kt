@@ -39,6 +39,7 @@ class LicensePluginJavaShould {
         reportFolder = "$testProjectDir/build/reports/licenses/licenseReport"
         mavenRepoUrl = javaClass.getResource("/maven")!!.toURI().toString()
         buildFile +
+            // language=gradle
             """
             plugins {
                id("java")
@@ -62,7 +63,12 @@ class LicensePluginJavaShould {
     }
 
     @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - Gradle Version = {0}")
-    @ValueSource(strings = ["7.2", "7.3", "7.4", "7.5", "7.6", "8.0", "8.1", "8.2", "8.3", "8.4", "8.5"])
+    @ValueSource(
+        strings = [
+            "7.2", "7.3", "7.4", "7.5", "7.6", "8.0", "8.1", "8.2", "8.3", "8.4",
+            "8.5", "8.6", "8.7", "8.8", "8.9", "8.10", "8.11",
+        ],
+    )
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
         val result =
             gradleRunner
@@ -82,10 +88,11 @@ class LicensePluginJavaShould {
     @Test
     fun `generate report with no open source dependencies`() {
         buildFile +
+            // language=gradle
             """
             licenses {
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
             dependencies {
@@ -97,11 +104,17 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)),
+            matchesPattern(
+                Pattern.compile(
+                    ".*licenses.html report saved to .*$reportFolder/licenses.html.*",
+                    Pattern.DOTALL,
+                ),
+            ),
         )
         assertThat(
             File("$reportFolder/licenses.html").readText().trim(),
             `is`(
+                // language=html
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +
@@ -125,10 +138,11 @@ class LicensePluginJavaShould {
     @Test
     fun `java library with parent pom dependency`() {
         buildFile +
+            // language=gradle
             """
             licenses {
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
             
@@ -140,11 +154,17 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)),
+            matchesPattern(
+                Pattern.compile(
+                    ".*licenses.html report saved to .*$reportFolder/licenses.html.*",
+                    Pattern.DOTALL,
+                ),
+            ),
         )
         assertThat(
             File("$reportFolder/licenses.html").readText().trim(),
             `is`(
+                // language=html
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +
@@ -174,10 +194,11 @@ class LicensePluginJavaShould {
     @Test
     fun `generate Report with custom license`() {
         buildFile +
+            // language=gradle
             """
             licenses {
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
             
@@ -190,11 +211,17 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)),
+            matchesPattern(
+                Pattern.compile(
+                    ".*licenses.html report saved to .*$reportFolder/licenses.html.*",
+                    Pattern.DOTALL,
+                ),
+            ),
         )
         assertThat(
             File("$reportFolder/licenses.html").readText().trim(),
             `is`(
+                // language=html
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +
@@ -225,10 +252,11 @@ class LicensePluginJavaShould {
     @Test
     fun `generate Report with lib with no name`() {
         buildFile +
+            // language=gradle
             """
             licenses {
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
             
@@ -241,11 +269,17 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)),
+            matchesPattern(
+                Pattern.compile(
+                    ".*licenses.html report saved to .*$reportFolder/licenses.html.*",
+                    Pattern.DOTALL,
+                ),
+            ),
         )
         assertThat(
             File("$reportFolder/licenses.html").readText().trim(),
             `is`(
+                // language=html
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +
@@ -276,10 +310,11 @@ class LicensePluginJavaShould {
     @Test
     fun `generate Html report with no dark theme`() {
         buildFile +
+            // language=gradle
             """
             licenses {
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                     html.useDarkMode.set(false)
                 }
             }
@@ -295,7 +330,7 @@ class LicensePluginJavaShould {
             result.output,
             matchesPattern(
                 Pattern.compile(
-                    ".*Wrote HTML report to .*$reportFolder/licenses.html.*",
+                    ".*licenses.html report saved to .*$reportFolder/licenses.html.*",
                     Pattern.DOTALL,
                 ),
             ),
@@ -303,6 +338,7 @@ class LicensePluginJavaShould {
         assertThat(
             File("$reportFolder/licenses.html").readText().trim(),
             `is`(
+                // language=html
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +
@@ -331,10 +367,11 @@ class LicensePluginJavaShould {
     @Test
     fun `generate TXT Report`() {
         buildFile +
+            // language=gradle
             """
             licenses {
                 reports {
-                    text.enabled = true
+                    plainText.enabled.set(true)
                 }
             }
 
@@ -347,7 +384,12 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote TEXT report to .*$reportFolder/licenses.txt.*", Pattern.DOTALL)),
+            matchesPattern(
+                Pattern.compile(
+                    ".*licenses.txt report saved to .*$reportFolder/licenses.txt.*",
+                    Pattern.DOTALL,
+                ),
+            ),
         )
         assertThat(
             File("$reportFolder/licenses.txt").readText().trim(),
@@ -363,10 +405,11 @@ class LicensePluginJavaShould {
     @Test
     fun `generate Report with different html styles`() {
         buildFile +
+            //language=gradle
             """
             licenses {
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                     html.stylesheet("body{}")
                     html.useDarkMode.set(false)
                 }
@@ -381,11 +424,17 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote HTML report to .*$reportFolder/licenses.html.*", Pattern.DOTALL)),
+            matchesPattern(
+                Pattern.compile(
+                    ".*licenses.html report saved to .*$reportFolder/licenses.html.*",
+                    Pattern.DOTALL,
+                ),
+            ),
         )
         assertThat(
             File("$reportFolder/licenses.html").readText().trim(),
             `is`(
+                // language=html
                 "<!DOCTYPE html>" +
                     "<html lang=\"en\">" +
                     "<head>" +
@@ -409,11 +458,13 @@ class LicensePluginJavaShould {
     @Test
     fun `generate custom report`() {
         buildFile +
+            // language=gradle
             """
             licenses {
                 reports {
-                    custom.enabled = true
-                    custom.generate { list -> list.collect { it.name }.join(', ') }
+                    custom.enabled.set(true)
+                    com.cmgapps.license.reporter.CustomReportGenerator builder = { list -> list.collect { it.name }.join(', ') }
+                    custom.generator.set(builder)
                 }
             }
 
@@ -426,7 +477,7 @@ class LicensePluginJavaShould {
 
         assertThat(
             result.output,
-            matchesPattern(Pattern.compile(".*Wrote CUSTOM report to .*$reportFolder/licenses.*", Pattern.DOTALL)),
+            matchesPattern(Pattern.compile(".*licenses report saved to .*$reportFolder/licenses.*", Pattern.DOTALL)),
         )
         assertThat(File("$reportFolder/licenses").readText().trim(), `is`("Fake dependency name"))
     }
@@ -434,31 +485,33 @@ class LicensePluginJavaShould {
     @Test
     fun `handle DSL`() {
         buildFile +
+            // language=gradle
             """
             licenses {
                 reports {
                     csv {
-                        enabled = true
+                        enabled.set(true)
                     }
                     custom {
-                        enabled = true
-                        generate {}
+                        enabled.set(true)
+                        com.cmgapps.license.reporter.CustomReportGenerator builder = { "" }
+                        generator.set(builder)
                     }
                     html {
-                        enabled = true
+                        enabled.set(true)
                         stylesheet("body {background: #FAFAFA}")
                     }
                     json {
-                        enabled = true
+                        enabled.set(true)
                     }
                     markdown {
-                        enabled = true
+                        enabled.set(true)
                     }
-                    text {
-                        enabled = true
+                    plainText {
+                        enabled.set(true)
                     }
                     xml {
-                        enabled = true
+                        enabled.set(true)
                     }
                 }
             }

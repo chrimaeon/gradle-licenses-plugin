@@ -17,17 +17,17 @@ licenses {
     reports {
         csv {
             enabled = true
-            destination = buildDir.resolve("csv-report").resolve("customdir.csv")
+            outputFile = buildDir.resolve("csv-report").resolve("customdir.csv")
         }
         html.enabled = true
         json.enabled = true
         markdown.enabled = true
-        text.enabled = true
+        plainText.enabled = true
 
         custom {
             enabled = true
-            destination = buildDir.resolve("reports").resolve("licenses.txt")
-            generate { list -> list.map { it.name }.joinToString() }
+            outputFile = buildDir.resolve("reports").resolve("licenses.custom")
+            generator.set { list -> list.joinToString(separator = "\n") }
         }
         xml.enabled = true
     }
