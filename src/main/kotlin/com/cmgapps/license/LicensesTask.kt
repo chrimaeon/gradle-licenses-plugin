@@ -270,10 +270,10 @@ abstract class LicensesTask :
             }
         }
 
-        logger.lifecycle("Project $name has no license in POM file.")
+        logger.info("Project $name has no license in POM file.")
 
         if (parent != null) {
-            logger.lifecycle("Checking parent POM file.")
+            logger.info("Checking parent POM file.")
             return parent.getModel().findLicenses()
         }
 
