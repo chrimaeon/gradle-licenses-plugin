@@ -14,7 +14,6 @@ import com.cmgapps.license.util.testLibraries
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.kotlin.dsl.property
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -88,7 +87,7 @@ private class TestJsonReport(
             .builder()
             .build()
             .objects
-            .property()
+            .property(Boolean::class.java)
 
     override fun getOutputLocation(): RegularFileProperty =
         ProjectBuilder

@@ -23,7 +23,6 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.resources.TextResource
-import org.gradle.kotlin.dsl.property
 import java.io.File
 import javax.inject.Inject
 
@@ -53,7 +52,7 @@ abstract class LicenseReportsExtension
     ) {
         val plainText: Reporter =
             Reporter(
-                enabled = objects.property<Boolean>().convention(false),
+                enabled = objects.property(Boolean::class.java).convention(false),
                 outputFile = objects.fileProperty(),
             )
 
@@ -61,7 +60,7 @@ abstract class LicenseReportsExtension
 
         val csv: Reporter =
             Reporter(
-                enabled = objects.property<Boolean>().convention(false),
+                enabled = objects.property(Boolean::class.java).convention(false),
                 outputFile = objects.fileProperty(),
             )
 
@@ -69,7 +68,7 @@ abstract class LicenseReportsExtension
 
         val json: Reporter =
             Reporter(
-                enabled = objects.property<Boolean>().convention(false),
+                enabled = objects.property(Boolean::class.java).convention(false),
                 outputFile = objects.fileProperty(),
             )
 
@@ -77,10 +76,10 @@ abstract class LicenseReportsExtension
 
         val html: HtmlReporter =
             HtmlReporter(
-                enabled = objects.property<Boolean>().convention(true),
+                enabled = objects.property(Boolean::class.java).convention(true),
                 outputFile = objects.fileProperty(),
-                useDarkMode = objects.property<Boolean>().convention(true),
-                css = objects.property<TextResource>(),
+                useDarkMode = objects.property(Boolean::class.java).convention(true),
+                css = objects.property(TextResource::class.java),
                 project = project,
             )
 
@@ -88,7 +87,7 @@ abstract class LicenseReportsExtension
 
         val markdown: Reporter =
             Reporter(
-                enabled = objects.property<Boolean>().convention(false),
+                enabled = objects.property(Boolean::class.java).convention(false),
                 outputFile = objects.fileProperty(),
             )
 
@@ -96,7 +95,7 @@ abstract class LicenseReportsExtension
 
         val xml: Reporter =
             Reporter(
-                enabled = objects.property<Boolean>().convention(false),
+                enabled = objects.property(Boolean::class.java).convention(false),
                 outputFile = objects.fileProperty(),
             )
 
@@ -104,9 +103,9 @@ abstract class LicenseReportsExtension
 
         val custom: CustomReporter =
             CustomReporter(
-                enabled = objects.property<Boolean>().convention(false),
+                enabled = objects.property(Boolean::class.java).convention(false),
                 outputFile = objects.fileProperty(),
-                generator = objects.property<CustomReportGenerator>(),
+                generator = objects.property(CustomReportGenerator::class.java),
             )
 
         fun custom(action: Action<in CustomReporter>) = action.execute(custom)

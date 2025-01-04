@@ -33,9 +33,7 @@ class LicensesTaskShould {
                 .build()
         val mavenRepoUrl = javaClass.getResource("/maven")!!.toURI().toString()
         project.repositories.add(
-            project.repositories.maven {
-                setUrl(mavenRepoUrl)
-            },
+            project.repositories.maven { it.setUrl(mavenRepoUrl) },
         )
         project.plugins.apply("java")
 
@@ -49,10 +47,10 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.html")
 
         val task =
-            project.tasks.create("licensesReport", LicensesTask::class.java) {
-                reports {
-                    html.required.set(true)
-                    html.useDarkMode.set(false)
+            project.tasks.create("licensesReport", LicensesTask::class.java) { task ->
+                task.reports { container ->
+                    container.html.required.set(true)
+                    container.html.useDarkMode.set(false)
                 }
             }
 
@@ -90,10 +88,10 @@ class LicensesTaskShould {
 
         val task =
             project.tasks.create("licensesReport", LicensesTask::class.java) {
-                reports {
-                    html.required.set(true)
-                    html.css.set(project.resources.text.fromString("body{}"))
-                    html.useDarkMode.set(false)
+                it.reports { container ->
+                    container.html.required.set(true)
+                    container.html.css.set(project.resources.text.fromString("body{}"))
+                    container.html.useDarkMode.set(false)
                 }
             }
 
@@ -128,8 +126,8 @@ class LicensesTaskShould {
 
         val task =
             project.tasks.create("licensesReport", LicensesTask::class.java) {
-                reports {
-                    json.required.set(true)
+                it.reports { container ->
+                    container.json.required.set(true)
                 }
             }
 
@@ -168,8 +166,8 @@ class LicensesTaskShould {
 
         val task =
             project.tasks.create("licensesReport", LicensesTask::class.java) {
-                reports {
-                    xml.required.set(true)
+                it.reports { container ->
+                    container.xml.required.set(true)
                 }
             }
 
@@ -208,7 +206,8 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.md")
         val task =
             project.tasks.create("licensesReport", LicensesTask::class.java) {
-                reports.markdown.required.set(true)
+                it.reports.markdown.required
+                    .set(true)
             }
 
         task.licensesReport()
@@ -235,9 +234,8 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.txt")
         val task =
             project.tasks.create("licensesReport", LicensesTask::class.java) {
-                reports {
-                    plainText.required.set(true)
-                }
+                it.reports.plainText.required
+                    .set(true)
             }
 
         task.licensesReport()
@@ -258,9 +256,9 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.csv")
         val task =
             project.tasks.create("licensesReport", LicensesTask::class.java) {
-                reports {
-                    csv.required.set(true)
-                    csv.outputLocation.set(outputFile)
+                it.reports { container ->
+                    container.csv.required.set(true)
+                    container.csv.outputLocation.set(outputFile)
                 }
             }
 
@@ -280,16 +278,14 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses")
         val task =
             project.tasks.create("licensesReport", LicensesTask::class.java) {
-                reports {
-                    custom.required.set(true)
-                    custom.outputLocation.set(outputFile)
-                    custom.generator.set(
-                        { list ->
-                            list.joinToString { lib ->
-                                lib.name ?: lib.mavenCoordinates.identifierWithoutVersion
-                            }
-                        },
-                    )
+                it.reports { container ->
+                    container.custom.required.set(true)
+                    container.custom.outputLocation.set(outputFile)
+                    container.custom.generator.set { list ->
+                        list.joinToString { lib ->
+                            lib.name ?: lib.mavenCoordinates.identifierWithoutVersion
+                        }
+                    }
                 }
             }
 
@@ -337,21 +333,21 @@ class LicensesTaskShould {
     fun `generate all reports`() {
         val task =
             project.tasks.create("licensesReport", LicensesTask::class.java) {
-                reports {
-                    csv.required.set(true)
+                it.reports { container ->
+                    container.csv.required.set(true)
 
-                    custom.required.set(true)
-                    custom.generator.set { list ->
+                    container.custom.required.set(true)
+                    container.custom.generator.set { list ->
                         list.joinToString { lib ->
                             lib.name ?: lib.mavenCoordinates.identifierWithoutVersion
                         }
                     }
 
-                    html.required.set(true)
-                    json.required.set(true)
-                    markdown.required.set(true)
-                    plainText.required.set(true)
-                    xml.required.set(true)
+                    container.html.required.set(true)
+                    container.json.required.set(true)
+                    container.markdown.required.set(true)
+                    container.plainText.required.set(true)
+                    container.xml.required.set(true)
                 }
             }
 
@@ -368,10 +364,10 @@ class LicensesTaskShould {
         project.dependencies.add("compile", "group:other:1.0.0")
         val task =
             project.tasks.create("licensesReport", LicensesTask::class.java) {
-                reports {
-                    html.required.set(false)
-                    plainText.required.set(true)
-                    plainText.outputLocation.set(outputFile)
+                it.reports { container ->
+                    container.html.required.set(false)
+                    container.plainText.required.set(true)
+                    container.plainText.outputLocation.set(outputFile)
                 }
             }
 
@@ -399,14 +395,14 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.txt")
 
         val task =
-            project.tasks.create("licensesReport", AndroidLicensesTask::class.java) {
-                buildType = "debug"
-                variant = "google"
-                productFlavors = listOf("google", "amazon")
-                reports {
-                    html.required.set(false)
-                    csv.required.set(true)
-                    csv.outputLocation.set(outputFile)
+            project.tasks.create("licensesReport", AndroidLicensesTask::class.java) { task ->
+                task.buildType = "debug"
+                task.variant = "google"
+                task.productFlavors = listOf("google", "amazon")
+                task.reports { container ->
+                    container.html.required.set(false)
+                    container.csv.required.set(true)
+                    container.csv.outputLocation.set(outputFile)
                 }
             }
 
@@ -426,12 +422,12 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.csv")
 
         val task =
-            project.tasks.create("licensesReport", KotlinMultiplatformTask::class.java) {
-                targetNames = listOf("jvm", "js")
-                reports {
-                    html.required.set(false)
-                    csv.required.set(true)
-                    csv.outputLocation.set(outputFile)
+            project.tasks.create("licensesReport", KotlinMultiplatformTask::class.java) { task ->
+                task.targetNames = listOf("jvm", "js")
+                task.reports { container ->
+                    container.html.required.set(false)
+                    container.csv.required.set(true)
+                    container.csv.outputLocation.set(outputFile)
                 }
             }
 
@@ -457,11 +453,11 @@ class LicensesTaskShould {
 
         val task =
             project.tasks.create("licensesReport", LicensesTask::class.java) {
-                reports {
-                    html.required.set(false)
+                it.reports { container ->
+                    container.html.required.set(false)
 
-                    csv.required.set(true)
-                    csv.outputLocation.set(outputFile)
+                    container.csv.required.set(true)
+                    container.csv.outputLocation.set(outputFile)
                 }
             }
 

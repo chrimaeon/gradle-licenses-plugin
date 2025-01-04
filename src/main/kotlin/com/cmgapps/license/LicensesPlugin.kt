@@ -16,6 +16,7 @@
 
 package com.cmgapps.license
 
+import com.cmgapps.license.helper.uppercaseFirstChar
 import com.cmgapps.license.reporter.CustomReport
 import com.cmgapps.license.reporter.HtmlReport
 import com.cmgapps.license.reporter.ReportType
@@ -25,9 +26,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.reporting.SingleFileReport
-import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.register
-import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
@@ -38,11 +36,12 @@ private const val MIN_KOTLIN_VERSION = "1.6.0"
 class LicensesPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            val licenseExtension = extensions.create<LicensesExtension>("licenses")
+            val licenseExtension = extensions.create("licenses", LicensesExtension::class.java)
 
             val licenseReportExtension =
-                (licenseExtension as ExtensionAware).extensions.create<LicenseReportsExtension>(
+                (licenseExtension as ExtensionAware).extensions.create(
                     "reports",
+                    LicenseReportsExtension::class.java,
                 )
 
             plugins.withId("java") {
@@ -79,10 +78,11 @@ class LicensesPlugin : Plugin<Project> {
             licenseExtension: LicensesExtension,
             licenseReportExtension: LicenseReportsExtension,
         ) {
-            project.tasks.register<LicensesTask>(
+            project.tasks.register(
                 "licenseReport",
-            ) {
-                addBasicConfiguration(licenseExtension, licenseReportExtension)
+                LicensesTask::class.java,
+            ) { task ->
+                task.addBasicConfiguration(licenseExtension, licenseReportExtension)
             }
         }
 
@@ -112,13 +112,14 @@ class LicensesPlugin : Plugin<Project> {
             androidComponentsExtension
                 .onVariants(androidComponentsExtension.selector().all()) { variant ->
 
-                    project.tasks.register<AndroidLicensesTask>(
+                    project.tasks.register(
                         "license${variant.name.uppercaseFirstChar()}Report",
-                    ) {
-                        addBasicConfiguration(extension, reportExtension)
-                        this.variant = variant.name
-                        this.buildType = variant.buildType!!
-                        this.productFlavors = variant.productFlavors.map { it.second }
+                        AndroidLicensesTask::class.java,
+                    ) { task ->
+                        task.addBasicConfiguration(extension, reportExtension)
+                        task.variant = variant.name
+                        task.buildType = variant.buildType!!
+                        task.productFlavors = variant.productFlavors.map { it.second }
                     }
                 }
         }
@@ -137,34 +138,36 @@ class LicensesPlugin : Plugin<Project> {
 
             val kotlinMultiplatformExtension = project.extensions.getByName("kotlin") as KotlinMultiplatformExtension
 
-            kotlinMultiplatformExtension.targets.all {
-                val targetName = this.name
-                if (this.platformType == KotlinPlatformType.common) {
+            kotlinMultiplatformExtension.targets.all { target ->
+                val targetName = target.name
+                if (target.platformType == KotlinPlatformType.common) {
                     return@all
                 }
 
-                project.tasks.register<KotlinMultiplatformTask>(
+                project.tasks.register(
                     "licenseMultiplatform${targetName.uppercaseFirstChar()}Report",
-                ) {
-                    this.addBasicConfiguration(extension, reportExtension)
-                    this.targetNames = listOf("common", targetName)
+                    KotlinMultiplatformTask::class.java,
+                ) { task ->
+                    task.addBasicConfiguration(extension, reportExtension)
+                    task.targetNames = listOf("common", targetName)
                 }
             }
 
             val targetNames = mutableListOf("common")
-            kotlinMultiplatformExtension.targets.all {
-                if (platformType == KotlinPlatformType.common) {
+            kotlinMultiplatformExtension.targets.all { target ->
+                if (target.platformType == KotlinPlatformType.common) {
                     return@all
                 }
 
-                targetNames.add(name)
+                targetNames.add(target.name)
             }
 
-            project.tasks.register<KotlinMultiplatformTask>(
+            project.tasks.register(
                 "licenseMultiplatformReport",
-            ) {
-                addBasicConfiguration(extension, reportExtension)
-                this.targetNames = targetNames
+                KotlinMultiplatformTask::class.java,
+            ) { task ->
+                task.addBasicConfiguration(extension, reportExtension)
+                task.targetNames = targetNames
             }
         }
 
@@ -177,17 +180,17 @@ class LicensesPlugin : Plugin<Project> {
             additionalProjects = extension.additionalProjects
             description = TASK_DESC
             group = TASK_GROUP
-            reports.configureEach {
-                when (this.name) {
+            reports.configureEach { report ->
+                when (report.name) {
                     ReportType.HTML.name -> {
-                        this as HtmlReport
+                        report as HtmlReport
                         val reporter =
                             reportExtension.html.apply {
                                 this.outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.html"))
                             }
-                        configureReport(reporter)
-                        css.set(reporter.css)
-                        useDarkMode.set(reporter.useDarkMode)
+                        report.configureReport(reporter)
+                        report.css.set(reporter.css)
+                        report.useDarkMode.set(reporter.useDarkMode)
                     }
 
                     ReportType.CSV.name -> {
@@ -195,7 +198,7 @@ class LicensesPlugin : Plugin<Project> {
                             reportExtension.csv.apply {
                                 outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.csv"))
                             }
-                        configureReport(reporter)
+                        report.configureReport(reporter)
                     }
 
                     ReportType.JSON.name -> {
@@ -203,7 +206,7 @@ class LicensesPlugin : Plugin<Project> {
                             reportExtension.json.apply {
                                 outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.json"))
                             }
-                        configureReport(reporter)
+                        report.configureReport(reporter)
                     }
 
                     ReportType.MARKDOWN.name -> {
@@ -211,7 +214,7 @@ class LicensesPlugin : Plugin<Project> {
                             reportExtension.markdown.apply {
                                 outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.md"))
                             }
-                        configureReport(reporter)
+                        report.configureReport(reporter)
                     }
 
                     ReportType.TEXT.name -> {
@@ -219,7 +222,7 @@ class LicensesPlugin : Plugin<Project> {
                             reportExtension.plainText.apply {
                                 outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.txt"))
                             }
-                        configureReport(reporter)
+                        report.configureReport(reporter)
                     }
 
                     ReportType.XML.name -> {
@@ -227,19 +230,19 @@ class LicensesPlugin : Plugin<Project> {
                             reportExtension.xml.apply {
                                 outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.xml"))
                             }
-                        configureReport(reporter)
+                        report.configureReport(reporter)
                     }
 
                     ReportType.CUSTOM.name -> {
-                        this as CustomReport
+                        report as CustomReport
                         val reporter =
                             reportExtension.custom.apply {
                                 outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses"))
                             }
 
-                        generator.set(reporter.generator)
+                        report.generator.set(reporter.generator)
 
-                        configureReport(reporter)
+                        report.configureReport(reporter)
                     }
 
                     else -> throw GradleException("Unknown report $name")

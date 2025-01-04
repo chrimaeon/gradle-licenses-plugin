@@ -15,7 +15,6 @@ import java.util.Date
 import java.util.Properties
 
 plugins {
-    `kotlin-dsl`
     `java-gradle-plugin`
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)

@@ -14,8 +14,8 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.logging.Logger
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.resources.TextResource
-import org.gradle.kotlin.dsl.property
 import java.io.OutputStream
 import javax.inject.Inject
 
@@ -42,8 +42,8 @@ abstract class HtmlReport
             required.set(true)
         }
 
-        val css = objects.property<TextResource>()
-        val useDarkMode = objects.property<Boolean>().convention(true)
+        val css: Property<TextResource> = objects.property(TextResource::class.java)
+        val useDarkMode: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
 
         override fun writeLicenses(outputStream: OutputStream) {
             outputStream.bufferedWriter().use { writer ->

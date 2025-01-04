@@ -371,7 +371,7 @@ class LicensePluginMultiplatformShould {
     }
 
     @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - KGP Version = {0}")
-    @ValueSource(strings = ["1.6.0", "1.7.0", "1.8.0", "1.9.0", "2.0.0"])
+    @ValueSource(strings = ["1.6.0", "1.7.0", "1.8.0", "1.9.0", "2.0.0", "2.1.0"])
     fun `handle kotlin gradle plugin versions`(kgpVersion: String) {
         buildFile.outputStream().bufferedWriter().use {
             @Language("groovy")

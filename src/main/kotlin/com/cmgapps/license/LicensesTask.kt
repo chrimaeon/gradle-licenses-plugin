@@ -6,6 +6,7 @@
 
 package com.cmgapps.license
 
+import com.cmgapps.license.helper.uppercaseFirstChar
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import com.cmgapps.license.model.LicenseId
@@ -37,9 +38,6 @@ import org.gradle.api.reporting.Reporting
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.invoke
-import org.gradle.kotlin.dsl.namedDomainObjectSet
-import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import java.io.File
 import java.net.URL
 import java.util.concurrent.atomic.AtomicInteger
@@ -70,7 +68,7 @@ interface LicenseReportContainer : ReportContainer<LicensesSingleFileReport> {
 internal class LicenseReportContainerImpl(
     private val project: Project,
     task: Provider<Task>,
-) : NamedDomainObjectSet<LicensesSingleFileReport> by project.objects.namedDomainObjectSet(LicensesSingleFileReport::class),
+) : NamedDomainObjectSet<LicensesSingleFileReport> by project.objects.namedDomainObjectSet(LicensesSingleFileReport::class.java),
     LicenseReportContainer {
     init {
         addReporter(TextReport::class.java, project, task.get())
@@ -91,7 +89,7 @@ internal class LicenseReportContainerImpl(
         matching { element -> element.required.get() }
 
     override fun configure(cl: Closure<*>?): ReportContainer<LicensesSingleFileReport> {
-        cl?.invoke(this)
+        cl?.call(this)
         return this
     }
 

@@ -21,7 +21,6 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
-import org.gradle.kotlin.dsl.property
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -31,6 +30,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import java.io.ByteArrayOutputStream
 
+@Suppress("HttpUrlsUsage")
 @ExtendWith(OutputStreamExtension::class)
 class MarkdownReportShould {
     @TestStream
@@ -133,7 +133,7 @@ private class TestMarkdownReport(
             .builder()
             .build()
             .objects
-            .property()
+            .property(Boolean::class.java)
 
     override fun getOutputLocation(): RegularFileProperty =
         ProjectBuilder

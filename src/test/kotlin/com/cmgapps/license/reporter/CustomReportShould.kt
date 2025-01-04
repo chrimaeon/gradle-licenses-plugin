@@ -13,7 +13,6 @@ import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.testLibraries
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.kotlin.dsl.property
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -32,7 +31,7 @@ class CustomReportShould {
         object : CustomReport(project, project.task("licenseReport")) {
             override var libraries: List<Library> = testLibraries
 
-            override fun getRequired(): Property<Boolean> = project.objects.property<Boolean>()
+            override fun getRequired(): Property<Boolean> = project.objects.property(Boolean::class.java)
 
             override fun getOutputLocation(): RegularFileProperty = project.objects.fileProperty()
         }.apply {

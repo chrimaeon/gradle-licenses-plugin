@@ -23,7 +23,6 @@ import org.gradle.api.Task
 import org.gradle.api.provider.Provider
 import org.gradle.api.reporting.Report
 import org.gradle.api.reporting.SingleFileReport
-import org.gradle.kotlin.dsl.invoke
 import java.io.File
 import java.io.OutputStream
 
@@ -91,7 +90,7 @@ abstract class LicensesSingleFileReport(
     fun setEnabled(enabled: Provider<Boolean>) = required.set(enabled)
 
     override fun configure(cl: Closure<*>): Report {
-        cl.invoke(this)
+        cl.call(this)
         return this
     }
 }

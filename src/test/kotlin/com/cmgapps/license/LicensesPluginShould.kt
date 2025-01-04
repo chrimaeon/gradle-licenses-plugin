@@ -8,8 +8,6 @@ package com.cmgapps.license
 
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
-import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.getByName
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -36,9 +34,7 @@ class LicensesPluginShould {
                 .build()
         val mavenRepoUrl = javaClass.getResource("/maven")!!.toURI().toString()
         project.repositories.add(
-            project.repositories.maven {
-                setUrl(mavenRepoUrl)
-            },
+            project.repositories.maven { it.setUrl(mavenRepoUrl) },
         )
     }
 
@@ -51,11 +47,15 @@ class LicensesPluginShould {
 
         val outputFile = File(reportFolder, "licenses.csv")
 
-        (project.extensions.getByName<LicensesExtension>("licenses") as ExtensionAware).extensions.configure<LicenseReportsExtension> {
-            html.enabled.set(false)
-            csv {
-                enabled.set(true)
-                this.outputFile.set(outputFile)
+        (
+            project.extensions.getByName(
+                "licenses",
+            ) as ExtensionAware
+        ).extensions.configure(LicenseReportsExtension::class.java) { extension ->
+            extension.html.enabled.set(false)
+            extension.csv { reporter ->
+                reporter.enabled.set(true)
+                reporter.outputFile.set(outputFile)
             }
         }
 
