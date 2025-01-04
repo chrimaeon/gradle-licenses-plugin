@@ -39,6 +39,7 @@ val pomProperties =
 val group: String by pomProperties
 val versionName: String by pomProperties
 val pomName: String by pomProperties
+val projectUrl: String by pomProperties
 
 project.group = group
 version = versionName
@@ -75,7 +76,6 @@ testing {
 
 @Suppress("UnstableApiUsage")
 gradlePlugin {
-    val projectUrl: String by pomProperties
     val scmUrl: String by pomProperties
     val pomDescription: String by pomProperties
 
@@ -96,8 +96,10 @@ gradlePlugin {
 }
 
 changelog {
-    version.set(versionName)
-    header.set(provider { version.get() })
+    version = versionName
+    header = provider { version.get() }
+    versionPrefix = provider { "" }
+    repositoryUrl = provider { projectUrl }
 }
 
 kover {

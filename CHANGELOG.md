@@ -2,12 +2,16 @@
 
 ## Unreleased
 
+Use Gradle's Reports API to generate reports
+
 ### Added
 
 ### Changed
+
 - `text` report renamed to `plainText`
 - `destination` is now `outputLocation`
 - Extension values are now `org.gradle.api.provider.Property`
+
 ### Deprecated
 
 ### Removed
@@ -90,9 +94,10 @@
 
 ### Changed
 
-- - `<version>` is now attribute to `<library>`
-  - `<url>` is now a attribute to `<license>`
-  - `<library>` has an `id` attribute now
+-
+    - `<version>` is now attribute to `<library>`
+    - `<url>` is now a attribute to `<license>`
+    - `<library>` has an `id` attribute now
 
 ### Fixed
 
