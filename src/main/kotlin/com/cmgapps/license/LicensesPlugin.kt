@@ -41,7 +41,7 @@ class LicensesPlugin : Plugin<Project> {
             val licenseExtension = extensions.create<LicensesExtension>("licenses")
 
             val licenseReportExtension =
-                (extensions.getByName("licenses") as ExtensionAware).extensions.create<LicenseReportsExtension>(
+                (licenseExtension as ExtensionAware).extensions.create<LicenseReportsExtension>(
                     "reports",
                 )
 
@@ -177,17 +177,17 @@ class LicensesPlugin : Plugin<Project> {
             additionalProjects = extension.additionalProjects
             description = TASK_DESC
             group = TASK_GROUP
-            reports.forEach { report ->
-                when (report.name) {
+            reports.configureEach {
+                when (this.name) {
                     ReportType.HTML.name -> {
-                        report as HtmlReport
+                        this as HtmlReport
                         val reporter =
                             reportExtension.html.apply {
                                 this.outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.html"))
                             }
-                        report.configureReports(reporter)
-                        report.css.set(reporter.css)
-                        report.useDarkMode.set(reporter.useDarkMode)
+                        configureReport(reporter)
+                        css.set(reporter.css)
+                        useDarkMode.set(reporter.useDarkMode)
                     }
 
                     ReportType.CSV.name -> {
@@ -195,7 +195,7 @@ class LicensesPlugin : Plugin<Project> {
                             reportExtension.csv.apply {
                                 outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.csv"))
                             }
-                        report.configureReports(reporter)
+                        configureReport(reporter)
                     }
 
                     ReportType.JSON.name -> {
@@ -203,7 +203,7 @@ class LicensesPlugin : Plugin<Project> {
                             reportExtension.json.apply {
                                 outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.json"))
                             }
-                        report.configureReports(reporter)
+                        configureReport(reporter)
                     }
 
                     ReportType.MARKDOWN.name -> {
@@ -211,7 +211,7 @@ class LicensesPlugin : Plugin<Project> {
                             reportExtension.markdown.apply {
                                 outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.md"))
                             }
-                        report.configureReports(reporter)
+                        configureReport(reporter)
                     }
 
                     ReportType.TEXT.name -> {
@@ -219,7 +219,7 @@ class LicensesPlugin : Plugin<Project> {
                             reportExtension.plainText.apply {
                                 outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.txt"))
                             }
-                        report.configureReports(reporter)
+                        configureReport(reporter)
                     }
 
                     ReportType.XML.name -> {
@@ -227,28 +227,28 @@ class LicensesPlugin : Plugin<Project> {
                             reportExtension.xml.apply {
                                 outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.xml"))
                             }
-                        report.configureReports(reporter)
+                        configureReport(reporter)
                     }
 
                     ReportType.CUSTOM.name -> {
-                        report as CustomReport
+                        this as CustomReport
                         val reporter =
                             reportExtension.custom.apply {
                                 outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses"))
                             }
 
-                        report.generator.set(reporter.generator)
+                        generator.set(reporter.generator)
 
-                        report.configureReports(reporter)
+                        configureReport(reporter)
                     }
 
-                    else -> throw GradleException("Unknown report ${report.name}")
+                    else -> throw GradleException("Unknown report $name")
                 }
             }
         }
 
         @JvmStatic
-        private fun SingleFileReport.configureReports(reporter: Reporter) {
+        private fun SingleFileReport.configureReport(reporter: Reporter) {
             required.set(reporter.enabled)
             this.outputLocation.set(reporter.outputFile)
         }
