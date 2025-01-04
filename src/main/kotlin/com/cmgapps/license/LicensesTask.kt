@@ -31,6 +31,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ExternalDependency
+import org.gradle.api.provider.Provider
 import org.gradle.api.reporting.ReportContainer
 import org.gradle.api.reporting.Reporting
 import org.gradle.api.tasks.Input
@@ -68,17 +69,17 @@ interface LicenseReportContainer : ReportContainer<LicensesSingleFileReport> {
 
 internal class LicenseReportContainerImpl(
     private val project: Project,
-    task: Task,
+    task: Provider<Task>,
 ) : NamedDomainObjectSet<LicensesSingleFileReport> by project.objects.namedDomainObjectSet(LicensesSingleFileReport::class),
     LicenseReportContainer {
     init {
-        addReporter(TextReport::class.java, project, task)
-        addReporter(JsonReport::class.java, project, task)
-        addReporter(HtmlReport::class.java, project, task, project.logger, project.objects)
-        addReporter(XmlReport::class.java, project, task)
-        addReporter(MarkdownReport::class.java, project, task, project.logger)
-        addReporter(CsvReport::class.java, project, task)
-        addReporter(CustomReport::class.java, project, task)
+        addReporter(TextReport::class.java, project, task.get())
+        addReporter(JsonReport::class.java, project, task.get())
+        addReporter(HtmlReport::class.java, project, task.get(), project.logger, project.objects)
+        addReporter(XmlReport::class.java, project, task.get())
+        addReporter(MarkdownReport::class.java, project, task.get(), project.logger)
+        addReporter(CsvReport::class.java, project, task.get())
+        addReporter(CustomReport::class.java, project, task.get())
     }
 
     override fun getEnabled(): NamedDomainObjectSet<LicensesSingleFileReport> = enabled
@@ -156,7 +157,7 @@ abstract class LicensesTask :
         get() = _allProjects
 
     private val reports: LicenseReportContainer =
-        LicenseReportContainerImpl(project, this)
+        LicenseReportContainerImpl(project, project.provider { this })
 
     @Internal
     override fun getReports(): LicenseReportContainer = reports
