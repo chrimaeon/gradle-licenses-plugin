@@ -16,24 +16,27 @@
 
 package com.cmgapps.gradle
 
+import org.gradle.api.Project
 import org.gradle.api.logging.Logger
+import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.TestDescriptor
 import org.gradle.api.tasks.testing.TestResult
 import org.gradle.api.tasks.testing.TestResult.ResultType
+import org.gradle.kotlin.dsl.KotlinClosure2
+import org.gradle.kotlin.dsl.withType
 
-const val CSI = "\u001B["
-const val ANSI_RED = "31"
-const val ANSI_GREEN = "32"
-const val ANSI_YELLOW = "33"
-const val ANSI_BOLD = "1"
+private const val CSI = "\u001B["
+private const val ANSI_RED = "31"
+private const val ANSI_GREEN = "32"
+private const val ANSI_YELLOW = "33"
+private const val ANSI_BOLD = "1"
 
-fun Logger.logResults(
+private fun Logger.logResults(
     desc: TestDescriptor,
     result: TestResult,
 ) {
     val message = "{} > {} {}" + if (result.exception != null) "\n>\t{}\n" else "\n"
 
-    @OptIn(ExperimentalStdlibApi::class)
     val params =
         buildList<String> {
             add(desc.className?.substringAfterLast('.') ?: "")
@@ -73,3 +76,9 @@ private fun getFormattedResult(result: TestResult): String =
             append("0m")
         }
     }
+
+fun Project.configureTestLogging() {
+    tasks.withType<Test> {
+        afterTest(KotlinClosure2(logger::logResults))
+    }
+}

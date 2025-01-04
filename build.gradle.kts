@@ -6,7 +6,6 @@
 
 @file:Suppress("UnstableApiUsage")
 
-import com.cmgapps.gradle.logResults
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.github.benmanes.gradle.versions.updates.gradle.GradleReleaseChannel
 import kotlinx.kover.gradle.plugin.dsl.AggregationType
@@ -22,9 +21,9 @@ plugins {
     alias(libs.plugins.gradle.pluginPublish)
     alias(libs.plugins.jetbrains.changelog)
     alias(libs.plugins.kotlinx.kover)
+    id("com.cmgapps.gradle.test-logger")
+    id("com.cmgapps.gradle.ktlint")
 }
-
-val ktlint: Configuration by configurations.creating
 
 kotlin {
     jvmToolchain(17)
@@ -123,35 +122,8 @@ kover {
 }
 
 tasks {
-    register<JavaExec>("ktlintFormat") {
-        group = "Verification"
-        description = "Format Kotlin code style."
-        mainClass.set("com.pinterest.ktlint.Main")
-        classpath = ktlint
-        args =
-            listOf(
-                "src/**/*.kt",
-                "--format",
-            )
-    }
-
-    val checkstyleOutputFile = layout.buildDirectory.file("reports/ktlint.xml")
-
-    val ktlint by registering(JavaExec::class) {
-        group = "Verification"
-        description = "Check Kotlin code style."
-        mainClass.set("com.pinterest.ktlint.Main")
-        classpath = ktlint
-        args =
-            listOf(
-                "src/**/*.kt",
-                "--reporter=plain",
-                "--reporter=checkstyle,output=${checkstyleOutputFile.get()}",
-            )
-    }
-
     check {
-        dependsOn(testing.suites.named("functionalTest"), ktlint)
+        dependsOn(testing.suites.named("functionalTest"))
     }
 
     jar {
@@ -186,7 +158,6 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
-        afterTest(KotlinClosure2(logger::logResults))
     }
 
     wrapper {
@@ -229,8 +200,6 @@ dependencies {
     implementation(libs.maven.artifact)
     implementation(libs.kotlin.serialization)
     implementation(libs.apache.commonsCsv)
-
-    ktlint(libs.ktlint.cli)
 
     testImplementation(libs.jUnit) {
         exclude(group = "org.hamcrest")
