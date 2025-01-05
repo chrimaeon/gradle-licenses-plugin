@@ -7,6 +7,7 @@
 @file:Suppress("UnstableApiUsage")
 
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google()
         mavenCentral()
@@ -22,4 +23,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Gradle Licenses Plugin"
+rootProject.name = "gradle-licenses-plugin"

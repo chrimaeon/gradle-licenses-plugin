@@ -6,17 +6,31 @@
 
 package com.cmgapps.license.reporter
 
+import com.cmgapps.license.model.Library
+import com.cmgapps.license.util.OutputStreamExtension
+import com.cmgapps.license.util.TestStream
+import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.testLibraries
+import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.io.ByteArrayOutputStream
 
+@ExtendWith(OutputStreamExtension::class)
 class JsonReportShould {
+    @TestStream
+    lateinit var outputStream: ByteArrayOutputStream
+
     @Test
     fun generateReport() {
-        val report = JsonReport(testLibraries).generate()
+        TestJsonReport(testLibraries).writeLicenses(outputStream)
         assertThat(
-            report,
+            outputStream.asString(),
             `is`(
                 """
                 [
@@ -62,4 +76,23 @@ class JsonReportShould {
             ),
         )
     }
+}
+
+private class TestJsonReport(
+    override var libraries: List<Library>,
+    project: Project = ProjectBuilder.builder().build(),
+) : JsonReport(project, project.task("licenseReport")) {
+    override fun getRequired(): Property<Boolean> =
+        ProjectBuilder
+            .builder()
+            .build()
+            .objects
+            .property(Boolean::class.java)
+
+    override fun getOutputLocation(): RegularFileProperty =
+        ProjectBuilder
+            .builder()
+            .build()
+            .objects
+            .fileProperty()
 }

@@ -154,8 +154,8 @@ class LicensePluginAndroidShould {
             
             licenses {
               reports {
-                html.enabled = false
-                csv.enabled = true
+                html.enabled.set(false)
+                csv.enabled.set(true)
               }
             }
             dependencies {
@@ -195,7 +195,7 @@ class LicensePluginAndroidShould {
             
             licenses {
                 reports {
-                    text.enabled = true
+                    plainText.enabled.set(true)
                 }
             }
             

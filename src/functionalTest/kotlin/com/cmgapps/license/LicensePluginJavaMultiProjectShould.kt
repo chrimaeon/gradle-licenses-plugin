@@ -86,7 +86,7 @@ class LicensePluginJavaMultiProjectShould {
             licenses {
                 additionalProjects ':module2', ':modules:submodule'
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
             """.trimIndent()
@@ -168,7 +168,7 @@ class LicensePluginJavaMultiProjectShould {
             licenses {
                 additionalProjects ':module2'
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
             dependencies {
@@ -240,7 +240,7 @@ class LicensePluginJavaMultiProjectShould {
             licenses {
                 additionalProjects ':module2'
                 reports {
-                    html.enabled = true
+                    html.enabled.set(true)
                 }
             }
             dependencies {

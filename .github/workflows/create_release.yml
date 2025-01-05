@@ -15,7 +15,7 @@ jobs:
         run: ./gradlew --quiet getChangelog --no-header > ./RELEASE_NOTES.md
       - name: Create Release
         id: create_release
-        uses: chrimaeon/github-create-release-action@v1
+        uses: chrimaeon/github-create-release-action@v2
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
@@ -23,7 +23,7 @@ jobs:
           body_file: ./RELEASE_NOTES.md
           publish: true
       - name: Notify Slack
-        uses: chrimaeon/github-slack-action@v1
+        uses: chrimaeon/github-slack-action@v2
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_CHANNEL }}

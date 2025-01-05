@@ -35,7 +35,7 @@ import java.nio.file.Paths
 import java.util.Properties
 import java.util.regex.Pattern
 
-private const val KOTLIN_MULTIPLATFORM_PLUGIN = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22"
+private const val KOTLIN_MULTIPLATFORM_PLUGIN = "org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21"
 
 class LicensePluginMultiplatformShould {
     @TempDir
@@ -70,6 +70,7 @@ class LicensePluginMultiplatformShould {
             javaClass.getResource("/maven")?.toURI()?.toString() ?: error("""resource folder "/maven" not found!""")
 
         buildFile +
+            // language=gradle
             """
             buildscript {
               repositories {
@@ -103,6 +104,7 @@ class LicensePluginMultiplatformShould {
         val taskName = "licenseMultiplatformReport"
 
         buildFile +
+            // language=gradle
             """
             kotlin {
                 jvm()
@@ -121,6 +123,7 @@ class LicensePluginMultiplatformShould {
         val taskName = "licenseMultiplatformReport"
 
         buildFile +
+            // language=gradle
             """
             
             kotlin {
@@ -151,21 +154,21 @@ class LicensePluginMultiplatformShould {
             }
             licenses {
                 reports {
-                    html.enabled = false
-                    text.enabled = true
+                    html.enabled.set(false)
+                    plainText.enabled.set(true)
                 }
             }
             
             """.trimIndent()
         val result =
             gradleRunner
-                .withArguments(":$taskName")
+                .withArguments(":$taskName", "--info")
                 .build()
 
         assertThat(
             result.output,
             matchesPattern(
-                ".*Wrote TEXT report to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL),
+                ".*licenses.txt report saved to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL),
             ),
         )
         assertThat(
@@ -222,21 +225,21 @@ class LicensePluginMultiplatformShould {
             }
             licenses {
                 reports {
-                    html.enabled = false
-                    text.enabled = true
+                    html.enabled.set(false)
+                    plainText.enabled.set(true)
                 }
             }
             
             """.trimIndent()
         val result =
             gradleRunner
-                .withArguments(":$taskName")
+                .withArguments(":$taskName", "--info")
                 .build()
 
         assertThat(
             result.output,
             matchesPattern(
-                ".*Wrote TEXT report to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL),
+                ".*licenses.txt report saved to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL),
             ),
         )
         assertThat(
@@ -280,20 +283,20 @@ class LicensePluginMultiplatformShould {
             }
             licenses {
                 reports {
-                    html.enabled = false
-                    text.enabled = true
+                    html.enabled.set(false)
+                    plainText.enabled.set(true)
                 }
             }
             """.trimIndent()
         val result =
             gradleRunner
-                .withArguments(":$taskName")
+                .withArguments(":$taskName", "--info")
                 .build()
 
         assertThat(
             result.output,
             matchesPattern(
-                ".*Wrote TEXT report to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL),
+                ".*licenses.txt report saved to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL),
             ),
         )
         assertThat(
@@ -336,20 +339,20 @@ class LicensePluginMultiplatformShould {
             }
             licenses {
                 reports {
-                    html.enabled = false
-                    text.enabled = true
+                    html.enabled.set(false)
+                    plainText.enabled.set(true)
                 }
             }
             """.trimIndent()
         val result =
             gradleRunner
-                .withArguments(":$taskName")
+                .withArguments(":$taskName", "--info")
                 .build()
 
         assertThat(
             result.output,
             matchesPattern(
-                ".*Wrote TEXT report to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL),
+                ".*licenses.txt report saved to .*$reportFolder/$taskName/licenses.txt.*".toPattern(Pattern.DOTALL),
             ),
         )
         assertThat(
@@ -368,13 +371,13 @@ class LicensePluginMultiplatformShould {
     }
 
     @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - KGP Version = {0}")
-    @ValueSource(strings = ["1.6.0", "1.7.0", "1.8.0", "1.9.0", "2.0.0"])
+    @ValueSource(strings = ["1.6.0", "1.7.0", "1.8.0", "1.9.0", "2.0.0", "2.1.0"])
     fun `handle kotlin gradle plugin versions`(kgpVersion: String) {
         buildFile.outputStream().bufferedWriter().use {
             @Language("groovy")
             val content =
                 """
-                        buildscript {
+                buildscript {
                   repositories {
                     mavenCentral()
                     google()

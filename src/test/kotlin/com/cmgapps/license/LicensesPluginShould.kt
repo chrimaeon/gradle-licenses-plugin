@@ -7,6 +7,7 @@
 package com.cmgapps.license
 
 import org.gradle.api.Project
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -33,9 +34,7 @@ class LicensesPluginShould {
                 .build()
         val mavenRepoUrl = javaClass.getResource("/maven")!!.toURI().toString()
         project.repositories.add(
-            project.repositories.maven {
-                it.setUrl(mavenRepoUrl)
-            },
+            project.repositories.maven { it.setUrl(mavenRepoUrl) },
         )
     }
 
@@ -46,15 +45,17 @@ class LicensesPluginShould {
 
         LicensesPlugin().apply(project)
 
-        val outputfile = File(reportFolder, "licenses.csv")
+        val outputFile = File(reportFolder, "licenses.csv")
 
-        project.extensions.configure(LicensesExtension::class.java) {
-            it.reports {
-                it.html.enabled = false
-                it.csv {
-                    it.enabled = true
-                    it.destination = outputfile
-                }
+        (
+            project.extensions.getByName(
+                "licenses",
+            ) as ExtensionAware
+        ).extensions.configure(LicenseReportsExtension::class.java) { extension ->
+            extension.html.enabled.set(false)
+            extension.csv { reporter ->
+                reporter.enabled.set(true)
+                reporter.outputFile.set(outputFile)
             }
         }
 
@@ -64,7 +65,7 @@ class LicensesPluginShould {
             .licensesReport()
 
         assertThat(
-            outputfile.readText(),
+            outputFile.readText(),
             `is`(
                 "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
                     "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/\r\n",

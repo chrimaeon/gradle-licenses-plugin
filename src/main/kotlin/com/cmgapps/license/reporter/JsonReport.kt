@@ -16,17 +16,27 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.model.Library
-import kotlinx.serialization.encodeToString
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToStream
+import org.gradle.api.Project
+import org.gradle.api.Task
+import java.io.OutputStream
+import javax.inject.Inject
 
-internal class JsonReport(
-    libraries: List<Library>,
-) : Report(libraries) {
-    private val json =
-        Json {
-            prettyPrint = true
+abstract class JsonReport
+    @Inject
+    constructor(
+        project: Project,
+        task: Task,
+    ) : LicensesSingleFileReport(project, task, ReportType.JSON) {
+        private val json =
+            Json {
+                prettyPrint = true
+            }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        override fun writeLicenses(outputStream: OutputStream) {
+            json.encodeToStream(libraries, outputStream)
         }
-
-    override fun generate() = json.encodeToString(libraries)
-}
+    }

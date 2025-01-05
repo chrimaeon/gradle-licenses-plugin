@@ -10,18 +10,31 @@ import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import com.cmgapps.license.model.LicenseId
 import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.util.OutputStreamExtension
+import com.cmgapps.license.util.TestStream
+import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.testLibraries
 import org.apache.maven.artifact.versioning.ComparableVersion
+import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.io.ByteArrayOutputStream
 
+@ExtendWith(OutputStreamExtension::class)
 class CsvReportShould {
+    @TestStream
+    lateinit var outputStream: ByteArrayOutputStream
+
     @Test
     fun `generate report`() {
-        val result = CsvReport(testLibraries).generate()
+        TestCsvReport(testLibraries).writeLicenses(outputStream)
         assertThat(
-            result,
+            outputStream.asString(),
             `is`(
                 "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
                     "Test lib 1," +
@@ -59,10 +72,11 @@ class CsvReportShould {
                 description = "description with \r in it",
                 listOf(license),
             )
-        val result = CsvReport(listOf(library)).generate()
+
+        TestCsvReport(listOf(library)).writeLicenses(outputStream)
 
         assertThat(
-            result,
+            outputStream.asString(),
             `is`(
                 "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
                     "\"Name with a , in it\"," +
@@ -76,4 +90,26 @@ class CsvReportShould {
             ),
         )
     }
+}
+
+private class TestCsvReport(
+    override var libraries: List<Library>,
+    project: Project = ProjectBuilder.builder().build().project,
+) : CsvReport(
+        project,
+        project.task("licensesTask"),
+    ) {
+    override fun getRequired(): Property<Boolean> =
+        ProjectBuilder
+            .builder()
+            .build()
+            .objects
+            .property(Boolean::class.java)
+
+    override fun getOutputLocation(): RegularFileProperty =
+        ProjectBuilder
+            .builder()
+            .build()
+            .objects
+            .fileProperty()
 }

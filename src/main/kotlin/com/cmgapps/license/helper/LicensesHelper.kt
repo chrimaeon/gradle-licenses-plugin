@@ -40,15 +40,9 @@ internal val LicenseId.text: String
         return this::class.java.getResource("/licenses/${this.filename}")!!.readText()
     }
 
-@OptIn(ExperimentalStdlibApi::class)
-fun List<Library>.toLicensesMap(): Map<License, List<Library>> =
-    buildMap<License, MutableList<Library>> {
-        this@toLicensesMap.forEach { library ->
-            library.licenses.forEach { license ->
-                get(license)?.add(library) ?: put(license, mutableListOf(library))
-            }
-        }
-    }
+internal fun List<Library>.toLicensesMap(): Map<License, List<Library>> =
+    flatMap { library -> library.licenses.map { license -> license to library } }
+        .groupBy({ (license, _) -> license }, { (_, library) -> library })
 
 fun Logger.logLicenseWarning(
     license: License,

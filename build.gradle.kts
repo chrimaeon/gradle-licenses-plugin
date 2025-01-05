@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import com.cmgapps.gradle.logResults
+@file:Suppress("UnstableApiUsage")
+
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.github.benmanes.gradle.versions.updates.gradle.GradleReleaseChannel
 import kotlinx.kover.gradle.plugin.dsl.AggregationType
@@ -13,56 +14,19 @@ import java.util.Date
 import java.util.Properties
 
 plugins {
-    idea
     `java-gradle-plugin`
-    signing
-    alias(libs.plugins.nexus.publish)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.versions)
     alias(libs.plugins.gradle.pluginPublish)
-    alias(libs.plugins.jetbrains.dokka)
     alias(libs.plugins.jetbrains.changelog)
     alias(libs.plugins.kotlinx.kover)
-}
-
-val functionalTestSourceSet: SourceSet =
-    sourceSets.create("functionalTest") {
-        val sourceSetName = name
-        java {
-            srcDir("src/$sourceSetName/kotlin")
-        }
-        resources {
-            srcDirs(
-                sourceSets.main
-                    .get()
-                    .resources.srcDirs,
-            )
-        }
-    }
-
-val ktlint: Configuration by configurations.creating
-
-idea {
-    module {
-        testSources.from(functionalTestSourceSet.allJava.srcDirs)
-        testResources.from(functionalTestSourceSet.resources.srcDirs)
-    }
-}
-
-val javaLanguageVersion = JavaLanguageVersion.of("17")
-
-java {
-    withSourcesJar()
-    toolchain {
-        languageVersion.set(javaLanguageVersion)
-    }
+    id("com.cmgapps.gradle.test-logger")
+    id("com.cmgapps.gradle.ktlint")
 }
 
 kotlin {
-    jvmToolchain {
-        languageVersion.set(javaLanguageVersion)
-    }
+    jvmToolchain(17)
 }
 
 val pomProperties =
@@ -74,16 +38,47 @@ val pomProperties =
 
 val group: String by pomProperties
 val versionName: String by pomProperties
-val projectUrl: String by pomProperties
 val pomName: String by pomProperties
-val pomDescription: String by pomProperties
-val scmUrl: String by pomProperties
+val projectUrl: String by pomProperties
 
 project.group = group
 version = versionName
 
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
+        }
+
+        register<JvmTestSuite>("functionalTest") {
+            dependencies {
+                implementation(project())
+                implementation(libs.jUnit) {
+                    exclude(group = "org.hamcrest")
+                }
+                implementation(libs.kotlin.multiplatformPlugin)
+                implementation(libs.hamcrest)
+                implementation(gradleTestKit())
+                implementation(libs.xmlunit.core)
+                implementation(libs.xmlunit.matchers)
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(test)
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Suppress("UnstableApiUsage")
 gradlePlugin {
+    val scmUrl: String by pomProperties
+    val pomDescription: String by pomProperties
+
     website.set(projectUrl)
     vcsUrl.set(scmUrl)
 
@@ -97,80 +92,21 @@ gradlePlugin {
         }
     }
 
-    testSourceSets(functionalTestSourceSet)
-}
-
-val javadocJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("javadoc")
-    from(tasks.dokkaJavadoc)
-}
-
-publishing {
-    publications {
-        register<MavenPublication>("pluginMaven") {
-            val pomArtifactId: String by pomProperties
-
-            artifactId = pomArtifactId
-
-            pom {
-                basePomInfo()
-                name.set(pomName)
-                description.set(pomDescription)
-                issueManagement {
-                    val issuesTrackerUrl: String by pomProperties
-                    system.set("github")
-                    url.set(issuesTrackerUrl)
-                }
-            }
-        }
-
-        afterEvaluate {
-            named<MavenPublication>("licensesPluginPluginMarkerMaven") {
-                pom {
-                    basePomInfo()
-                }
-            }
-        }
-    }
-}
-
-nexusPublishing {
-    repositories {
-        sonatype {
-            if (System.getenv("CI") == null) {
-                val credentials =
-                    Properties().apply {
-                        val credFile = projectDir.resolve("credentials.properties")
-                        if (credFile.exists()) {
-                            credFile.inputStream().use {
-                                load(it)
-                            }
-                        }
-                    }
-                val username: String by credentials
-                val password: String by credentials
-
-                this.username = username
-                this.password = password
-            }
-        }
-    }
-}
-
-signing {
-    sign(publishing.publications["pluginMaven"])
+    testSourceSet(sourceSets["functionalTest"])
 }
 
 changelog {
-    version.set(versionName)
-    header.set(provider { version.get() })
+    version = versionName
+    header = provider { version.get() }
+    versionPrefix = provider { "" }
+    repositoryUrl = provider { projectUrl }
 }
 
 kover {
     useJacoco()
     currentProject {
         sources {
-            excludedSourceSets.addAll(functionalTestSourceSet.name)
+            excludedSourceSets.addAll(sourceSets["functionalTest"].name)
         }
     }
 
@@ -187,66 +123,9 @@ kover {
     }
 }
 
-fun MavenPom.basePomInfo() {
-    url.set(projectUrl)
-
-    developers {
-        developer {
-            id.set("cgrach")
-            name.set("Christian Grach")
-        }
-    }
-    scm {
-        val connectionUrl: String by pomProperties
-        connection.set(connectionUrl)
-        val developerConnectionUrl: String by pomProperties
-        developerConnection.set(developerConnectionUrl)
-        url.set(scmUrl)
-    }
-    licenses {
-        license {
-            name.set("Apache License, Version 2.0")
-            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-        }
-    }
-}
-
 tasks {
-    val functionalTest by registering(Test::class) {
-        group = "verification"
-        testClassesDirs = functionalTestSourceSet.output.classesDirs
-        classpath = functionalTestSourceSet.runtimeClasspath
-    }
-
-    register<JavaExec>("ktlintFormat") {
-        group = "Verification"
-        description = "Format Kotlin code style."
-        mainClass.set("com.pinterest.ktlint.Main")
-        classpath = ktlint
-        args =
-            listOf(
-                "src/**/*.kt",
-                "--format",
-            )
-    }
-
-    val checkstyleOutputFile = layout.buildDirectory.file("reports/ktlint.xml")
-
-    val ktlint by registering(JavaExec::class) {
-        group = "Verification"
-        description = "Check Kotlin code style."
-        mainClass.set("com.pinterest.ktlint.Main")
-        classpath = ktlint
-        args =
-            listOf(
-                "src/**/*.kt",
-                "--reporter=plain",
-                "--reporter=checkstyle,output=${checkstyleOutputFile.get()}",
-            )
-    }
-
     check {
-        dependsOn(functionalTest, ktlint)
+        dependsOn(testing.suites.named("functionalTest"))
     }
 
     jar {
@@ -281,11 +160,6 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
-        afterTest(KotlinClosure2(logger::logResults))
-    }
-
-    dokkaJavadoc {
-        outputDirectory.set(layout.buildDirectory.dir("javadoc"))
     }
 
     wrapper {
@@ -329,21 +203,10 @@ dependencies {
     implementation(libs.kotlin.serialization)
     implementation(libs.apache.commonsCsv)
 
-    ktlint(libs.ktlint.cli)
-
     testImplementation(libs.jUnit) {
         exclude(group = "org.hamcrest")
     }
     testImplementation(libs.hamcrest)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.android.gradlePlugin)
-
-    "functionalTestImplementation"(libs.jUnit) {
-        exclude(group = "org.hamcrest")
-    }
-    "functionalTestImplementation"(libs.kotlin.multiplatformPlugin)
-    "functionalTestImplementation"(libs.hamcrest)
-    "functionalTestImplementation"(gradleTestKit())
-    "functionalTestImplementation"(libs.xmlunit.core)
-    "functionalTestImplementation"(libs.xmlunit.matchers)
 }

@@ -41,8 +41,8 @@ class XmlValidationShould {
             
             licenses {
               reports {
-                  html.enabled = false
-                  xml.enabled = true
+                  html.enabled.set(false)
+                  xml.enabled.set(true)
               }
             }
             

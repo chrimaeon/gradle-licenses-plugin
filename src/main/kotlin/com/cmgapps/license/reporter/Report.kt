@@ -18,177 +18,86 @@ package com.cmgapps.license.reporter
 
 import com.cmgapps.license.model.Library
 import groovy.lang.Closure
-import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.Property
-import org.gradle.api.resources.TextResource
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.OutputFile
+import org.gradle.api.provider.Provider
+import org.gradle.api.reporting.Report
+import org.gradle.api.reporting.SingleFileReport
 import java.io.File
+import java.io.OutputStream
 
-abstract class Report(
-    protected val libraries: List<Library>,
-) {
-    abstract fun generate(): String
+interface LicenseReport {
+    var libraries: List<Library>
 }
 
-open class LicensesReport(
-    internal val type: ReportType,
+abstract class LicensesSingleFileReport(
+    project: Project,
     task: Task,
-    internal val project: Project,
-) {
-    @get:Internal
-    internal val name: String = type.name
-
-    private val _destination: RegularFileProperty = task.project.objects.fileProperty()
-
-    @get:OutputFile
-    var destination: File
-        get() = _destination.get().asFile
-        set(value) = _destination.set(value)
-
-    private val _enabled: Property<Boolean> =
-        task.project.objects
-            .property(Boolean::class.java)
-            .convention(false)
-
-    @get:Input
-    var enabled: Boolean
-        get() = _enabled.get()
-        set(value) = _enabled.set(value)
-
+    private val type: ReportType,
+) : LicenseReport,
+    SingleFileReport {
     init {
-        val extension = if (type.extension.isBlank()) "" else ".${type.extension}"
-        _destination.set(
-            task.project.layout.buildDirectory
-                .file("reports/licenses/${task.name}/licenses$extension"),
-        )
+        required.convention(false)
+        outputLocation.convention(project.layout.buildDirectory.file("reports/licenses/${task.name}/licenses.${type.extension}"))
     }
 
-    internal open fun configure(
-        config: (Action<in LicensesReport>)? = null,
-        configHtml: (Action<in CustomizableHtmlReport>)? = null,
-        configCustom: (Action<in CustomizableReport>)? = null,
-    ) {
-        config?.execute(this)
+    abstract fun writeLicenses(outputStream: OutputStream)
+
+    override fun getName(): String = type.name
+
+    override fun getDisplayName(): String = "License Report for ${type.name}"
+
+    @Override
+    @Deprecated("Deprecated in Java", replaceWith = ReplaceWith("getOutputLocation().set"))
+    override fun setDestination(file: File) {
+        outputLocation.fileValue(file)
     }
 
-    override fun toString(): String = "LicenseReport{name:$name,enabled:$enabled,destination:$destination}}"
-}
+    override fun getOutputType(): Report.OutputType = Report.OutputType.FILE
 
-class CustomizableHtmlReport(
-    type: ReportType,
-    task: Task,
-    project: Project,
-) : LicensesReport(type, task, project) {
-    internal val stylesheet: Property<TextResource?> = task.project.objects.property(TextResource::class.java)
-
-    @Input
-    fun stylesheet(css: String) {
-        stylesheet.set(project.resources.text.fromString(css))
+    /**
+     * Needed for 7.x
+     */
+    @Override
+    fun setDestination(provider: Provider<File>) {
+        outputLocation.fileProvider(provider)
     }
 
-    @Input
-    fun stylesheet(css: File) {
-        stylesheet.set(project.resources.text.fromFile(css))
+    /**
+     * Needed for 7.x
+     */
+    @Override
+    fun getDestination(): File = outputLocation.get().asFile
+
+    /**
+     * Needed for 7.x
+     */
+    @Override
+    fun isEnabled(): Boolean = required.get()
+
+    /**
+     * Needed for 7.x
+     */
+    @Override
+    fun setEnabled(enabled: Boolean) {
+        required.set(enabled)
     }
 
-    @Input
-    val useDarkMode: Property<Boolean> =
-        task.project.objects
-            .property(Boolean::class.java)
-            .convention(true)
+    /**
+     * Needed for 7.x
+     */
+    @Override
+    fun setEnabled(enabled: Provider<Boolean>) = required.set(enabled)
 
-    override fun configure(
-        config: (Action<in LicensesReport>)?,
-        configHtml: (Action<in CustomizableHtmlReport>)?,
-        configCustom: (Action<in CustomizableReport>)?,
-    ) {
-        super.configure(config, configHtml, configCustom)
-        configHtml?.execute(this)
-    }
-}
-
-class CustomizableReport(
-    type: ReportType,
-    task: Task,
-    project: Project,
-) : LicensesReport(type, task, project) {
-    @get:Internal
-    internal var action: CustomReportAction? = null
-        private set
-
-    fun generate(block: CustomReportAction? = null) {
-        action = block
-    }
-
-    override fun configure(
-        config: (Action<in LicensesReport>)?,
-        configHtml: (Action<in CustomizableHtmlReport>)?,
-        configCustom: (Action<in CustomizableReport>)?,
-    ) {
-        super.configure(config, configHtml, configCustom)
-        configCustom?.execute(this)
+    override fun configure(cl: Closure<*>): Report {
+        cl.call(this)
+        return this
     }
 }
 
-typealias CustomReportAction = (List<Library>) -> String
-
-interface LicensesReportsContainer {
-    @get:Internal
-    val csv: LicensesReport
-
-    fun csv(config: Action<LicensesReport>)
-
-    fun csv(config: Closure<LicensesReport>)
-
-    @get:Internal
-    val html: CustomizableHtmlReport
-
-    fun html(config: Action<CustomizableHtmlReport>)
-
-    fun html(config: Closure<CustomizableHtmlReport>)
-
-    @get:Internal
-    val json: LicensesReport
-
-    fun json(config: Action<LicensesReport>)
-
-    fun json(config: Closure<LicensesReport>)
-
-    @get:Internal
-    val markdown: LicensesReport
-
-    fun markdown(config: Action<LicensesReport>)
-
-    fun markdown(config: Closure<LicensesReport>)
-
-    @get:Internal
-    val text: LicensesReport
-
-    fun text(config: Action<LicensesReport>)
-
-    fun text(config: Closure<LicensesReport>)
-
-    @get:Internal
-    val xml: LicensesReport
-
-    fun xml(config: Action<LicensesReport>)
-
-    fun xml(config: Closure<LicensesReport>)
-
-    @get:Internal
-    val custom: CustomizableReport
-
-    fun custom(config: Action<CustomizableReport>)
-
-    fun custom(config: Closure<CustomizableReport>)
-
-    @Internal
-    fun getAll(): List<LicensesReport>
+@FunctionalInterface
+fun interface CustomReportGenerator {
+    fun generate(libraries: List<Library>): String
 }
 
 enum class ReportType(

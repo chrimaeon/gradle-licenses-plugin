@@ -6,52 +6,57 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.model.Library
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
-import java.io.StringWriter
+import org.gradle.api.Project
+import org.gradle.api.Task
+import java.io.OutputStream
+import javax.inject.Inject
 
-internal class CsvReport(
-    libraries: List<Library>,
-) : Report(libraries) {
-    override fun generate(): String =
-        StringWriter().use { writer ->
-            CSVPrinter(
-                writer,
-                CSVFormat.RFC4180
-                    .builder()
-                    .setHeader(*HEADER)
-                    .build(),
-            ).use { printer ->
-                libraries.forEach { library ->
-                    library.licenses.forEach { license ->
-                        printer.printRecord(
-                            library.name,
-                            library.mavenCoordinates.version,
-                            library.mavenCoordinates,
-                            library.description,
-                            license.id.spdxLicenseIdentifier,
-                            license.name,
-                            license.url,
-                        )
+abstract class CsvReport
+    @Inject
+    constructor(
+        project: Project,
+        task: Task,
+    ) : LicensesSingleFileReport(project, task, ReportType.CSV) {
+        override fun writeLicenses(outputStream: OutputStream) {
+            outputStream.bufferedWriter().use { writer ->
+                CSVPrinter(
+                    writer,
+                    CSVFormat.RFC4180
+                        .builder()
+                        .setHeader(*HEADER)
+                        .build(),
+                ).use { printer ->
+                    libraries.forEach { library ->
+                        library.licenses.forEach { license ->
+                            printer.printRecord(
+                                library.name,
+                                library.mavenCoordinates.version,
+                                library.mavenCoordinates,
+                                library.description,
+                                license.id.spdxLicenseIdentifier,
+                                license.name,
+                                license.url,
+                            )
+                        }
                     }
+                    printer.flush()
                 }
-                printer.flush()
             }
-            writer.toString()
         }
 
-    companion object {
-        @JvmStatic
-        private val HEADER =
-            arrayOf(
-                "Name",
-                "Version",
-                "MavenCoordinates",
-                "Description",
-                "SPDX-License-Identifier",
-                "License Name",
-                "License Url",
-            )
+        companion object {
+            @JvmStatic
+            private val HEADER =
+                arrayOf(
+                    "Name",
+                    "Version",
+                    "MavenCoordinates",
+                    "Description",
+                    "SPDX-License-Identifier",
+                    "License Name",
+                    "License Url",
+                )
+        }
     }
-}

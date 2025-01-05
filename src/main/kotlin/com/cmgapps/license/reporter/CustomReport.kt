@@ -16,11 +16,24 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.model.Library
+import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.provider.Property
+import java.io.OutputStream
+import javax.inject.Inject
 
-class CustomReport(
-    libraries: List<Library>,
-    private val action: CustomReportAction,
-) : Report(libraries) {
-    override fun generate() = action(libraries)
-}
+abstract class CustomReport
+    @Inject
+    constructor(
+        project: Project,
+        task: Task,
+    ) : LicensesSingleFileReport(project, task, ReportType.CUSTOM) {
+        val generator: Property<CustomReportGenerator> = project.objects.property(CustomReportGenerator::class.java)
+
+        override fun writeLicenses(outputStream: OutputStream) {
+            if (!generator.isPresent) {
+                throw IllegalStateException("CustomReport.generator not set")
+            }
+            outputStream.bufferedWriter().use { writer -> writer.write(generator.get().generate(libraries)) }
+        }
+    }

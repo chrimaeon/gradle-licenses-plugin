@@ -26,15 +26,16 @@ repositories {
 licenses {
     reports {
         csv {
-            enabled = true
-            destination = file("$buildDir/csv-report/customdir.csv")
+            enabled.set(true)
+            outputFile.set(file("$buildDir/csv-report/customdir.csv"))
         }
-        json.enabled = true
+        json.enabled.set(true)
 
         custom {
-            enabled = true
-            destination = file("$buildDir/reports/licenses/licenses.txt")
-            generate { list -> list.collect { it.name }.join(', ') }
+            enabled.set(true)
+            outputFile.set(file("$buildDir/reports/licenses/licenses.custom"))
+            com.cmgapps.license.reporter.CustomReportGenerator builder = { list -> list.collect { it.name }.join(', ') }
+            generator.set(builder)
         }
     }
 }
