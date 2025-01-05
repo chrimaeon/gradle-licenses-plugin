@@ -31,10 +31,9 @@ data class MavenCoordinates(
     companion object {
         @JvmStatic
         private val COMPARATOR =
-            Comparator
-                .comparing(MavenCoordinates::groupId)
-                .thenComparing(MavenCoordinates::artifactId)
-                .thenComparing(MavenCoordinates::version, reverseOrder())
+            compareBy(MavenCoordinates::groupId)
+                .thenBy(MavenCoordinates::artifactId)
+                .thenByDescending(MavenCoordinates::version)
     }
 }
 
@@ -122,15 +121,8 @@ data class Library(
         @Suppress("FunctionName")
         @JvmStatic
         fun NameComparator(): Comparator<Library> =
-            Comparator
-                .comparing<Library, String> {
-                    it.name
-                        ?: it.mavenCoordinates.identifierWithoutVersion
-                }.thenComparing({ it.mavenCoordinates.version }, reverseOrder())
-
-        @Suppress("FunctionName")
-        @JvmStatic
-        fun MavenCoordinatesComparator(): Comparator<Library> = Comparator.comparing { it.mavenCoordinates }
+            compareBy<Library> { it.name ?: it.mavenCoordinates.identifierWithoutVersion }
+                .thenByDescending { it.mavenCoordinates.version }
     }
 }
 

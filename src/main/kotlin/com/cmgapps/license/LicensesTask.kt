@@ -238,14 +238,14 @@ abstract class LicensesTask :
                     model.findDescription(),
                     licenses,
                 )
-            }.sortedWith(Library.NameComparator())
-            .toList()
+            }.sortedWith(
+                compareBy<Library> { it.name ?: it.mavenCoordinates.identifierWithoutVersion }
+                    .thenByDescending { it.mavenCoordinates.version },
+            ).toList()
 
     private fun getPomModel(file: File): Model =
         MavenXpp3Reader().run {
-            file.inputStream().use {
-                read(it)
-            }
+            file.inputStream().use(::read)
         }
 
     private fun Model.findLicenses(): List<License> {
