@@ -18,7 +18,7 @@ This Gradle plugin provides tasks to generate a file with the licenses used from
 
 ```kotlin
 plugins {
-    id("com.cmgapps.licenses") version "4.8.0"
+    id("com.cmgapps.licenses") version "5.0.0"
 }
 ```
 </details>
@@ -28,7 +28,7 @@ plugins {
 
 ```groovy
 plugins {
-    id 'com.cmgapps.licenses' version '4.8.0'
+    id 'com.cmgapps.licenses' version '5.0.0'
 }
 ```
 </details>
@@ -46,7 +46,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath("com.cmgapps:gradle-licenses-plugin:4.8.0")
+        classpath("com.cmgapps:gradle-licenses-plugin:5.0.0")
     }
 }
 
@@ -65,7 +65,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.cmgapps:gradle-licenses-plugin:4.8.0'
+        classpath 'com.cmgapps:gradle-licenses-plugin:5.0.0'
     }
 }
 
@@ -126,7 +126,7 @@ The plugin can output different formats.
         ```kotlin
         licenses {
             reports {
-                html.stylesheet(file("$projectDir/styles/licenses.css"))
+                html.stylesheet.set(file("$projectDir/styles/licenses.css"))
             } 
         }
         ```
