@@ -6,9 +6,12 @@
 
 package com.cmgapps.license
 
+import com.cmgapps.license.reporter.CustomReport
+import com.cmgapps.license.reporter.ReportType
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -470,6 +473,28 @@ class LicensesTaskShould {
                     "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/\r\n" +
                     "Has Parent,1.0.0,group:has-parent:1.0.0,,Apache-2.0,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt\r\n",
             ),
+        )
+    }
+
+    @Test
+    fun `have outputFiles`() {
+        val task =
+            project.tasks.create("licensesReport", LicensesTask::class.java) {
+                it.reports { container ->
+                    container.forEach { report ->
+                        report.required.set(true)
+                        if (report is CustomReport) {
+                            report.generator.set { list -> list.joinToString() }
+                        }
+                    }
+                }
+            }
+
+        task.licensesReport()
+
+        assertThat(
+            task.outputFiles.keys,
+            containsInAnyOrder(*ReportType.entries.map { it.name }.toTypedArray()),
         )
     }
 }

@@ -177,7 +177,7 @@ class LicensesPlugin : Plugin<Project> {
             reportExtension: LicenseReportsExtension,
         ) {
             val name = this.name
-            additionalProjects = extension.additionalProjects
+            additionalProjects.set(extension.additionalProjects)
             description = TASK_DESC
             group = TASK_GROUP
             reports.configureEach { report ->

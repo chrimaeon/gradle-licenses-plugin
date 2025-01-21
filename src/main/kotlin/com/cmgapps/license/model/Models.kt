@@ -84,7 +84,7 @@ enum class LicenseId(
             CSVFormat.DEFAULT
                 .parse(this::class.java.getResourceAsStream("/license_map.csv")?.bufferedReader())
                 .associate {
-                    it.get(0) to LicenseId.valueOf(it.get(1))
+                    it[0] to LicenseId.valueOf(it[1])
                 }
         }
     }
@@ -104,9 +104,7 @@ data class License(
 
         other as License
 
-        if (id != other.id) return false
-
-        return true
+        return id == other.id
     }
 }
 
