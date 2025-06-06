@@ -88,7 +88,7 @@ class TextReportShould {
 private class TestTextReport(
     override var libraries: List<Library>,
     project: Project = ProjectBuilder.builder().build(),
-) : TextReport(project, project.task("licenseReport")) {
+) : TextReport(project, project.tasks.register("licenseReport").get()) {
     override fun getRequired(): Property<Boolean> =
         ProjectBuilder
             .builder()

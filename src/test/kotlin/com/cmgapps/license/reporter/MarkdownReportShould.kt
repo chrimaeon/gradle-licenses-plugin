@@ -127,7 +127,7 @@ private class TestMarkdownReport(
     override var libraries: List<Library>,
     logger: Logger = Logging.getLogger("TestMarkdownReport"),
     project: Project = ProjectBuilder.builder().build(),
-) : MarkdownReport(project, project.task("licenseReport"), logger) {
+) : MarkdownReport(project, project.tasks.register("licenseReport").get(), logger) {
     override fun getRequired(): Property<Boolean> =
         ProjectBuilder
             .builder()
