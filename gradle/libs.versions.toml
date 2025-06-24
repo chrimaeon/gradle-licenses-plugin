@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.1.21"
-xmlunit = "2.10.2"
+xmlunit = "2.10.3"
 gradle = "8.14.2"
 maven = "3.9.10"
 
