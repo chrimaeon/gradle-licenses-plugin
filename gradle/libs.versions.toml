@@ -14,7 +14,7 @@ jetbrains-dokka = "org.jetbrains.dokka:2.0.0"
 jetbrains-changelog = "org.jetbrains.changelog:2.2.1"
 
 [libraries]
-android-gradlePlugin = "com.android.tools.build:gradle:8.10.1"
+android-gradlePlugin = "com.android.tools.build:gradle:8.12.0"
 kotlin-multiplatformPlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1"
 apache-commonsCsv = "org.apache.commons:commons-csv:1.14.0"
