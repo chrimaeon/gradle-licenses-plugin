@@ -28,6 +28,7 @@ internal val LicenseId.filename: String
             LicenseId.MIT -> "mit.txt"
             LicenseId.MPL_2 -> "mpl-2.0.txt"
             LicenseId.EPL_1 -> "epl-1.0.txt"
+            LicenseId.ISC -> "isc.txt"
             else -> throw IllegalArgumentException("$this does not have a file associated")
         }
 

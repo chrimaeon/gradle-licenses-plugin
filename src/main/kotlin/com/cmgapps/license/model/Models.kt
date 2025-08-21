@@ -52,6 +52,7 @@ enum class LicenseId(
     MIT("MIT"),
     MPL_2("MPL-2.0"),
     EPL_1("EPL-1.0"),
+    ISC("ISC"),
     UNKNOWN(null),
     ;
 
@@ -71,6 +72,7 @@ enum class LicenseId(
                 "MIT" -> MIT
                 "MPL-2.0" -> MPL_2
                 "EPL-1.0" -> EPL_1
+                "ISC" -> ISC
                 else -> UNKNOWN
             }
 
