@@ -103,7 +103,7 @@ changelog {
 }
 
 kover {
-    useJacoco()
+    useJacoco("0.8.13")
     currentProject {
         sources {
             excludedSourceSets.addAll(sourceSets["functionalTest"].name)

@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+@file:Suppress("HttpUrlsUsage")
+
 package com.cmgapps.license
 
 import com.cmgapps.license.util.plus
@@ -15,6 +17,7 @@ import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedInvocationConstants
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
@@ -79,7 +82,7 @@ class LicensePluginAndroidShould {
         gradleRunner = GradleRunner.create().withProjectDir(testProjectDir.toFile())
     }
 
-    @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - taskName = {0}, AGP = {1}")
+    @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} - taskName = {0}, AGP = {1}")
     @MethodSource("buildTypesAndAgpVersions")
     fun `generate licenses buildType report`(
         taskName: String,
@@ -115,7 +118,7 @@ class LicensePluginAndroidShould {
         assertThat(result.task(":$taskName")?.outcome, `is`(TaskOutcome.SUCCESS))
     }
 
-    @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - taskName = {0}")
+    @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} - taskName = {0}")
     @MethodSource("productFlavorsAndCsv")
     fun `generate licenses variant report`(
         taskName: String,
