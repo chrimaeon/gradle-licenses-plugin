@@ -3,7 +3,6 @@
 ## [Unreleased]
 
 ### Added
-- Add [ISC License](https://opensource.org/license/isc-license-txt)
 
 ### Changed
 
@@ -14,6 +13,12 @@
 ### Fixed
 
 ### Security
+
+## [5.1.0]
+
+### Added
+
+- Add [ISC License](https://opensource.org/license/isc-license-txt)
 
 ## [5.0.0]
 
@@ -149,7 +154,8 @@ Use Gradle's Reports API to generate reports
 - All public properties are now provided Properties
 - Use Kotlin Serialization instead of Moshi
 
-[Unreleased]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/5.0.0...HEAD
+[Unreleased]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/5.1.0...HEAD
+[5.1.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/5.0.0...5.1.0
 [5.0.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.8.0...5.0.0
 [4.8.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.7.0...4.8.0
 [4.7.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.6.1...4.7.0
