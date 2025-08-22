@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- Add [ISC License](https://opensource.org/license/isc-license-txt)
 
 ### Changed
 
