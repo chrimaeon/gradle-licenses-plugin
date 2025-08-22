@@ -17,7 +17,7 @@ jetbrains-changelog = "org.jetbrains.changelog:2.2.1"
 android-gradlePlugin = "com.android.tools.build:gradle:8.10.1"
 kotlin-multiplatformPlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0"
-apache-commonsCsv = "org.apache.commons:commons-csv:1.14.0"
+apache-commonsCsv = "org.apache.commons:commons-csv:1.14.1"
 maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven" }
 maven-artifact = { module = "org.apache.maven:maven-artifact", version.ref = "maven" }
 jUnit = "org.junit.jupiter:junit-jupiter:5.13.4"
