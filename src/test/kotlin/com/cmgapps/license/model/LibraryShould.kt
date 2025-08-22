@@ -6,7 +6,6 @@
 
 package com.cmgapps.license.model
 
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.apache.maven.artifact.versioning.ComparableVersion
@@ -62,6 +61,7 @@ internal class LibraryShould {
     fun deserialize() {
         val lib: Library =
             json.decodeFromString(
+                // language=json
                 """
                     |{
                     |  "mavenCoordinates": {
@@ -73,7 +73,7 @@ internal class LibraryShould {
                     |  "description": "description",
                     |  "licenses": [
                     |    {
-                    |      "spdxLicenseIdentifier": null
+                    |      "spdxLicenseIdentifier": null,
                     |      "name":"License name",
                     |      "url":"https://domain.com"
                     |    }
@@ -261,7 +261,7 @@ internal class LibraryShould {
                             ),
                         ),
                 ),
-            ).sortedWith(Library.MavenCoordinatesComparator())
+            ).sortedBy { it.mavenCoordinates }
         assertThat(
             sortedList,
             contains(

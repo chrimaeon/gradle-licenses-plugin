@@ -31,10 +31,9 @@ data class MavenCoordinates(
     companion object {
         @JvmStatic
         private val COMPARATOR =
-            Comparator
-                .comparing(MavenCoordinates::groupId)
-                .thenComparing(MavenCoordinates::artifactId)
-                .thenComparing(MavenCoordinates::version, reverseOrder())
+            compareBy(MavenCoordinates::groupId)
+                .thenBy(MavenCoordinates::artifactId)
+                .thenByDescending(MavenCoordinates::version)
     }
 }
 
@@ -53,6 +52,7 @@ enum class LicenseId(
     MIT("MIT"),
     MPL_2("MPL-2.0"),
     EPL_1("EPL-1.0"),
+    ISC("ISC"),
     UNKNOWN(null),
     ;
 
@@ -72,6 +72,7 @@ enum class LicenseId(
                 "MIT" -> MIT
                 "MPL-2.0" -> MPL_2
                 "EPL-1.0" -> EPL_1
+                "ISC" -> ISC
                 else -> UNKNOWN
             }
 
@@ -85,7 +86,7 @@ enum class LicenseId(
             CSVFormat.DEFAULT
                 .parse(this::class.java.getResourceAsStream("/license_map.csv")?.bufferedReader())
                 .associate {
-                    it.get(0) to LicenseId.valueOf(it.get(1))
+                    it[0] to LicenseId.valueOf(it[1])
                 }
         }
     }
@@ -105,9 +106,7 @@ data class License(
 
         other as License
 
-        if (id != other.id) return false
-
-        return true
+        return id == other.id
     }
 }
 
@@ -122,15 +121,8 @@ data class Library(
         @Suppress("FunctionName")
         @JvmStatic
         fun NameComparator(): Comparator<Library> =
-            Comparator
-                .comparing<Library, String> {
-                    it.name
-                        ?: it.mavenCoordinates.identifierWithoutVersion
-                }.thenComparing({ it.mavenCoordinates.version }, reverseOrder())
-
-        @Suppress("FunctionName")
-        @JvmStatic
-        fun MavenCoordinatesComparator(): Comparator<Library> = Comparator.comparing { it.mavenCoordinates }
+            compareBy<Library> { it.name ?: it.mavenCoordinates.identifierWithoutVersion }
+                .thenByDescending { it.mavenCoordinates.version }
     }
 }
 

@@ -81,7 +81,7 @@ class XmlReportShould {
 private class TestXmlReport(
     override var libraries: List<Library>,
     project: Project = ProjectBuilder.builder().build(),
-) : XmlReport(project, project.task("licenseReport")) {
+) : XmlReport(project, project.tasks.register("licenseReport").get()) {
     override fun getRequired(): Property<Boolean> =
         ProjectBuilder
             .builder()

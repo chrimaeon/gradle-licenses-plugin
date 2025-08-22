@@ -31,9 +31,7 @@ abstract class CustomReport
         val generator: Property<CustomReportGenerator> = project.objects.property(CustomReportGenerator::class.java)
 
         override fun writeLicenses(outputStream: OutputStream) {
-            if (!generator.isPresent) {
-                throw IllegalStateException("CustomReport.generator not set")
-            }
+            check(generator.isPresent) { "CustomReport.generator not set" }
             outputStream.bufferedWriter().use { writer -> writer.write(generator.get().generate(libraries)) }
         }
     }

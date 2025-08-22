@@ -26,7 +26,7 @@ abstract class CsvReport
                     CSVFormat.RFC4180
                         .builder()
                         .setHeader(*HEADER)
-                        .build(),
+                        .get(),
                 ).use { printer ->
                     libraries.forEach { library ->
                         library.licenses.forEach { license ->

@@ -16,6 +16,7 @@ import org.hamcrest.Matchers.nullValue
 import org.hamcrest.Matchers.oneOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedInvocationConstants
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.EnumSource
@@ -47,6 +48,7 @@ class LicenseIdShould {
                     "MIT",
                     "MPL-2.0",
                     "EPL-1.0",
+                    "ISC",
                 ),
             ),
         )
@@ -72,6 +74,7 @@ class LicenseIdShould {
             "MIT",
             "MPL-2.0",
             "EPL-1.0",
+            "ISC",
         ],
     )
     fun `map spdx license identifiers to known ids`(value: String) {
@@ -106,6 +109,7 @@ class LicenseIdShould {
                     "mit.txt",
                     "mpl-2.0.txt",
                     "epl-1.0.txt",
+                    "isc.txt",
                 ),
             ),
         )
@@ -131,7 +135,7 @@ class LicenseIdShould {
         assertThat(LicenseId.UNKNOWN.text, `is`(emptyString()))
     }
 
-    @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - LicenseId = {0}")
+    @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} - LicenseId = {0}")
     @MethodSource("provideLicenseIdMapping")
     fun `map licenses to name and url`(
         id: LicenseId,
@@ -156,6 +160,7 @@ class LicenseIdShould {
                 Arguments.of(LicenseId.MPL_2, 6),
                 Arguments.of(LicenseId.CDDL, 4),
                 Arguments.of(LicenseId.EPL_1, 9),
+                Arguments.of(LicenseId.ISC, 3),
             )
     }
 }

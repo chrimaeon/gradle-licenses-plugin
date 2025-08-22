@@ -16,6 +16,7 @@ import org.hamcrest.Matchers.matchesPattern
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedInvocationConstants
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
@@ -62,11 +63,11 @@ class LicensePluginJavaShould {
                 .withPluginClasspath()
     }
 
-    @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - Gradle Version = {0}")
+    @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} - Gradle Version = {0}")
     @ValueSource(
         strings = [
             "7.2", "7.3", "7.4", "7.5", "7.6", "8.0", "8.1", "8.2", "8.3", "8.4",
-            "8.5", "8.6", "8.7", "8.8", "8.9", "8.10", "8.11", "8.12",
+            "8.5", "8.6", "8.7", "8.8", "8.9", "8.10", "8.11", "8.12", "8.13", "8.14",
         ],
     )
     fun `apply Licenses plugin to various Gradle versions`(version: String) {

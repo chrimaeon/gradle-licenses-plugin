@@ -160,7 +160,7 @@ private class TestHtmlReport(
             project
                 .objects,
         project = project,
-        task = project.task("licenseReport"),
+        task = project.tasks.register("licenseReport").get(),
     ) {
     override fun getRequired(): Property<Boolean> =
         ProjectBuilder

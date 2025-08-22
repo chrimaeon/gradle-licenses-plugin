@@ -47,22 +47,10 @@ abstract class HtmlReport
 
         override fun writeLicenses(outputStream: OutputStream) {
             outputStream.bufferedWriter().use { writer ->
-                val useDarkMode = useDarkMode.get()
-                val css = if (this.css.isPresent) css.get() else null
-
                 writer.write(
                     html {
                         head {
-                            meta(mapOf("charset" to "UTF-8"))
-                            if (useDarkMode) {
-                                meta(mapOf("name" to "color-scheme", "content" to "dark light"))
-                            }
-                            style {
-                                +(css?.asString() ?: (DEFAULT_CSS + if (useDarkMode) NIGHT_MODE_CSS else ""))
-                            }
-                            title {
-                                +OPEN_SOURCE_LIBRARIES
-                            }
+                            css()
                         }
 
                         body {
@@ -101,6 +89,22 @@ abstract class HtmlReport
                         }
                     }.toString(false),
                 )
+            }
+        }
+
+        private fun Head.css() {
+            val useDarkMode = useDarkMode.get()
+            val css = if (css.isPresent) css.get() else null
+
+            meta(mapOf("charset" to "UTF-8"))
+            if (useDarkMode) {
+                meta(mapOf("name" to "color-scheme", "content" to "dark light"))
+            }
+            style {
+                +(css?.asString() ?: (DEFAULT_CSS + if (useDarkMode) NIGHT_MODE_CSS else ""))
+            }
+            title {
+                +OPEN_SOURCE_LIBRARIES
             }
         }
     }
@@ -205,7 +209,7 @@ internal class Li : BodyTag("li")
 
 internal class A : BodyTag("a") {
     var href: String
-        get() = attributes.get("href") ?: throw IllegalStateException("href is missing")
+        get() = attributes["href"] ?: throw IllegalStateException("href is missing")
         set(value) {
             attributes["href"] = value
         }
