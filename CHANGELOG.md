@@ -4,6 +4,8 @@
 
 ### Added
 
+- Additional License Desciptors
+
 ### Changed
 
 ### Deprecated
