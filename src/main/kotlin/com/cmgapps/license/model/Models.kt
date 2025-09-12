@@ -98,13 +98,25 @@ data class License(
     val name: String,
     val url: String,
 ) {
-    override fun hashCode(): Int = id.hashCode()
+    override fun hashCode(): Int =
+        if (id == LicenseId.UNKNOWN) {
+            var result = id.hashCode()
+            result = 31 * result + name.hashCode()
+            result = 31 * result + url.hashCode()
+            result
+        } else {
+            id.hashCode()
+        }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
         other as License
+
+        if (id == LicenseId.UNKNOWN && other.id == LicenseId.UNKNOWN) {
+            return other.name == name && other.url == url
+        }
 
         return id == other.id
     }

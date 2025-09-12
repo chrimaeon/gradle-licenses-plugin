@@ -42,7 +42,9 @@ internal val LicenseId.text: String
     }
 
 internal fun List<Library>.toLicensesMap(): Map<License, List<Library>> =
-    flatMap { library -> library.licenses.map { license -> license to library } }
+    this
+        .asSequence()
+        .flatMap { library -> library.licenses.map { license -> license to library } }
         .groupBy({ (license, _) -> license }, { (_, library) -> library })
 
 fun Logger.logLicenseWarning(

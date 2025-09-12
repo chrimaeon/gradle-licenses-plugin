@@ -74,6 +74,24 @@ class MarkdownReportShould {
                             License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
                         ),
                 ),
+                Library(
+                    MavenCoordinates("test.group2", "test.artifact2", ComparableVersion("1.0")),
+                    name = "Lib with invalid license 2",
+                    description = null,
+                    licenses =
+                        listOf(
+                            License(LicenseId.UNKNOWN, name = "foo2", url = "http://www.license2.foo"),
+                        ),
+                ),
+                Library(
+                    MavenCoordinates("test.group3", "test.artifact3", ComparableVersion("1.0")),
+                    name = "Lib with invalid license 3",
+                    description = null,
+                    licenses =
+                        listOf(
+                            License(LicenseId.UNKNOWN, name = "foo2", url = "http://www.license2.foo"),
+                        ),
+                ),
             ),
         ).writeLicenses(outputStream)
         assertThat(
@@ -86,6 +104,13 @@ class MarkdownReportShould {
                     |```
                     |foo
                     |http://www.license.foo
+                    |```
+                    |
+                    |* Lib with invalid license 2
+                    |* Lib with invalid license 3
+                    |```
+                    |foo2
+                    |http://www.license2.foo
                     |```
                     |
                 """.trimMargin(),
