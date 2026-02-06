@@ -83,7 +83,9 @@ abstract class HtmlReport
                                         }
                                     }
 
-                                    else -> pre { +(license.id.text) }
+                                    else -> {
+                                        pre { +(license.id.text) }
+                                    }
                                 }
                             }
                         }

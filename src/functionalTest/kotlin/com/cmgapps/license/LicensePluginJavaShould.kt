@@ -65,13 +65,16 @@ class LicensePluginJavaShould {
 
     @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} - Gradle Version = {0}")
     @ValueSource(
-        strings = ["9.0.0", "9.1.0", "9.2.0", "9.3.0"],
+        strings = [MINIMUM_GRADLE_VERSION, "9.1.0", "9.2.0", "9.3.0", LATEST_VERSION],
     )
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
         val result =
             gradleRunner
-                .withGradleVersion(version)
-                .build()
+                .apply {
+                    if (version != LATEST_VERSION) {
+                        withGradleVersion(version)
+                    }
+                }.build()
 
         assertThat("Gradle version $version", result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
     }
@@ -524,3 +527,5 @@ class LicensePluginJavaShould {
         assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
     }
 }
+
+private const val LATEST_VERSION = "latest"

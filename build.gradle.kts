@@ -27,6 +27,7 @@ plugins {
     alias(libs.plugins.kotlinx.kover)
     id("testlogger")
     id("ktlint")
+    alias(libs.plugins.buildconfig)
 }
 
 kotlin {
@@ -130,7 +131,8 @@ changelog {
 }
 
 kover {
-    useJacoco("0.8.13")
+    useJacoco = true
+    jacocoVersion = libs.versions.jacoco
     currentProject {
         sources {
             excludedSourceSets.addAll(sourceSets["functionalTest"].name)
@@ -147,6 +149,16 @@ kover {
                 }
             }
         }
+    }
+}
+
+buildConfig {
+    sourceSets.getByName("functionalTest") {
+        useKotlinOutput {
+            packageName = "com.cmgapps.license"
+            topLevelConstants = true
+        }
+        buildConfigField("MINIMUM_GRADLE_VERSION", minimumGradleVersion)
     }
 }
 
