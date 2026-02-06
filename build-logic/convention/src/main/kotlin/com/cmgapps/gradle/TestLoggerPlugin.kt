@@ -16,20 +16,39 @@
 
 package com.cmgapps.gradle
 
+import groovy.lang.Closure
+import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.TestDescriptor
 import org.gradle.api.tasks.testing.TestResult
 import org.gradle.api.tasks.testing.TestResult.ResultType
-import org.gradle.kotlin.dsl.KotlinClosure2
-import org.gradle.kotlin.dsl.withType
 
 private const val CSI = "\u001B["
 private const val ANSI_RED = "31"
 private const val ANSI_GREEN = "32"
 private const val ANSI_YELLOW = "33"
 private const val ANSI_BOLD = "1"
+
+@Suppress("unused")
+class TestLoggerPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        target.tasks.withType(Test::class.java).configureEach { task ->
+            val closure =
+                object : Closure<Unit>(this) {
+                    fun doCall(
+                        desc: TestDescriptor,
+                        result: TestResult,
+                    ) {
+                        target.logger.logResults(desc, result)
+                    }
+                }
+
+            task.afterTest(closure)
+        }
+    }
+}
 
 private fun Logger.logResults(
     desc: TestDescriptor,
@@ -38,7 +57,7 @@ private fun Logger.logResults(
     val message = "{} > {} {}" + if (result.exception != null) "\n>\t{}\n" else "\n"
 
     val params =
-        buildList<String> {
+        buildList {
             add(desc.className?.substringAfterLast('.') ?: "")
             add(desc.displayName)
             add(getFormattedResult(result))
@@ -76,9 +95,3 @@ private fun getFormattedResult(result: TestResult): String =
             append("0m")
         }
     }
-
-fun Project.configureTestLogging() {
-    tasks.withType<Test> {
-        afterTest(KotlinClosure2(logger::logResults))
-    }
-}

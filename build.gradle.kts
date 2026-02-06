@@ -10,6 +10,10 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.github.benmanes.gradle.versions.updates.gradle.GradleReleaseChannel
 import kotlinx.kover.gradle.plugin.dsl.AggregationType
 import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
 import java.util.Properties
 
@@ -21,8 +25,8 @@ plugins {
     alias(libs.plugins.gradle.pluginPublish)
     alias(libs.plugins.jetbrains.changelog)
     alias(libs.plugins.kotlinx.kover)
-    id("com.cmgapps.gradle.test-logger")
-    id("com.cmgapps.gradle.ktlint")
+    id("testlogger")
+    id("ktlint")
 }
 
 kotlin {
@@ -43,6 +47,30 @@ val projectUrl: String by pomProperties
 
 project.group = group
 version = versionName
+
+val minimumGradleVersion = "9.0"
+configurations.apiElements {
+    attributes {
+        attribute(
+            GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE,
+            objects.named(GradlePluginApiVersion::class.java, minimumGradleVersion),
+        )
+    }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    sourceCompatibility = "17"
+    targetCompatibility = "17"
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        apiVersion = KotlinVersion.KOTLIN_2_2
+        languageVersion = KotlinVersion.KOTLIN_2_2
+        jvmTarget = JvmTarget.JVM_17
+        jvmDefault = JvmDefaultMode.NO_COMPATIBILITY
+    }
+}
 
 testing {
     suites {
@@ -74,7 +102,6 @@ testing {
     }
 }
 
-@Suppress("UnstableApiUsage")
 gradlePlugin {
     val scmUrl: String by pomProperties
     val pomDescription: String by pomProperties

@@ -1,0 +1,18 @@
+[
+    {
+        "mavenCoordinates": {
+            "groupId": "com.squareup.retrofit2",
+            "artifactId": "retrofit",
+            "version": "2.3.0"
+        },
+        "name": "Retrofit",
+        "description": null,
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "Apache 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
+    }
+]

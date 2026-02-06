@@ -4,9 +4,12 @@
 
 ### Added
 
-- Additional License Desciptors
+- Additional License Descriptors
 
 ### Changed
+
+- The minimum Gradle version is now 9.0.0
+- The minimum Android Gradle Plugin version is now 8.13.2
 
 ### Deprecated
 

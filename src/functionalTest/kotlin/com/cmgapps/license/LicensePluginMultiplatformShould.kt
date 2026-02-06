@@ -26,6 +26,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedInvocationConstants
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
@@ -34,8 +35,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.Properties
 import java.util.regex.Pattern
-
-private const val KOTLIN_MULTIPLATFORM_PLUGIN = "org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21"
 
 class LicensePluginMultiplatformShould {
     @TempDir
@@ -73,16 +72,14 @@ class LicensePluginMultiplatformShould {
             // language=gradle
             """
             buildscript {
-              repositories {
-                mavenCentral()
-                google()
-              }
               dependencies {
-                classpath "$KOTLIN_MULTIPLATFORM_PLUGIN"
                 classpath files($pluginClasspath)
               }
             }
-            apply plugin: 'org.jetbrains.kotlin.multiplatform'
+            plugins {
+              id("org.jetbrains.kotlin.multiplatform") version "2.3.0"
+            }
+
             apply plugin: 'com.cmgapps.licenses'
             
             repositories {
@@ -370,8 +367,8 @@ class LicensePluginMultiplatformShould {
         )
     }
 
-    @ParameterizedTest(name = "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} - KGP Version = {0}")
-    @ValueSource(strings = ["1.6.0", "1.7.0", "1.8.0", "1.9.0", "2.0.0", "2.1.0"])
+    @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} - KGP Version = {0}")
+    @ValueSource(strings = ["2.0.0", "2.1.0"])
     fun `handle kotlin gradle plugin versions`(kgpVersion: String) {
         buildFile.outputStream().bufferedWriter().use {
             @Language("groovy")

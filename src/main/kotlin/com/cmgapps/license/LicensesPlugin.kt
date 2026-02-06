@@ -30,7 +30,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
 
-private const val MIN_KOTLIN_VERSION = "1.6.0"
+private const val MIN_KOTLIN_VERSION = "2.0.0"
 
 @Suppress("unused")
 class LicensesPlugin : Plugin<Project> {
@@ -138,10 +138,10 @@ class LicensesPlugin : Plugin<Project> {
 
             val kotlinMultiplatformExtension = project.extensions.getByName("kotlin") as KotlinMultiplatformExtension
 
-            kotlinMultiplatformExtension.targets.all { target ->
+            kotlinMultiplatformExtension.targets.configureEach { target ->
                 val targetName = target.name
                 if (target.platformType == KotlinPlatformType.common) {
-                    return@all
+                    return@configureEach
                 }
 
                 project.tasks.register(
@@ -154,9 +154,9 @@ class LicensesPlugin : Plugin<Project> {
             }
 
             val targetNames = mutableListOf("common")
-            kotlinMultiplatformExtension.targets.all { target ->
+            kotlinMultiplatformExtension.targets.configureEach { target ->
                 if (target.platformType == KotlinPlatformType.common) {
-                    return@all
+                    return@configureEach
                 }
 
                 targetNames.add(target.name)
@@ -245,7 +245,9 @@ class LicensesPlugin : Plugin<Project> {
                         report.configureReport(reporter)
                     }
 
-                    else -> throw GradleException("Unknown report $name")
+                    else -> {
+                        throw GradleException("Unknown report $name")
+                    }
                 }
             }
         }
@@ -261,6 +263,6 @@ class LicensesPlugin : Plugin<Project> {
 fun findClass(fqName: String) =
     try {
         Class.forName(fqName)
-    } catch (ex: ClassNotFoundException) {
+    } catch (_: ClassNotFoundException) {
         null
     }
