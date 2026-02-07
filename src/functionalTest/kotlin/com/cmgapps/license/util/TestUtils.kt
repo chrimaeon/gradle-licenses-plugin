@@ -19,7 +19,12 @@ package com.cmgapps.license.util
 import org.gradle.testkit.runner.GradleRunner
 import org.hamcrest.Description
 import org.hamcrest.Matcher
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.empty
+import org.hamcrest.Matchers.not
 import org.hamcrest.TypeSafeDiagnosingMatcher
+import org.hamcrest.io.FileMatchers.anExistingDirectory
+import org.hamcrest.io.FileMatchers.anExistingFile
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import java.io.File
@@ -131,7 +136,24 @@ fun createBuildRunner(
         .withDebug(true)
         .withArguments(
             *tasks,
+            "--info",
             "--stacktrace",
             "--continue",
         ).withProjectDir(fixtureDir)
         .forwardOutput()
+
+fun assertExpectedFiles(
+    fixtureDir: File,
+    taskName: String = "",
+) {
+    val expectedDir = File(fixtureDir, "expected/$taskName")
+    assertThat(expectedDir, anExistingDirectory())
+
+    val expectedFiles = expectedDir.walk().filter { it.isFile }.toList()
+    assertThat("$expectedDir is emtpy", expectedFiles, not(empty()))
+    for (expectedFile in expectedFiles) {
+        val actualFile = File(fixtureDir, expectedFile.relativeTo(expectedDir).toString())
+        assertThat(actualFile, anExistingFile())
+        assertThat(actualFile, hasSameContentAs(expectedFile))
+    }
+}

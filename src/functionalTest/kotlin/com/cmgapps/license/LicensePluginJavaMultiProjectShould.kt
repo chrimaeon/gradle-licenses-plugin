@@ -16,14 +16,22 @@
 
 package com.cmgapps.license
 
-import com.cmgapps.license.util.getFileContent
+import com.cmgapps.license.util.assertExpectedFiles
+import com.cmgapps.license.util.createBuildRunner
+import com.cmgapps.license.util.fixturesDir
+import com.cmgapps.license.util.hasSameContentAs
 import com.cmgapps.license.util.plus
 import org.gradle.testkit.runner.GradleRunner
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.`is`
+import org.hamcrest.Matchers.empty
+import org.hamcrest.Matchers.not
+import org.hamcrest.io.FileMatchers.anExistingDirectory
+import org.hamcrest.io.FileMatchers.anExistingFile
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedInvocationConstants
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -72,226 +80,18 @@ class LicensePluginJavaMultiProjectShould {
                 .withPluginClasspath()
     }
 
-    @Test
-    fun `collect dependencies from additional module`() {
-        module1File +
-            """
-            plugins {
-                id("java")
-                id("com.cmgapps.licenses")
-            }
-            repositories {  
-                maven { url '$mavenRepoUrl' }
-            }
-            licenses {
-                additionalProjects ':module2', ':modules:submodule'
-                reports {
-                    html.enabled.set(true)
-                }
-            }
-            """.trimIndent()
+    @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} with {0}")
+    @ValueSource(
+        strings = [
+            "multi-project-collect-additional",
+            "multi-project-merge-additional",
+            "multi-project-only-single-instance",
+        ],
+    )
+    fun `collect dependencies from additional module`(fixture: String) {
+        val fixtureDir = File(fixturesDir, fixture)
+        createBuildRunner(fixtureDir, "clean", ":module1:licenseReport").build()
 
-        module2File +
-            """
-            plugins {
-                id("java-library")
-            }
-            repositories {  
-                maven { url '$mavenRepoUrl' }
-            }
-            dependencies {
-                implementation 'group:name:1.0.0'
-            }
-            """.trimIndent()
-
-        module3File +
-            """
-            plugins {
-                id("java-library")
-            }
-            repositories {  
-                maven { url '$mavenRepoUrl' }
-            }
-            dependencies {
-                implementation 'com.squareup.retrofit2:retrofit:2.3.0'
-            }
-            """.trimIndent()
-
-        gradleRunner.build()
-
-        assertThat(
-            File("$testProjectDir/module1/build/reports/licenses/licenseReport/licenses.html")
-                .readText()
-                .trim(),
-            `is`(
-                "<!DOCTYPE html>" +
-                    "<html lang=\"en\">" +
-                    "<head>" +
-                    "<meta charset=\"UTF-8\">" +
-                    "<meta name=\"color-scheme\" content=\"dark light\">" +
-                    "<style>" +
-                    "body{font-family:sans-serif;background-color:#eee}" +
-                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
-                    "@media(prefers-color-scheme: dark){" +
-                    "body{background-color: #303030}" +
-                    "pre,.license {background-color: #242424}" +
-                    "}" +
-                    "</style>" +
-                    "<title>Open source licenses</title>" +
-                    "</head>" +
-                    "<body>" +
-                    "<h3>Notice for packages:</h3>" +
-                    "<ul><li>Fake dependency name</li></ul>" +
-                    "<div class=\"license\"><p>Some license</p>" +
-                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
-                    "</div>" +
-                    "<ul><li>Retrofit</li></ul><pre>" +
-                    getFileContent("apache-2.0.txt") +
-                    "</pre>" +
-                    "</body>" +
-                    "</html>",
-            ),
-        )
-    }
-
-    @Test
-    fun `merge dependencies of modules`() {
-        module1File +
-            """
-            plugins {
-                id("java-library")
-                id("com.cmgapps.licenses")
-            }
-            repositories {  
-                maven { url '$mavenRepoUrl' }
-            }
-            licenses {
-                additionalProjects ':module2'
-                reports {
-                    html.enabled.set(true)
-                }
-            }
-            dependencies {
-                implementation 'com.squareup.retrofit2:retrofit:2.3.0'
-            }
-            """.trimIndent()
-
-        module2File +
-            """
-            plugins {
-                id("java-library")
-            }
-            repositories {  
-                maven { url '$mavenRepoUrl' }
-            }
-            dependencies {
-                implementation 'group:name:1.0.0'
-            }
-            """.trimIndent()
-
-        gradleRunner.build()
-
-        assertThat(
-            File("$testProjectDir/module1/build/reports/licenses/licenseReport/licenses.html")
-                .readText()
-                .trim(),
-            `is`(
-                "<!DOCTYPE html>" +
-                    "<html lang=\"en\">" +
-                    "<head>" +
-                    "<meta charset=\"UTF-8\">" +
-                    "<meta name=\"color-scheme\" content=\"dark light\">" +
-                    "<style>" +
-                    "body{font-family:sans-serif;background-color:#eee}" +
-                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
-                    "@media(prefers-color-scheme: dark){" +
-                    "body{background-color: #303030}" +
-                    "pre,.license {background-color: #242424}" +
-                    "}" +
-                    "</style>" +
-                    "<title>Open source licenses</title>" +
-                    "</head>" +
-                    "<body>" +
-                    "<h3>Notice for packages:</h3>" +
-                    "<ul><li>Fake dependency name</li></ul>" +
-                    "<div class=\"license\"><p>Some license</p>" +
-                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
-                    "</div>" +
-                    "<ul><li>Retrofit</li></ul><pre>" +
-                    getFileContent("apache-2.0.txt") +
-                    "</pre>" +
-                    "</body>" +
-                    "</html>",
-            ),
-        )
-    }
-
-    @Test
-    fun `not add already added dependencies`() {
-        module1File +
-            """
-            plugins {
-                id("java")
-                id("com.cmgapps.licenses")
-            }
-            repositories {  
-                maven { url '$mavenRepoUrl' }
-            }
-            licenses {
-                additionalProjects ':module2'
-                reports {
-                    html.enabled.set(true)
-                }
-            }
-            dependencies {
-                implementation 'group:name:1.0.0'
-            }
-            """.trimIndent()
-
-        module2File +
-            """
-            plugins {
-                id("java-library")
-            }
-            repositories {  
-                maven { url '$mavenRepoUrl' }
-            }
-            dependencies {
-                implementation 'group:name:1.0.0'
-            }
-            """.trimIndent()
-
-        gradleRunner.build()
-
-        assertThat(
-            File("$testProjectDir/module1/build/reports/licenses/licenseReport/licenses.html")
-                .readText()
-                .trim(),
-            `is`(
-                "<!DOCTYPE html>" +
-                    "<html lang=\"en\">" +
-                    "<head>" +
-                    "<meta charset=\"UTF-8\">" +
-                    "<meta name=\"color-scheme\" content=\"dark light\">" +
-                    "<style>" +
-                    "body{font-family:sans-serif;background-color:#eee}" +
-                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
-                    "@media(prefers-color-scheme: dark){" +
-                    "body{background-color: #303030}" +
-                    "pre,.license {background-color: #242424}" +
-                    "}" +
-                    "</style>" +
-                    "<title>Open source licenses</title>" +
-                    "</head>" +
-                    "<body>" +
-                    "<h3>Notice for packages:</h3>" +
-                    "<ul><li>Fake dependency name</li></ul>" +
-                    "<div class=\"license\"><p>Some license</p>" +
-                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
-                    "</div>" +
-                    "</body>" +
-                    "</html>",
-            ),
-        )
+        assertExpectedFiles(fixtureDir)
     }
 }

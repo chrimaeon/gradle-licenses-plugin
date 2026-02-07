@@ -6,11 +6,10 @@
 
 package com.cmgapps.license
 
+import com.cmgapps.license.util.assertExpectedFiles
 import com.cmgapps.license.util.createBuildRunner
 import com.cmgapps.license.util.fixturesDir
 import com.cmgapps.license.util.hasSameContentAs
-import com.cmgapps.license.util.plus
-import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.empty
@@ -18,59 +17,19 @@ import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.not
 import org.hamcrest.io.FileMatchers.anExistingDirectory
 import org.hamcrest.io.FileMatchers.anExistingFile
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedInvocationConstants
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.util.stream.Stream
 
 class LicensePluginJavaShould {
-    @TempDir
-    lateinit var testProjectDir: Path
-
-    private lateinit var buildFile: File
-    private lateinit var reportFolder: String
-    private lateinit var mavenRepoUrl: String
-    private lateinit var gradleRunner: GradleRunner
-
-    @BeforeEach
-    fun setUp() {
-        buildFile = Files.createFile(Paths.get(testProjectDir.toString(), "build.gradle")).toFile()
-        reportFolder = "$testProjectDir/build/reports/licenses/licenseReport"
-        mavenRepoUrl = javaClass.getResource("/maven")!!.toURI().toString()
-        buildFile +
-            // language=gradle
-            """
-            plugins {
-               id("java")
-               id("com.cmgapps.licenses")
-            }
-
-            repositories {
-                maven {
-                    url '$mavenRepoUrl'
-                }
-            }
-
-            """.trimIndent()
-
-        gradleRunner =
-            GradleRunner
-                .create()
-                .withProjectDir(testProjectDir.toFile())
-                .withArguments(":licenseReport", "--info", "--stacktrace")
-                .withPluginClasspath()
-    }
-
     @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} - Gradle Version = {0}")
-    @ValueSource(
-        strings = [MINIMUM_GRADLE_VERSION, "9.1.0", "9.2.0", "9.3.0", LATEST_VERSION],
-    )
+    @MethodSource("gradleVersions")
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
         val result =
             createBuildRunner(
@@ -116,17 +75,18 @@ class LicensePluginJavaShould {
         assertExpectedFiles(fixtureDir)
     }
 
-    private fun assertExpectedFiles(fixtureDir: File) {
-        val expectedDir = File(fixtureDir, "expected")
-        assertThat(expectedDir, anExistingDirectory())
-
-        val expectedFiles = expectedDir.walk().filter { it.isFile }.toList()
-        assertThat("$expectedDir is emtpy", expectedFiles, not(empty()))
-        for (expectedFile in expectedFiles) {
-            val actualFile = File(fixtureDir, expectedFile.relativeTo(expectedDir).toString())
-            assertThat(actualFile, anExistingFile())
-            assertThat(actualFile, hasSameContentAs(expectedFile))
-        }
+    companion object {
+        @JvmStatic
+        fun gradleVersions(): Stream<Arguments> =
+            buildList {
+                add(MINIMUM_GRADLE_VERSION)
+                add(LATEST_VERSION)
+                if (System.getenv("CI") == null) {
+                    add("9.1.0")
+                    add("9.2.0")
+                    add("9.3.0")
+                }
+            }.stream().map { arguments(it) }
     }
 }
 

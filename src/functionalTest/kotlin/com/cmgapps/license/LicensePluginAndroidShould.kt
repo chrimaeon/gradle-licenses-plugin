@@ -8,16 +8,10 @@
 
 package com.cmgapps.license
 
+import com.cmgapps.license.util.assertExpectedFiles
 import com.cmgapps.license.util.cartesianProduct
 import com.cmgapps.license.util.createBuildRunner
 import com.cmgapps.license.util.fixturesDir
-import com.cmgapps.license.util.hasSameContentAs
-import org.gradle.testkit.runner.GradleRunner
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.empty
-import org.hamcrest.Matchers.not
-import org.hamcrest.io.FileMatchers.anExistingDirectory
-import org.hamcrest.io.FileMatchers.anExistingFile
 import org.junit.jupiter.params.ParameterizedInvocationConstants
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -58,22 +52,6 @@ class LicensePluginAndroidShould {
         createBuildRunner(fixture, taskName).build()
 
         assertExpectedFiles(fixture, taskName)
-    }
-
-    private fun assertExpectedFiles(
-        fixtureDir: File,
-        taskName: String,
-    ) {
-        val expectedDir = File(fixtureDir, "expected/$taskName")
-        assertThat(expectedDir, anExistingDirectory())
-
-        val expectedFiles = expectedDir.walk().filter { it.isFile }.toList()
-        assertThat(expectedFiles, not(empty()))
-        for (expectedFile in expectedFiles) {
-            val actualFile = File(fixtureDir, expectedFile.relativeTo(expectedDir).toString())
-            assertThat(actualFile, anExistingFile())
-            assertThat(actualFile, hasSameContentAs(expectedFile))
-        }
     }
 
     companion object {
