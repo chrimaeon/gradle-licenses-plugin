@@ -1,0 +1,2 @@
+Library(mavenCoordinates=group:bar:1.0.0, name=Bar, description=Fake dependency description, licenses=[License(id=APACHE, name=Apache-2.0, url=http://www.apache.org/licenses/LICENSE-2.0.txt)])
+Library(mavenCoordinates=group:name:1.0.0, name=Fake dependency name, description=Fake dependency description, licenses=[License(id=UNKNOWN, name=Some license, url=http://website.tld/)])

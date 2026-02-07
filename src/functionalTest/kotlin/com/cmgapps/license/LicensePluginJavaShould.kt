@@ -6,13 +6,18 @@
 
 package com.cmgapps.license
 
-import com.cmgapps.license.util.getFileContent
+import com.cmgapps.license.util.createBuildRunner
+import com.cmgapps.license.util.fixturesDir
+import com.cmgapps.license.util.hasSameContentAs
 import com.cmgapps.license.util.plus
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.empty
 import org.hamcrest.Matchers.`is`
-import org.hamcrest.Matchers.matchesPattern
+import org.hamcrest.Matchers.not
+import org.hamcrest.io.FileMatchers.anExistingDirectory
+import org.hamcrest.io.FileMatchers.anExistingFile
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -23,7 +28,6 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.regex.Pattern
 
 class LicensePluginJavaShould {
     @TempDir
@@ -69,462 +73,60 @@ class LicensePluginJavaShould {
     )
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
         val result =
-            gradleRunner
-                .apply {
-                    if (version != LATEST_VERSION) {
-                        withGradleVersion(version)
-                    }
-                }.build()
+            createBuildRunner(
+                File(fixturesDir, "apply-license"),
+            ).apply {
+                if (version != LATEST_VERSION) {
+                    withGradleVersion(version)
+                }
+            }.build()
 
-        assertThat("Gradle version $version", result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
+        assertThat(
+            "Gradle version $version",
+            result.task(":licenseReport")?.outcome,
+            `is`(TaskOutcome.SUCCESS),
+        )
     }
 
     @Test
     fun `generate report with no dependencies`() {
-        val result = gradleRunner.build()
+        val result = createBuildRunner(File(fixturesDir, "apply-license-no-dependency")).build()
 
         assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
     }
 
-    @Test
-    fun `generate report with no open source dependencies`() {
-        buildFile +
-            // language=gradle
-            """
-            licenses {
-                reports {
-                    html.enabled.set(true)
-                }
-            }
-            dependencies {
-              implementation 'com.google.firebase:firebase-core:10.0.1'
-            }
-            """.trimIndent()
+    @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} {0}")
+    @ValueSource(
+        strings = [
+            "java-library-no-open-source-dependency",
+            "java-library-parent-pom-dependency",
+            "java-library-custom-license",
+            "java-library-no-name-license",
+            "java-library-html-no-dark-mode",
+            "java-library-text-report",
+            "java-library-custom-css-style",
+            "java-library-custom-report",
+            "java-library-handle-complete-dsl",
+        ],
+    )
+    fun `generate report for`(fixture: String) {
+        val fixtureDir = File(fixturesDir, fixture)
+        createBuildRunner(fixtureDir).build()
 
-        val result = gradleRunner.build()
-
-        assertThat(
-            result.output,
-            matchesPattern(
-                Pattern.compile(
-                    ".*licenses.html report saved to .*$reportFolder/licenses.html.*",
-                    Pattern.DOTALL,
-                ),
-            ),
-        )
-        assertThat(
-            File("$reportFolder/licenses.html").readText().trim(),
-            `is`(
-                // language=html
-                "<!DOCTYPE html>" +
-                    "<html lang=\"en\">" +
-                    "<head>" +
-                    "<meta charset=\"UTF-8\">" +
-                    "<meta name=\"color-scheme\" content=\"dark light\">" +
-                    "<style>" +
-                    "body{font-family:sans-serif;background-color:#eee}" +
-                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
-                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
-                    "</style>" +
-                    "<title>Open source licenses</title>" +
-                    "</head>" +
-                    "<body>" +
-                    "<h3>Notice for packages:</h3>" +
-                    "</body>" +
-                    "</html>",
-            ),
-        )
+        assertExpectedFiles(fixtureDir)
     }
 
-    @Test
-    fun `java library with parent pom dependency`() {
-        buildFile +
-            // language=gradle
-            """
-            licenses {
-                reports {
-                    html.enabled.set(true)
-                }
-            }
-            
-            dependencies {
-              implementation 'com.squareup.retrofit2:retrofit:2.3.0'
-            }
-            """.trimIndent()
-        val result = gradleRunner.build()
+    private fun assertExpectedFiles(fixtureDir: File) {
+        val expectedDir = File(fixtureDir, "expected")
+        assertThat(expectedDir, anExistingDirectory())
 
-        assertThat(
-            result.output,
-            matchesPattern(
-                Pattern.compile(
-                    ".*licenses.html report saved to .*$reportFolder/licenses.html.*",
-                    Pattern.DOTALL,
-                ),
-            ),
-        )
-        assertThat(
-            File("$reportFolder/licenses.html").readText().trim(),
-            `is`(
-                // language=html
-                "<!DOCTYPE html>" +
-                    "<html lang=\"en\">" +
-                    "<head>" +
-                    "<meta charset=\"UTF-8\">" +
-                    "<meta name=\"color-scheme\" content=\"dark light\">" +
-                    "<style>" +
-                    "body{font-family:sans-serif;background-color:#eee}" +
-                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
-                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
-                    "</style>" +
-                    "<title>Open source licenses</title>" +
-                    "</head>" +
-                    "<body>" +
-                    "<h3>Notice for packages:</h3>" +
-                    "<ul>" +
-                    "<li>Retrofit</li>" +
-                    "</ul>" +
-                    "<pre>" +
-                    getFileContent("apache-2.0.txt") +
-                    "</pre>" +
-                    "</body>" +
-                    "</html>",
-            ),
-        )
-    }
-
-    @Test
-    fun `generate Report with custom license`() {
-        buildFile +
-            // language=gradle
-            """
-            licenses {
-                reports {
-                    html.enabled.set(true)
-                }
-            }
-            
-            dependencies {
-              implementation 'group:name:1.0.0'
-            }
-            """.trimIndent()
-
-        val result = gradleRunner.build()
-
-        assertThat(
-            result.output,
-            matchesPattern(
-                Pattern.compile(
-                    ".*licenses.html report saved to .*$reportFolder/licenses.html.*",
-                    Pattern.DOTALL,
-                ),
-            ),
-        )
-        assertThat(
-            File("$reportFolder/licenses.html").readText().trim(),
-            `is`(
-                // language=html
-                "<!DOCTYPE html>" +
-                    "<html lang=\"en\">" +
-                    "<head>" +
-                    "<meta charset=\"UTF-8\">" +
-                    "<meta name=\"color-scheme\" content=\"dark light\">" +
-                    "<style>" +
-                    "body{font-family:sans-serif;background-color:#eee}" +
-                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
-                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
-                    "</style>" +
-                    "<title>Open source licenses</title>" +
-                    "</head>" +
-                    "<body>" +
-                    "<h3>Notice for packages:</h3>" +
-                    "<ul>" +
-                    "<li>Fake dependency name</li>" +
-                    "</ul>" +
-                    "<div class=\"license\">" +
-                    "<p>Some license</p>" +
-                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
-                    "</div>" +
-                    "</body>" +
-                    "</html>",
-            ),
-        )
-    }
-
-    @Test
-    fun `generate Report with lib with no name`() {
-        buildFile +
-            // language=gradle
-            """
-            licenses {
-                reports {
-                    html.enabled.set(true)
-                }
-            }
-            
-            dependencies {
-              implementation 'group:noname:1.0.0'
-            }
-            """.trimIndent()
-
-        val result = gradleRunner.build()
-
-        assertThat(
-            result.output,
-            matchesPattern(
-                Pattern.compile(
-                    ".*licenses.html report saved to .*$reportFolder/licenses.html.*",
-                    Pattern.DOTALL,
-                ),
-            ),
-        )
-        assertThat(
-            File("$reportFolder/licenses.html").readText().trim(),
-            `is`(
-                // language=html
-                "<!DOCTYPE html>" +
-                    "<html lang=\"en\">" +
-                    "<head>" +
-                    "<meta charset=\"UTF-8\">" +
-                    "<meta name=\"color-scheme\" content=\"dark light\">" +
-                    "<style>" +
-                    "body{font-family:sans-serif;background-color:#eee}" +
-                    "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}" +
-                    "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}" +
-                    "</style>" +
-                    "<title>Open source licenses</title>" +
-                    "</head>" +
-                    "<body>" +
-                    "<h3>Notice for packages:</h3>" +
-                    "<ul>" +
-                    "<li>group:noname</li>" +
-                    "</ul>" +
-                    "<div class=\"license\">" +
-                    "<p>Some license</p>" +
-                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
-                    "</div>" +
-                    "</body>" +
-                    "</html>",
-            ),
-        )
-    }
-
-    @Test
-    fun `generate Html report with no dark theme`() {
-        buildFile +
-            // language=gradle
-            """
-            licenses {
-                reports {
-                    html.enabled.set(true)
-                    html.useDarkMode.set(false)
-                }
-            }
-            
-            dependencies {
-              implementation 'group:noname:1.0.0'
-            }
-            """.trimIndent()
-
-        val result = gradleRunner.build()
-
-        assertThat(
-            result.output,
-            matchesPattern(
-                Pattern.compile(
-                    ".*licenses.html report saved to .*$reportFolder/licenses.html.*",
-                    Pattern.DOTALL,
-                ),
-            ),
-        )
-        assertThat(
-            File("$reportFolder/licenses.html").readText().trim(),
-            `is`(
-                // language=html
-                "<!DOCTYPE html>" +
-                    "<html lang=\"en\">" +
-                    "<head>" +
-                    "<meta charset=\"UTF-8\">" +
-                    "<style>body{font-family:sans-serif;background-color:#eee}" +
-                    "pre,.license{background-color:#ddd;padding:1em}" +
-                    "pre{white-space:pre-wrap}" +
-                    "</style>" +
-                    "<title>Open source licenses</title>" +
-                    "</head>" +
-                    "<body>" +
-                    "<h3>Notice for packages:</h3>" +
-                    "<ul>" +
-                    "<li>group:noname</li>" +
-                    "</ul>" +
-                    "<div class=\"license\">" +
-                    "<p>Some license</p>" +
-                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
-                    "</div>" +
-                    "</body>" +
-                    "</html>",
-            ),
-        )
-    }
-
-    @Test
-    fun `generate TXT Report`() {
-        buildFile +
-            // language=gradle
-            """
-            licenses {
-                reports {
-                    plainText.enabled.set(true)
-                }
-            }
-
-            dependencies {
-              implementation 'group:noname:1.0.0'
-            }
-            """.trimIndent()
-
-        val result = gradleRunner.build()
-
-        assertThat(
-            result.output,
-            matchesPattern(
-                Pattern.compile(
-                    ".*licenses.txt report saved to .*$reportFolder/licenses.txt.*",
-                    Pattern.DOTALL,
-                ),
-            ),
-        )
-        assertThat(
-            File("$reportFolder/licenses.txt").readText().trim(),
-            `is`(
-                "Licenses\n" +
-                    "└─ group:noname:1.0.0\n" +
-                    "   ├─ License: Some license\n" +
-                    "   └─ URL: http://website.tld/",
-            ),
-        )
-    }
-
-    @Test
-    fun `generate Report with different html styles`() {
-        buildFile +
-            //language=gradle
-            """
-            licenses {
-                reports {
-                    html.enabled.set(true)
-                    html.stylesheet("body{}")
-                    html.useDarkMode.set(false)
-                }
-            }
-
-            dependencies {
-              implementation 'group:name:1.0.0'
-            }
-            """.trimIndent()
-
-        val result = gradleRunner.build()
-
-        assertThat(
-            result.output,
-            matchesPattern(
-                Pattern.compile(
-                    ".*licenses.html report saved to .*$reportFolder/licenses.html.*",
-                    Pattern.DOTALL,
-                ),
-            ),
-        )
-        assertThat(
-            File("$reportFolder/licenses.html").readText().trim(),
-            `is`(
-                // language=html
-                "<!DOCTYPE html>" +
-                    "<html lang=\"en\">" +
-                    "<head>" +
-                    "<meta charset=\"UTF-8\">" +
-                    "<style>body{}</style>" +
-                    "<title>Open source licenses</title>" +
-                    "</head>" +
-                    "<body>" +
-                    "<h3>Notice for packages:</h3>" +
-                    "<ul><li>Fake dependency name</li></ul>" +
-                    "<div class=\"license\">" +
-                    "<p>Some license</p>" +
-                    "<a href=\"http://website.tld/\">http://website.tld/</a>" +
-                    "</div>" +
-                    "</body>" +
-                    "</html>",
-            ),
-        )
-    }
-
-    @Test
-    fun `generate custom report`() {
-        buildFile +
-            // language=gradle
-            """
-            licenses {
-                reports {
-                    custom.enabled.set(true)
-                    com.cmgapps.license.reporter.CustomReportGenerator builder = { list -> list.collect { it.name }.join(', ') }
-                    custom.generator.set(builder)
-                }
-            }
-
-            dependencies {
-              implementation 'group:name:1.0.0'
-            }
-            """.trimIndent()
-
-        val result = gradleRunner.withDebug(true).build()
-
-        assertThat(
-            result.output,
-            matchesPattern(Pattern.compile(".*licenses report saved to .*$reportFolder/licenses.*", Pattern.DOTALL)),
-        )
-        assertThat(File("$reportFolder/licenses").readText().trim(), `is`("Fake dependency name"))
-    }
-
-    @Test
-    fun `handle DSL`() {
-        buildFile +
-            // language=gradle
-            """
-            licenses {
-                reports {
-                    csv {
-                        enabled.set(true)
-                    }
-                    custom {
-                        enabled.set(true)
-                        com.cmgapps.license.reporter.CustomReportGenerator builder = { "" }
-                        generator.set(builder)
-                    }
-                    html {
-                        enabled.set(true)
-                        stylesheet("body {background: #FAFAFA}")
-                    }
-                    json {
-                        enabled.set(true)
-                    }
-                    markdown {
-                        enabled.set(true)
-                    }
-                    plainText {
-                        enabled.set(true)
-                    }
-                    xml {
-                        enabled.set(true)
-                    }
-                }
-            }
-
-            dependencies {
-              implementation 'group:name:1.0.0'
-            }
-            """.trimIndent()
-
-        val result = gradleRunner.withDebug(true).build()
-
-        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
+        val expectedFiles = expectedDir.walk().filter { it.isFile }.toList()
+        assertThat("$expectedDir is emtpy", expectedFiles, not(empty()))
+        for (expectedFile in expectedFiles) {
+            val actualFile = File(fixtureDir, expectedFile.relativeTo(expectedDir).toString())
+            assertThat(actualFile, anExistingFile())
+            assertThat(actualFile, hasSameContentAs(expectedFile))
+        }
     }
 }
 

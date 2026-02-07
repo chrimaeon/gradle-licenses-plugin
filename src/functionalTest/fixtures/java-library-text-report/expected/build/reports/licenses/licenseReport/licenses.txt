@@ -1,0 +1,4 @@
+Licenses
+└─ Fake dependency name:1.0.0
+   ├─ License: Some license
+   └─ URL: http://website.tld/

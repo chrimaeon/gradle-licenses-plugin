@@ -9,6 +9,7 @@
 package com.cmgapps.license
 
 import com.cmgapps.license.util.cartesianProduct
+import com.cmgapps.license.util.createBuildRunner
 import com.cmgapps.license.util.fixturesDir
 import com.cmgapps.license.util.hasSameContentAs
 import org.gradle.testkit.runner.GradleRunner
@@ -58,20 +59,6 @@ class LicensePluginAndroidShould {
 
         assertExpectedFiles(fixture, taskName)
     }
-
-    private fun createBuildRunner(
-        fixtureDir: File,
-        vararg tasks: String,
-    ): GradleRunner =
-        GradleRunner
-            .create()
-            .withDebug(true)
-            .withArguments(
-                *tasks,
-                "--stacktrace",
-                "--continue",
-            ).withProjectDir(fixtureDir)
-            .forwardOutput()
 
     private fun assertExpectedFiles(
         fixtureDir: File,

@@ -16,6 +16,7 @@
 
 package com.cmgapps.license.util
 
+import org.gradle.testkit.runner.GradleRunner
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeDiagnosingMatcher
@@ -120,3 +121,17 @@ fun <S, T> List<S>.cartesianProduct(other: List<T>): Stream<Arguments> =
                 arguments(s1, s2)
             }
         }.stream()
+
+fun createBuildRunner(
+    fixtureDir: File,
+    vararg tasks: String = arrayOf("clean", "licenseReport"),
+): GradleRunner =
+    GradleRunner
+        .create()
+        .withDebug(true)
+        .withArguments(
+            *tasks,
+            "--stacktrace",
+            "--continue",
+        ).withProjectDir(fixtureDir)
+        .forwardOutput()

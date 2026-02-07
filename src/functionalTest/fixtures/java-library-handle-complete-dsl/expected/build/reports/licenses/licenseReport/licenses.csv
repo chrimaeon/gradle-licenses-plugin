@@ -1,0 +1,2 @@
+Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url
+Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/
