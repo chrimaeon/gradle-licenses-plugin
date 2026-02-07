@@ -12,11 +12,11 @@ import com.cmgapps.license.util.cartesianProduct
 import com.cmgapps.license.util.fixturesDir
 import com.cmgapps.license.util.hasSameContentAs
 import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.empty
-import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.not
+import org.hamcrest.io.FileMatchers.anExistingDirectory
+import org.hamcrest.io.FileMatchers.anExistingFile
 import org.junit.jupiter.params.ParameterizedInvocationConstants
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -26,7 +26,7 @@ import java.io.File
 import java.util.stream.Stream
 
 class LicensePluginAndroidShould {
-    @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} {1} and :{0}")
+    @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} {1} and {0}")
     @MethodSource("taskNamesAndFixtures")
     fun `generate licenses report for `(
         taskName: String,
@@ -34,13 +34,12 @@ class LicensePluginAndroidShould {
     ) {
         val fixtureDir = File(fixturesDir, fixture)
 
-        val result = createBuildRunner(fixtureDir).withArguments(":$taskName").build()
+        createBuildRunner(fixtureDir, "clean", taskName).build()
 
-        assertThat(result.task(":$taskName")?.outcome, `is`(TaskOutcome.SUCCESS))
-        assertExpectedFiles(fixtureDir)
+        assertExpectedFiles(fixtureDir, taskName)
     }
 
-    @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} - taskName = {0}")
+    @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} {0}")
     @ValueSource(
         strings = [
             "licenseDemoGoogleDebugReport",
@@ -53,36 +52,39 @@ class LicensePluginAndroidShould {
             "licenseFullAmazonReleaseReport",
         ],
     )
-    fun `generate licenses for flavors into csv`(taskName: String) {
+    fun `generate licenses into csv for for flavor`(taskName: String) {
         val fixture = File(fixturesDir, "android-gradle-plugin-flavors-into-csv")
-        val result =
-            createBuildRunner(fixture)
-                .withArguments(":$taskName", "--stacktrace")
-                .build()
+        createBuildRunner(fixture, taskName).build()
 
-        assertThat(result.task(":$taskName")?.outcome, `is`(TaskOutcome.SUCCESS))
-        assertExpectedFiles(fixture)
+        assertExpectedFiles(fixture, taskName)
     }
 
-    private fun createBuildRunner(fixtureDir: File): GradleRunner =
+    private fun createBuildRunner(
+        fixtureDir: File,
+        vararg tasks: String,
+    ): GradleRunner =
         GradleRunner
             .create()
             .withDebug(true)
-            .withProjectDir(fixtureDir)
+            .withArguments(
+                *tasks,
+                "--stacktrace",
+                "--continue",
+            ).withProjectDir(fixtureDir)
+            .forwardOutput()
 
-    private fun assertExpectedFiles(fixtureDir: File) {
-        val expectedDir = File(fixtureDir, "expected")
-        if (!expectedDir.exists()) {
-            throw AssertionError("Missing expected/ directory")
-        }
+    private fun assertExpectedFiles(
+        fixtureDir: File,
+        taskName: String,
+    ) {
+        val expectedDir = File(fixtureDir, "expected/$taskName")
+        assertThat(expectedDir, anExistingDirectory())
 
         val expectedFiles = expectedDir.walk().filter { it.isFile }.toList()
         assertThat(expectedFiles, not(empty()))
         for (expectedFile in expectedFiles) {
             val actualFile = File(fixtureDir, expectedFile.relativeTo(expectedDir).toString())
-            if (!actualFile.exists()) {
-                throw AssertionError("Expected $actualFile but does not exist")
-            }
+            assertThat(actualFile, anExistingFile())
             assertThat(actualFile, hasSameContentAs(expectedFile))
         }
     }
