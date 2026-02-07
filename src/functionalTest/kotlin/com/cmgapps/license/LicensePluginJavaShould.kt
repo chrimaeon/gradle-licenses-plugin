@@ -9,14 +9,9 @@ package com.cmgapps.license
 import com.cmgapps.license.util.assertExpectedFiles
 import com.cmgapps.license.util.createBuildRunner
 import com.cmgapps.license.util.fixturesDir
-import com.cmgapps.license.util.hasSameContentAs
 import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.empty
 import org.hamcrest.Matchers.`is`
-import org.hamcrest.Matchers.not
-import org.hamcrest.io.FileMatchers.anExistingDirectory
-import org.hamcrest.io.FileMatchers.anExistingFile
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedInvocationConstants
 import org.junit.jupiter.params.ParameterizedTest

@@ -32,15 +32,50 @@ import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.util.stream.Stream
 
-fun Any.getFileContent(fileName: String) =
-    javaClass.getResource("/licenses/$fileName")?.readText()
-        ?: error("""resource file "/licenses/$fileName" not found! """)
-
 operator fun File.plus(text: String) = appendText(text)
 
-infix fun File.write(text: String) = writeText(text)
+val fixturesDir = File("src/functionalTest/fixtures")
 
-fun hasSameContentAs(
+fun <S, T> List<S>.cartesianProduct(other: List<T>): Stream<Arguments> =
+    this
+        .flatMap { s1 ->
+            other.map { s2 ->
+                arguments(s1, s2)
+            }
+        }.stream()
+
+fun createBuildRunner(
+    fixtureDir: File,
+    vararg tasks: String = arrayOf("clean", "licenseReport"),
+): GradleRunner =
+    GradleRunner
+        .create()
+        .withDebug(true)
+        .withArguments(
+            *tasks,
+            "--info",
+            "--stacktrace",
+            "--continue",
+        ).withProjectDir(fixtureDir)
+        .forwardOutput()
+
+fun assertExpectedFiles(
+    fixtureDir: File,
+    taskName: String = "",
+) {
+    val expectedDir = File(fixtureDir, "expected/$taskName")
+    assertThat(expectedDir, anExistingDirectory())
+
+    val expectedFiles = expectedDir.walk().filter { it.isFile }.toList()
+    assertThat("$expectedDir is emtpy", expectedFiles, not(empty()))
+    for (expectedFile in expectedFiles) {
+        val actualFile = File(fixtureDir, expectedFile.relativeTo(expectedDir).toString())
+        assertThat(actualFile, anExistingFile())
+        assertThat(actualFile, hasSameContentAs(expectedFile))
+    }
+}
+
+private fun hasSameContentAs(
     expected: File,
     charset: Charset = StandardCharsets.UTF_8,
     normalizeLineEndings: Boolean = true,
@@ -116,44 +151,3 @@ fun hasSameContentAs(
             return min
         }
     }
-
-val fixturesDir = File("src/functionalTest/fixtures")
-
-fun <S, T> List<S>.cartesianProduct(other: List<T>): Stream<Arguments> =
-    this
-        .flatMap { s1 ->
-            other.map { s2 ->
-                arguments(s1, s2)
-            }
-        }.stream()
-
-fun createBuildRunner(
-    fixtureDir: File,
-    vararg tasks: String = arrayOf("clean", "licenseReport"),
-): GradleRunner =
-    GradleRunner
-        .create()
-        .withDebug(true)
-        .withArguments(
-            *tasks,
-            "--info",
-            "--stacktrace",
-            "--continue",
-        ).withProjectDir(fixtureDir)
-        .forwardOutput()
-
-fun assertExpectedFiles(
-    fixtureDir: File,
-    taskName: String = "",
-) {
-    val expectedDir = File(fixtureDir, "expected/$taskName")
-    assertThat(expectedDir, anExistingDirectory())
-
-    val expectedFiles = expectedDir.walk().filter { it.isFile }.toList()
-    assertThat("$expectedDir is emtpy", expectedFiles, not(empty()))
-    for (expectedFile in expectedFiles) {
-        val actualFile = File(fixtureDir, expectedFile.relativeTo(expectedDir).toString())
-        assertThat(actualFile, anExistingFile())
-        assertThat(actualFile, hasSameContentAs(expectedFile))
-    }
-}
