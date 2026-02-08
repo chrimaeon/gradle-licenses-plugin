@@ -153,7 +153,7 @@ kover {
 }
 
 buildConfig {
-    sourceSets.getByName("functionalTest") {
+    sourceSets.named("functionalTest") {
         useKotlinOutput {
             packageName = "com.cmgapps.license"
             topLevelConstants = true
@@ -248,4 +248,5 @@ dependencies {
     testImplementation(libs.hamcrest)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.android.gradlePlugin)
+    "functionalTestImplementation"(libs.networknt.jsonschemavalidator)
 }

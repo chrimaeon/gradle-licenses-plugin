@@ -28,3 +28,5 @@ ktlint-cli = "com.pinterest.ktlint:ktlint-cli:1.8.0"
 mockito-kotlin = "org.mockito.kotlin:mockito-kotlin:6.2.3"
 xmlunit-core = { module = "org.xmlunit:xmlunit-core", version.ref = "xmlunit" }
 xmlunit-matchers = { module = "org.xmlunit:xmlunit-matchers", version.ref = "xmlunit" }
+
+networknt-jsonschemavalidator = "com.networknt:json-schema-validator:3.0.0"
