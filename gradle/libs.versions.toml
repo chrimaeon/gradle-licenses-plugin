@@ -16,7 +16,7 @@ jetbrains-changelog = "org.jetbrains.changelog:2.5.0"
 buildconfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.7" }
 
 [libraries]
-android-gradlePlugin = "com.android.tools.build:gradle:8.13.0"
+android-gradlePlugin = "com.android.tools.build:gradle:9.0.0"
 kotlin-multiplatformPlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0"
 apache-commonsCsv = "org.apache.commons:commons-csv:1.14.1"
