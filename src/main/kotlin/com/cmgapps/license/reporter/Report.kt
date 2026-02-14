@@ -20,10 +20,8 @@ import com.cmgapps.license.model.Library
 import groovy.lang.Closure
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.provider.Provider
 import org.gradle.api.reporting.Report
 import org.gradle.api.reporting.SingleFileReport
-import java.io.File
 import java.io.OutputStream
 
 interface LicenseReport {

@@ -6,8 +6,10 @@
 
 package com.cmgapps.gradle.ktlint
 
+import groovy.lang.Closure
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.attributes.Bundling
 import org.gradle.api.tasks.JavaExec
@@ -67,16 +69,13 @@ class KtlintPlugin : Plugin<Project> {
             val libs = extensions.getByType(VersionCatalogsExtension::class.java).named("libs")
 
             val closure =
-                object : groovy.lang.Closure<Unit>(this) {
-                    fun doCall() {
-                        // delegate will be the Dependency instance when Gradle invokes the closure
-                        (delegate as? org.gradle.api.artifacts.ModuleDependency)?.apply {
-                            attributes {
-                                it.attribute(
-                                    Bundling.BUNDLING_ATTRIBUTE,
-                                    objects.named(Bundling::class.java, Bundling.EXTERNAL),
-                                )
-                            }
+                object : Closure<Unit>(this) {
+                    fun doCall(dependency: ModuleDependency) {
+                        dependency.attributes {
+                            it.attribute(
+                                Bundling.BUNDLING_ATTRIBUTE,
+                                objects.named(Bundling::class.java, Bundling.EXTERNAL),
+                            )
                         }
                     }
                 }
