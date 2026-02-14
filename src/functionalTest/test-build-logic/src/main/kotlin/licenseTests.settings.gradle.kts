@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import kotlin.io.path.Path
+
 pluginManagement {
     includeBuild(rootDir.parentFile.parentFile.parentFile.parentFile)
     repositories {
@@ -15,7 +17,7 @@ pluginManagement {
 dependencyResolutionManagement {
     repositories {
         maven {
-            url = uri("$rootDir/../../resources/maven/")
+            url = Path(rootDir.parentFile.parent, "maven-repo").toUri()
         }
     }
 }

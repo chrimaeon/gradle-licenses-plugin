@@ -8,10 +8,14 @@ package com.cmgapps.license
 
 import com.cmgapps.license.util.createBuildRunner
 import com.cmgapps.license.util.fixturesDir
+import com.networknt.schema.Error
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaRegistry
+import com.networknt.schema.utils.JsonNodes
+import org.hamcrest.Description
+import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.empty
+import org.hamcrest.TypeSafeDiagnosingMatcher
 import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.io.path.Path
@@ -24,8 +28,10 @@ class JsonSchemaValidationShould {
 
         val schema =
             SchemaRegistry
-                // setting null uses the "$schema" from JSON and throws if absent
-                .withDefaultDialectId(null, null)
+                .builder()
+                .nodeReader { nodeReader ->
+                    nodeReader.locationAware()
+                }.build()
                 .getSchema(
                     Path(
                         fixturesDir.parentFile.parent,
@@ -45,6 +51,39 @@ class JsonSchemaValidationShould {
                 }
             }
 
-        assertThat(result, empty())
+        assertThat(result, hasNoJsonSchemaValidationErrors())
     }
 }
+
+private fun hasNoJsonSchemaValidationErrors(): Matcher<List<Error>> =
+    object : TypeSafeDiagnosingMatcher<List<Error>>() {
+        override fun matchesSafely(
+            item: List<Error>,
+            mismatchDescription: Description,
+        ): Boolean {
+            if (item.isEmpty()) {
+                return true
+            }
+
+            item.forEachIndexed { index, error ->
+                val instanceLocation =
+                    JsonNodes.tokenStreamLocationOf(error.instanceNode)
+
+                mismatchDescription
+                    .appendText(error.message)
+                    .appendText(" on line ")
+                    .appendValue(instanceLocation.lineNr)
+                    .appendText(" column ")
+                    .appendValue(instanceLocation.columnNr)
+                if (index != item.lastIndex) {
+                    mismatchDescription.appendText(" and \n")
+                }
+            }
+
+            return false
+        }
+
+        override fun describeTo(description: Description) {
+            description.appendText("no JSON Schema validation errors")
+        }
+    }

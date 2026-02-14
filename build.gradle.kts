@@ -30,15 +30,15 @@ plugins {
     alias(libs.plugins.buildconfig)
 }
 
+private val jvmTargetVersion = JvmTarget.JVM_17
+
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(jvmTargetVersion.target.toInt())
 }
 
 val pomProperties =
     Properties().apply {
-        rootDir.resolve("pom.properties").inputStream().use {
-            load(it)
-        }
+        rootDir.resolve("pom.properties").inputStream().use(::load)
     }
 
 val group: String by pomProperties
@@ -47,7 +47,7 @@ val pomName: String by pomProperties
 val projectUrl: String by pomProperties
 
 project.group = group
-version = versionName
+project.version = versionName
 
 val minimumGradleVersion = "9.0"
 configurations.apiElements {
@@ -60,15 +60,15 @@ configurations.apiElements {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    sourceCompatibility = "17"
-    targetCompatibility = "17"
+    sourceCompatibility = jvmTargetVersion.target
+    targetCompatibility = jvmTargetVersion.target
 }
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
         apiVersion = KotlinVersion.KOTLIN_2_2
         languageVersion = KotlinVersion.KOTLIN_2_2
-        jvmTarget = JvmTarget.JVM_17
+        jvmTarget = jvmTargetVersion
         jvmDefault = JvmDefaultMode.NO_COMPATIBILITY
     }
 }
@@ -85,18 +85,16 @@ testing {
                 implementation(libs.jUnit) {
                     exclude(group = "org.hamcrest")
                 }
-                implementation(libs.kotlin.multiplatformPlugin)
                 implementation(libs.hamcrest)
                 implementation(gradleTestKit())
                 implementation(libs.xmlunit.core)
                 implementation(libs.xmlunit.matchers)
+                implementation(libs.networknt.jsonschemavalidator)
             }
 
-            targets {
-                all {
-                    testTask.configure {
-                        shouldRunAfter(test)
-                    }
+            targets.configureEach {
+                testTask.configure {
+                    shouldRunAfter(test)
                 }
             }
         }
@@ -234,8 +232,8 @@ tasks {
 
 @Suppress("UnstableApiUsage")
 dependencies {
-    compileOnly(libs.android.gradlePlugin)
-    compileOnly(libs.kotlin.multiplatformPlugin)
+    compileOnly(libs.android.gradle.plugin)
+    compileOnly(libs.kotlin.multiplatform.plugin)
 
     implementation(libs.maven.model)
     implementation(libs.maven.artifact)
@@ -247,6 +245,4 @@ dependencies {
     }
     testImplementation(libs.hamcrest)
     testImplementation(libs.mockito.kotlin)
-    testImplementation(libs.android.gradlePlugin)
-    "functionalTestImplementation"(libs.networknt.jsonschemavalidator)
 }
