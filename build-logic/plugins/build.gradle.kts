@@ -5,7 +5,17 @@
  */
 
 plugins {
-    `kotlin-dsl`
+    kotlin("jvm") version embeddedKotlinVersion
+    id("java-gradle-plugin")
 }
 
 group = "com.cmgapps.gradle.plugins"
+
+gradlePlugin {
+    plugins {
+        register("ktlintPlugin") {
+            id = "ktlint"
+            implementationClass = "com.cmgapps.gradle.ktlint.KtlintPlugin"
+        }
+    }
+}

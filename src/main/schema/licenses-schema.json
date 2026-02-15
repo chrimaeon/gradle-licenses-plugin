@@ -1,0 +1,85 @@
+{
+  "$id": "https://www.cmgapps.com/schema/licenses-schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Licenses",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "mavenCoordinates": {
+        "type": "object",
+        "$ref": "#/$defs/MavenCoordinates"
+      },
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "description": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "licenses": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "$ref": "#/$defs/License"
+        }
+      },
+      "additionalProperties": false
+    },
+    "required": [
+      "mavenCoordinates",
+      "name",
+      "description",
+      "licenses"
+    ],
+    "additionalProperties": false
+  },
+  "$defs": {
+    "MavenCoordinates": {
+      "properties": {
+        "groupId": {
+          "type": "string"
+        },
+        "artifactId": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "groupId",
+        "artifactId",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "License": {
+      "properties": {
+        "spdxLicenseIdentifier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spdxLicenseIdentifier",
+        "name",
+        "url"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

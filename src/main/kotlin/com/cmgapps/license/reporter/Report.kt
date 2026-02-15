@@ -20,10 +20,8 @@ import com.cmgapps.license.model.Library
 import groovy.lang.Closure
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.provider.Provider
 import org.gradle.api.reporting.Report
 import org.gradle.api.reporting.SingleFileReport
-import java.io.File
 import java.io.OutputStream
 
 interface LicenseReport {
@@ -47,47 +45,7 @@ abstract class LicensesSingleFileReport(
 
     override fun getDisplayName(): String = "License Report for ${type.name}"
 
-    @Override
-    @Deprecated("Deprecated in Java", replaceWith = ReplaceWith("getOutputLocation().set"))
-    override fun setDestination(file: File) {
-        outputLocation.fileValue(file)
-    }
-
     override fun getOutputType(): Report.OutputType = Report.OutputType.FILE
-
-    /**
-     * Needed for 7.x
-     */
-    @Override
-    fun setDestination(provider: Provider<File>) {
-        outputLocation.fileProvider(provider)
-    }
-
-    /**
-     * Needed for 7.x
-     */
-    @Override
-    fun getDestination(): File = outputLocation.get().asFile
-
-    /**
-     * Needed for 7.x
-     */
-    @Override
-    fun isEnabled(): Boolean = required.get()
-
-    /**
-     * Needed for 7.x
-     */
-    @Override
-    fun setEnabled(enabled: Boolean) {
-        required.set(enabled)
-    }
-
-    /**
-     * Needed for 7.x
-     */
-    @Override
-    fun setEnabled(enabled: Provider<Boolean>) = required.set(enabled)
 
     override fun configure(cl: Closure<*>): Report {
         cl.call(this)

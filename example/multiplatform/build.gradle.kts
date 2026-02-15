@@ -15,7 +15,7 @@
  */
 
 plugins {
-    kotlin("multiplatform") version "2.0.21"
+    kotlin("multiplatform") version "2.3.10"
     id("com.cmgapps.licenses") version "1.0.0"
 }
 
@@ -30,7 +30,6 @@ kotlin {
     }
 
     iosArm64()
-    iosX64()
 
     sourceSets {
         named("commonMain") {
@@ -42,12 +41,6 @@ kotlin {
         named("jvmMain") {
             dependencies {
                 implementation("org.apache.commons:commons-csv:1.9.0")
-            }
-        }
-
-        named("iosX64Main") {
-            dependencies {
-                implementation("com.squareup.retrofit2:retrofit:2.3.0")
             }
         }
     }

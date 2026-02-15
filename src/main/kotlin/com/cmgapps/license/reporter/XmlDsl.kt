@@ -16,7 +16,7 @@
 
 package com.cmgapps.license.reporter
 
-internal interface Element {
+internal fun interface Element {
     fun render(
         builder: StringBuilder,
         intent: String,

@@ -10,6 +10,10 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.github.benmanes.gradle.versions.updates.gradle.GradleReleaseChannel
 import kotlinx.kover.gradle.plugin.dsl.AggregationType
 import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
 import java.util.Properties
 
@@ -21,19 +25,20 @@ plugins {
     alias(libs.plugins.gradle.pluginPublish)
     alias(libs.plugins.jetbrains.changelog)
     alias(libs.plugins.kotlinx.kover)
-    id("com.cmgapps.gradle.test-logger")
-    id("com.cmgapps.gradle.ktlint")
+    id("testlogger")
+    id("ktlint")
+    alias(libs.plugins.buildconfig)
 }
 
+private val jvmTargetVersion = JvmTarget.JVM_17
+
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(jvmTargetVersion.target.toInt())
 }
 
 val pomProperties =
     Properties().apply {
-        rootDir.resolve("pom.properties").inputStream().use {
-            load(it)
-        }
+        rootDir.resolve("pom.properties").inputStream().use(::load)
     }
 
 val group: String by pomProperties
@@ -42,7 +47,31 @@ val pomName: String by pomProperties
 val projectUrl: String by pomProperties
 
 project.group = group
-version = versionName
+project.version = versionName
+
+val minimumGradleVersion = "9.0"
+configurations.apiElements {
+    attributes {
+        attribute(
+            GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE,
+            objects.named(GradlePluginApiVersion::class.java, minimumGradleVersion),
+        )
+    }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    sourceCompatibility = jvmTargetVersion.target
+    targetCompatibility = jvmTargetVersion.target
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        apiVersion = KotlinVersion.KOTLIN_2_2
+        languageVersion = KotlinVersion.KOTLIN_2_2
+        jvmTarget = jvmTargetVersion
+        jvmDefault = JvmDefaultMode.NO_COMPATIBILITY
+    }
+}
 
 testing {
     suites {
@@ -56,25 +85,22 @@ testing {
                 implementation(libs.jUnit) {
                     exclude(group = "org.hamcrest")
                 }
-                implementation(libs.kotlin.multiplatformPlugin)
                 implementation(libs.hamcrest)
                 implementation(gradleTestKit())
                 implementation(libs.xmlunit.core)
                 implementation(libs.xmlunit.matchers)
+                implementation(libs.networknt.jsonschemavalidator)
             }
 
-            targets {
-                all {
-                    testTask.configure {
-                        shouldRunAfter(test)
-                    }
+            targets.configureEach {
+                testTask.configure {
+                    shouldRunAfter(test)
                 }
             }
         }
     }
 }
 
-@Suppress("UnstableApiUsage")
 gradlePlugin {
     val scmUrl: String by pomProperties
     val pomDescription: String by pomProperties
@@ -103,7 +129,8 @@ changelog {
 }
 
 kover {
-    useJacoco()
+    useJacoco = true
+    jacocoVersion = libs.versions.jacoco
     currentProject {
         sources {
             excludedSourceSets.addAll(sourceSets["functionalTest"].name)
@@ -120,6 +147,16 @@ kover {
                 }
             }
         }
+    }
+}
+
+buildConfig {
+    sourceSets.named("functionalTest") {
+        useKotlinOutput {
+            packageName = "com.cmgapps.license"
+            topLevelConstants = true
+        }
+        buildConfigField("MINIMUM_GRADLE_VERSION", minimumGradleVersion)
     }
 }
 
@@ -195,8 +232,8 @@ tasks {
 
 @Suppress("UnstableApiUsage")
 dependencies {
-    compileOnly(libs.android.gradlePlugin)
-    compileOnly(libs.kotlin.multiplatformPlugin)
+    compileOnly(libs.android.gradle.plugin)
+    compileOnly(libs.kotlin.multiplatform.plugin)
 
     implementation(libs.maven.model)
     implementation(libs.maven.artifact)
@@ -208,5 +245,4 @@ dependencies {
     }
     testImplementation(libs.hamcrest)
     testImplementation(libs.mockito.kotlin)
-    testImplementation(libs.android.gradlePlugin)
 }

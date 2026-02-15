@@ -222,9 +222,9 @@ abstract class LicensesTask
                     .map { dep ->
                         "${dep.group}:${dep.name}:${dep.version}@pom"
                     }.forEach { pom ->
-                        pomConfiguration.dependencies.add(
-                            project.dependencies.add(POM_CONFIGURATION, pom),
-                        )
+                        project.dependencies.add(POM_CONFIGURATION, pom)?.let {
+                            pomConfiguration.dependencies.add(it)
+                        }
                     }
             }
         }
@@ -316,15 +316,21 @@ abstract class LicensesTask
 
         private fun Model.findVersion(): String? =
             when {
-                version != null -> version
-                parent != null ->
+                version != null -> {
+                    version
+                }
+
+                parent != null -> {
                     if (parent.version != null) {
                         parent.version
                     } else {
                         parent.getModel().findVersion()
                     }
+                }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
 
         private fun Model.findDescription(): String? =
@@ -336,28 +342,40 @@ abstract class LicensesTask
 
         private fun Model.findGroupId(): String? =
             when {
-                groupId != null -> groupId
-                parent != null ->
+                groupId != null -> {
+                    groupId
+                }
+
+                parent != null -> {
                     if (parent.groupId != null) {
                         parent.groupId
                     } else {
                         parent.getModel().findGroupId()
                     }
+                }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
 
         private fun Model.findArtifactId(): String? =
             when {
-                artifactId != null -> artifactId
-                parent != null ->
+                artifactId != null -> {
+                    artifactId
+                }
+
+                parent != null -> {
                     if (parent.artifactId != null) {
                         parent.artifactId
                     } else {
                         parent.getModel().findArtifactId()
                     }
+                }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
 
         private fun createReport(libraries: List<Library>) {
@@ -367,7 +385,7 @@ abstract class LicensesTask
 
             reports.filter { it.required.get() }.forEach { report ->
                 report.libraries = libraries
-                (report as LicensesSingleFileReport).write()
+                report.write()
             }
         }
 

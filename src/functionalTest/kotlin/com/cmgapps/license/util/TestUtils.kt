@@ -17,19 +17,137 @@
 package com.cmgapps.license.util
 
 import org.gradle.testkit.runner.GradleRunner
+import org.hamcrest.Description
+import org.hamcrest.Matcher
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.empty
+import org.hamcrest.Matchers.not
+import org.hamcrest.TypeSafeDiagnosingMatcher
+import org.hamcrest.io.FileMatchers.anExistingDirectory
+import org.hamcrest.io.FileMatchers.anExistingFile
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.arguments
 import java.io.File
-
-fun Any.getFileContent(fileName: String) =
-    javaClass.getResource("/licenses/$fileName")?.readText()
-        ?: error("""resource file "/licenses/$fileName" not found! """)
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
+import java.util.stream.Stream
 
 operator fun File.plus(text: String) = appendText(text)
 
-infix fun File.write(text: String) = writeText(text)
+val fixturesDir = File("src/functionalTest/fixtures")
 
-fun GradleRunner.withJaCoCo(): GradleRunner =
-    also {
-        javaClass.classLoader.getResourceAsStream("testkit/testkit-gradle.properties")?.use { input ->
-            File(projectDir, "gradle.properties").outputStream().use { input.copyTo(it) }
-        } ?: throw IllegalStateException("Resource not found: testkit/testkit-gradle.properties")
+fun <S, T> List<S>.cartesianProduct(other: List<T>): Stream<Arguments> =
+    this
+        .flatMap { s1 ->
+            other.map { s2 ->
+                arguments(s1, s2)
+            }
+        }.stream()
+
+fun createBuildRunner(
+    fixtureDir: File,
+    vararg tasks: String = arrayOf("clean", "licenseReport"),
+): GradleRunner =
+    GradleRunner
+        .create()
+        .withDebug(true)
+        .withArguments(
+            *tasks,
+            "--info",
+            "--stacktrace",
+            "--continue",
+        ).withProjectDir(fixtureDir)
+        .forwardOutput()
+
+fun assertExpectedFiles(
+    fixtureDir: File,
+    taskName: String = "",
+) {
+    val expectedDir = File(fixtureDir, "expected/$taskName")
+    assertThat(expectedDir, anExistingDirectory())
+
+    val expectedFiles = expectedDir.walk().filter { it.isFile }.toList()
+    assertThat("$expectedDir is emtpy", expectedFiles, not(empty()))
+    for (expectedFile in expectedFiles) {
+        val actualFile = File(fixtureDir, expectedFile.relativeTo(expectedDir).toString())
+        assertThat(actualFile, anExistingFile())
+        assertThat(actualFile, hasSameContentAs(expectedFile))
+    }
+}
+
+private fun hasSameContentAs(
+    expected: File,
+    charset: Charset = StandardCharsets.UTF_8,
+    normalizeLineEndings: Boolean = true,
+): Matcher<File> =
+    object : TypeSafeDiagnosingMatcher<File>(File::class.java) {
+        override fun describeTo(description: Description) {
+            description
+                .appendText("a file with same content as ")
+                .appendValue(expected.path)
+                .appendText(" (charset=")
+                .appendValue(charset.name())
+                .appendText(", normalizeLineEndings=")
+                .appendValue(normalizeLineEndings)
+                .appendText(")")
+        }
+
+        override fun matchesSafely(
+            actual: File,
+            mismatchDescription: Description,
+        ): Boolean {
+            if (!expected.exists()) {
+                mismatchDescription.appendText("expected file does not exist: ").appendValue(expected.path)
+                return false
+            }
+            if (!actual.exists()) {
+                mismatchDescription.appendText("actual file does not exist: ").appendValue(actual.path)
+                return false
+            }
+            if (!expected.isFile) {
+                mismatchDescription.appendText("expected is not a file: ").appendValue(expected.path)
+                return false
+            }
+            if (!actual.isFile) {
+                mismatchDescription.appendText("actual is not a file: ").appendValue(actual.path)
+                return false
+            }
+
+            val expectedText = readText(expected, charset, normalizeLineEndings)
+            val actualText = readText(actual, charset, normalizeLineEndings)
+
+            if (expectedText == actualText) return true
+
+            val diffIndex = firstDiffIndex(expectedText, actualText)
+            mismatchDescription
+                .appendText("content differed")
+                .appendText(", first difference at index ")
+                .appendValue(diffIndex)
+                .appendText(", expected length=")
+                .appendValue(expectedText.length)
+                .appendText(", actual length=")
+                .appendValue(actualText.length)
+
+            return false
+        }
+
+        private fun readText(
+            file: File,
+            charset: Charset,
+            normalizeLineEndings: Boolean,
+        ): String {
+            val text = file.readText(charset)
+            return if (normalizeLineEndings) text.replace("\r\n", "\n") else text
+        }
+
+        private fun firstDiffIndex(
+            a: String,
+            b: String,
+        ): Int {
+            val min = minOf(a.length, b.length)
+            for (i in 0 until min) {
+                if (a[i] != b[i]) return i
+            }
+            return min
+        }
     }

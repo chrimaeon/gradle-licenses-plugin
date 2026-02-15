@@ -34,12 +34,12 @@ licenses {
         xml.enabled = true
         csv {
             enabled = true
-            outputFile = buildDir.resolve("csv-report").resolve("customdir.csv")
+            outputFile = project.layout.buildDirectory.file("csv-report/customdir.csv")
         }
 
         custom {
             enabled = true
-            outputFile = buildDir.resolve("reports").resolve("licenses.txt")
+            outputFile = project.layout.buildDirectory.file("reports/licenses.txt")
             generator.set { list -> list.map { it.name }.joinToString(separator = "\n") }
         }
     }

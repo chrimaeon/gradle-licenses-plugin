@@ -6,6 +6,8 @@
 
 @file:Suppress("UnstableApiUsage")
 
+import kotlin.io.path.div
+
 rootProject.name = "build-logic"
 
 dependencyResolutionManagement {
@@ -15,7 +17,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            from(files("../gradle/libs.versions.toml"))
+            from(files(rootDir.parentFile.toPath() / "gradle" / "libs.versions.toml"))
         }
     }
 }

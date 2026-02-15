@@ -1,0 +1,10 @@
+Licenses
+├─ Fake dependency name:1.0.0
+│  ├─ License: Some license
+│  └─ URL: http://website.tld/
+├─ Retrofit:2.3.0
+│  ├─ License: Apache 2.0
+│  ├─ SPDX-License-Identifier: Apache-2.0
+│  └─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt
+└─ com.google.firebase:firebase-core:10.0.1
+   └─ License: Undefined

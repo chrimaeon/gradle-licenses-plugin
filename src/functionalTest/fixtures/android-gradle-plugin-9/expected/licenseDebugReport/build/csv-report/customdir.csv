@@ -1,0 +1,2 @@
+Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url
+Retrofit,2.3.0,com.squareup.retrofit2:retrofit:2.3.0,,Apache-2.0,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt

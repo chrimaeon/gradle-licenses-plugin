@@ -1,0 +1,18 @@
+[
+    {
+        "mavenCoordinates": {
+            "groupId": "group",
+            "artifactId": "name",
+            "version": "1.0.0"
+        },
+        "name": "Fake dependency name",
+        "description": "Fake dependency description",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": null,
+                "name": "Some license",
+                "url": "http://website.tld/"
+            }
+        ]
+    }
+]

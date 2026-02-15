@@ -15,5 +15,5 @@
  */
 
 plugins {
-    id("com.android.application") version "8.10.0" apply false
+    id("com.android.application") version "9.0.0" apply false
 }

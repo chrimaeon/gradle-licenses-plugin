@@ -14,6 +14,19 @@
 
 ### Security
 
+## [6.0.0]
+
+### Added
+
+- Additional License Descriptors
+- Added JSON Schema for the licenses export available
+  on [https://www.cmgapps.com/schema/licenses-schema.json](https://www.cmgapps.com/schema/licenses-schema.json)
+
+### Changed
+
+- The minimum Gradle version is now 9.0.0
+- The minimum Android Gradle Plugin version is now 8.13.2
+
 ## [5.1.0]
 
 ### Added
@@ -154,7 +167,8 @@ Use Gradle's Reports API to generate reports
 - All public properties are now provided Properties
 - Use Kotlin Serialization instead of Moshi
 
-[Unreleased]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/5.1.0...HEAD
+[Unreleased]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/6.0.0...HEAD
+[6.0.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/5.1.0...6.0.0
 [5.1.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/5.0.0...5.1.0
 [5.0.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.8.0...5.0.0
 [4.8.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.7.0...4.8.0
