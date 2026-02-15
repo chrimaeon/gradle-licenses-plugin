@@ -4,14 +4,7 @@
 
 ### Added
 
-- Additional License Descriptors
-- Added JSON Schema for the licenses export available
-  on [https://www.cmgapps.com/schema/licenses-schema.json](https://www.cmgapps.com/schema/licenses-schema.json)
-
 ### Changed
-
-- The minimum Gradle version is now 9.0.0
-- The minimum Android Gradle Plugin version is now 8.13.2
 
 ### Deprecated
 
@@ -20,6 +13,19 @@
 ### Fixed
 
 ### Security
+
+## [6.0.0]
+
+### Added
+
+- Additional License Descriptors
+- Added JSON Schema for the licenses export available
+  on [https://www.cmgapps.com/schema/licenses-schema.json](https://www.cmgapps.com/schema/licenses-schema.json)
+
+### Changed
+
+- The minimum Gradle version is now 9.0.0
+- The minimum Android Gradle Plugin version is now 8.13.2
 
 ## [5.1.0]
 
@@ -111,7 +117,7 @@ Use Gradle's Reports API to generate reports
 
 ### Changed
 
--
+- 
     - `<version>` is now attribute to `<library>`
     - `<url>` is now a attribute to `<license>`
     - `<library>` has an `id` attribute now
@@ -161,34 +167,20 @@ Use Gradle's Reports API to generate reports
 - All public properties are now provided Properties
 - Use Kotlin Serialization instead of Moshi
 
-[Unreleased]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/5.1.0...HEAD
-
+[Unreleased]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/6.0.0...HEAD
+[6.0.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/5.1.0...6.0.0
 [5.1.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/5.0.0...5.1.0
-
 [5.0.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.8.0...5.0.0
-
 [4.8.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.7.0...4.8.0
-
 [4.7.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.6.1...4.7.0
-
 [4.6.1]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.6.0...4.6.1
-
 [4.6.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.5.0...4.6.0
-
 [4.5.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.4.0...4.5.0
-
 [4.4.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.3.0...4.4.0
-
 [4.3.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.2.0...4.3.0
-
 [4.2.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.1.0...4.2.0
-
 [4.1.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.0.0...4.1.0
-
 [4.0.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/3.3.0...4.0.0
-
 [3.3.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/3.2.0...3.3.0
-
 [3.2.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/3.1.0...3.2.0
-
 [3.1.0]: https://github.com/chrimaeon/gradle-licenses-plugin/commits/3.1.0

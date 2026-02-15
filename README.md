@@ -1,8 +1,7 @@
 # Gradle Licenses Plugin [![Build & Test](https://github.com/chrimaeon/gradle-licenses-plugin/actions/workflows/main.yml/badge.svg)](https://github.com/chrimaeon/gradle-licenses-plugin/actions/workflows/main.yml) [![codecov](https://codecov.io/gh/chrimaeon/gradle-licenses-plugin/branch/master/graph/badge.svg?token=XY0G488B3B)](https://codecov.io/gh/chrimaeon/gradle-licenses-plugin)
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg?style=for-the-badge)](http://www.apache.org/licenses/LICENSE-2.0)
-[![Gradle Plugin](https://img.shields.io/badge/Gradle-7.2%2B-%2302303A.svg?style=for-the-badge&logo=Gradle)](https://gradle.org/)
-[![MavenCentral](https://img.shields.io/maven-central/v/com.cmgapps/gradle-licenses-plugin?style=for-the-badge&logo=Apache%20Maven)](https://repo1.maven.org/maven2/com/cmgapps/gradle-licenses-plugin/)
+[![Gradle Plugin](https://img.shields.io/badge/Gradle-9.0%2B-%2302303A.svg?style=for-the-badge&logo=Gradle)](https://gradle.org/)
 [![gradlePluginPortal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/cmgapps/licenses/com.cmgapps.licenses.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin%20Portal&style=for-the-badge&logo=Gradle)](https://plugins.gradle.org/plugin/com.cmgapps.licenses)
 
 This Gradle plugin provides tasks to generate a file with the licenses used from the project's dependencies.
@@ -18,7 +17,7 @@ This Gradle plugin provides tasks to generate a file with the licenses used from
 
 ```kotlin
 plugins {
-    id("com.cmgapps.licenses") version "5.1.0"
+    id("com.cmgapps.licenses") version "6.0.0"
 }
 ```
 </details>
@@ -28,12 +27,12 @@ plugins {
 
 ```groovy
 plugins {
-    id 'com.cmgapps.licenses' version '5.1.0'
+    id 'com.cmgapps.licenses' version '6.0.0'
 }
 ```
 </details>
 
-#### Using legacy plugin application
+#### Using the legacy plugin application
 
 <details open="open">
 <summary>Kotlin</summary>
@@ -46,7 +45,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath("com.cmgapps:gradle-licenses-plugin:5.1.0")
+        classpath("com.cmgapps:gradle-licenses-plugin:6.0.0")
     }
 }
 
@@ -65,7 +64,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.cmgapps:gradle-licenses-plugin:5.1.0'
+        classpath 'com.cmgapps:gradle-licenses-plugin:6.0.0'
     }
 }
 
@@ -131,7 +130,7 @@ The plugin can output different formats.
         }
         ```
       
-    * On the default CSS style Dark Mode for supported browsers is also enabled by default. It adds a `<meta name="color-scheme" content="dark light">` and a custom css theme.      
+    * In the default CSS style, Dark Mode for supported browsers is also enabled by default. It adds a `<meta name="color-scheme" content="dark light">` and a custom css theme.      
 
       It can be disabled via
       ```kotlin
