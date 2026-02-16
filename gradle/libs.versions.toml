@@ -21,7 +21,7 @@ kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0"
 apache-commonsCsv = "org.apache.commons:commons-csv:1.14.1"
 maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven" }
 maven-artifact = { module = "org.apache.maven:maven-artifact", version.ref = "maven" }
-jUnit = "org.junit.jupiter:junit-jupiter:6.0.2"
+jUnit = "org.junit.jupiter:junit-jupiter:6.0.3"
 hamcrest = "org.hamcrest:hamcrest:3.0"
 ktlint-cli = "com.pinterest.ktlint:ktlint-cli:1.8.0"
 mockito-kotlin = "org.mockito.kotlin:mockito-kotlin:6.2.3"
