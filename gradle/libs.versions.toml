@@ -12,7 +12,7 @@ versions = "com.github.ben-manes.versions:0.53.0"
 gradle-pluginPublish = "com.gradle.plugin-publish:2.0.0"
 kotlinx-kover = "org.jetbrains.kotlinx.kover:0.9.7"
 jetbrains-changelog = "org.jetbrains.changelog:2.5.0"
-buildconfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.7" }
+buildconfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.9" }
 
 [libraries]
 android-gradle-plugin = "com.android.tools.build:gradle-api:9.0.1"
