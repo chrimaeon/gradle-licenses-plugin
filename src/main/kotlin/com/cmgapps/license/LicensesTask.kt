@@ -133,6 +133,11 @@ internal abstract class LicenseReportContainerImpl
 
         @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
         override fun <T> toArray(generator: IntFunction<Array<out T?>?>): Array<out T?>? = super<LicenseReportContainer>.toArray(generator)
+
+        @Suppress("UnstableApiUsage")
+        override fun disallowChanges() {
+            super<LicenseReportContainer>.disallowChanges()
+        }
     }
 
 @CacheableTask
