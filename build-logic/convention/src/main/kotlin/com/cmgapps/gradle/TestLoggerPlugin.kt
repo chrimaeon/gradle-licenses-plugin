@@ -16,12 +16,12 @@
 
 package com.cmgapps.gradle
 
-import groovy.lang.Closure
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.TestDescriptor
+import org.gradle.api.tasks.testing.TestListener
 import org.gradle.api.tasks.testing.TestResult
 import org.gradle.api.tasks.testing.TestResult.ResultType
 
@@ -34,18 +34,17 @@ private const val ANSI_BOLD = "1"
 @Suppress("unused")
 class TestLoggerPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        target.tasks.withType(Test::class.java).configureEach { task ->
-            val closure =
-                object : Closure<Unit>(this) {
-                    fun doCall(
-                        desc: TestDescriptor,
+        target.tasks.withType(Test::class.java).configureEach { testTask ->
+            testTask.addTestListener(
+                object : TestListener {
+                    override fun afterTest(
+                        testDescriptor: TestDescriptor,
                         result: TestResult,
                     ) {
-                        task.logger.logResults(desc, result)
+                        testTask.logger.logResults(testDescriptor, result)
                     }
-                }
-
-            task.afterTest(closure)
+                },
+            )
         }
     }
 }

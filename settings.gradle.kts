@@ -6,6 +6,11 @@
 
 @file:Suppress("UnstableApiUsage")
 
+import de.fayard.refreshVersions.core.FeatureFlag
+import de.fayard.refreshVersions.core.StabilityLevel
+
+rootProject.name = "gradle-licenses-plugin"
+
 pluginManagement {
     includeBuild("build-logic")
     repositories {
@@ -23,4 +28,16 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "gradle-licenses-plugin"
+plugins {
+    id("de.fayard.refreshVersions") version "0.60.6"
+}
+
+refreshVersions {
+    featureFlags {
+        enable(FeatureFlag.GRADLE_UPDATES)
+    }
+
+    rejectVersionIf {
+        candidate.stabilityLevel != StabilityLevel.Stable
+    }
+}

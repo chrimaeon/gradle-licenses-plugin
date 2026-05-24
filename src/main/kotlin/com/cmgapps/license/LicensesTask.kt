@@ -36,6 +36,7 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.reporting.ReportContainer
 import org.gradle.api.reporting.Reporting
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -134,6 +135,7 @@ internal abstract class LicenseReportContainerImpl
         override fun <T> toArray(generator: IntFunction<Array<out T?>?>): Array<out T?>? = super<LicenseReportContainer>.toArray(generator)
     }
 
+@CacheableTask
 abstract class LicensesTask
     @Inject
     constructor(
@@ -330,6 +332,7 @@ abstract class LicensesTask
         }
     }
 
+@CacheableTask
 abstract class AndroidLicensesTask
     @Inject
     constructor(
@@ -345,6 +348,7 @@ abstract class AndroidLicensesTask
         lateinit var productFlavors: List<String>
     }
 
+@CacheableTask
 abstract class KotlinMultiplatformTask
     @Inject
     constructor(

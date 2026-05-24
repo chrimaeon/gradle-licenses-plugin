@@ -47,5 +47,6 @@ licenses {
 
 dependencies {
     implementation("org.apache.maven:maven-model:3.6.3")
+    implementation("io.github.java-diff-utils:java-diff-utils:4.12")
     implementation("ch.qos.logback:logback-classic:1.4.5")
 }

@@ -6,8 +6,6 @@
 
 @file:Suppress("UnstableApiUsage")
 
-import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import com.github.benmanes.gradle.versions.updates.gradle.GradleReleaseChannel
 import kotlinx.kover.gradle.plugin.dsl.AggregationType
 import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
 import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
@@ -21,7 +19,6 @@ plugins {
     `java-gradle-plugin`
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.versions)
     alias(libs.plugins.gradle.pluginPublish)
     alias(libs.plugins.jetbrains.changelog)
     alias(libs.plugins.kotlinx.kover)
@@ -182,18 +179,6 @@ tasks {
                     "Build-Kotlin" to libs.versions.kotlin,
                 ),
             )
-        }
-    }
-
-    named<DependencyUpdatesTask>("dependencyUpdates") {
-        revision = "release"
-
-        gradleReleaseChannel = GradleReleaseChannel.CURRENT.id
-
-        rejectVersionIf {
-            listOf("alpha", "beta", "rc", "cr", "m", "preview")
-                .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-]*") }
-                .any { it.matches(candidate.version) }
         }
     }
 
