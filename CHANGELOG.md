@@ -6,6 +6,11 @@
 
 ### Changed
 
+- Plugin is now configuration-cache compatible
+- Improved plugin setup and task execution architecture
+- Updated dependencies to the latest versions
+- Updated Gradle wrapper
+
 ### Deprecated
 
 ### Removed
