@@ -10,8 +10,8 @@ import com.cmgapps.license.helper.logLicenseWarning
 import com.cmgapps.license.helper.text
 import com.cmgapps.license.helper.toLicensesMap
 import com.cmgapps.license.model.LicenseId
-import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.logging.Logger
 import java.io.OutputStream
 import javax.inject.Inject
@@ -19,13 +19,13 @@ import javax.inject.Inject
 abstract class MarkdownReport
     @Inject
     constructor(
-        project: Project,
+        layout: ProjectLayout,
         task: Task,
         private val logger: Logger,
-    ) : LicensesSingleFileReport(project, task, ReportType.MARKDOWN) {
+    ) : LicensesSingleFileReport(layout, task, ReportType.MARKDOWN) {
         override fun writeLicenses(outputStream: OutputStream) {
-            outputStream.bufferedWriter().use {
-                it.write(
+            outputStream.bufferedWriter().use { writer ->
+                writer.write(
                     buildString {
                         append("# Open source licenses\n")
                         append("## Notice for packages")

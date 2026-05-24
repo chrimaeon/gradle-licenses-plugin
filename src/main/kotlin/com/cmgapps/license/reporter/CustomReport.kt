@@ -16,8 +16,9 @@
 
 package com.cmgapps.license.reporter
 
-import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ProjectLayout
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import java.io.OutputStream
 import javax.inject.Inject
@@ -25,10 +26,11 @@ import javax.inject.Inject
 abstract class CustomReport
     @Inject
     constructor(
-        project: Project,
+        layout: ProjectLayout,
         task: Task,
-    ) : LicensesSingleFileReport(project, task, ReportType.CUSTOM) {
-        val generator: Property<CustomReportGenerator> = project.objects.property(CustomReportGenerator::class.java)
+        objects: ObjectFactory,
+    ) : LicensesSingleFileReport(layout, task, ReportType.CUSTOM) {
+        val generator: Property<CustomReportGenerator> = objects.property(CustomReportGenerator::class.java)
 
         override fun writeLicenses(outputStream: OutputStream) {
             check(generator.isPresent) { "CustomReport.generator not set" }

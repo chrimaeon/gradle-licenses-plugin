@@ -81,7 +81,7 @@ class JsonReportShould {
 private class TestJsonReport(
     override var libraries: List<Library>,
     project: Project = ProjectBuilder.builder().build(),
-) : JsonReport(project, project.tasks.register("licenseReport").get()) {
+) : JsonReport(project.layout, project.tasks.register("licenseReport").get()) {
     override fun getRequired(): Property<Boolean> =
         ProjectBuilder
             .builder()

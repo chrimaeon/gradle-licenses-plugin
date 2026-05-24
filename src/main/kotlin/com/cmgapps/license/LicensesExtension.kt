@@ -18,11 +18,12 @@ package com.cmgapps.license
 
 import com.cmgapps.license.reporter.CustomReportGenerator
 import org.gradle.api.Action
-import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.internal.file.FileOperations
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.resources.TextResource
+import org.gradle.api.resources.TextResourceFactory
 import java.io.File
 import javax.inject.Inject
 
@@ -47,8 +48,8 @@ abstract class LicensesExtension {
 abstract class LicenseReportsExtension
     @Inject
     constructor(
-        project: Project,
         objects: ObjectFactory,
+        fileOperations: FileOperations,
     ) {
         val plainText: Reporter =
             Reporter(
@@ -80,7 +81,7 @@ abstract class LicenseReportsExtension
                 outputFile = objects.fileProperty(),
                 useDarkMode = objects.property(Boolean::class.java).convention(true),
                 css = objects.property(TextResource::class.java),
-                project = project,
+                textResourceFactory = fileOperations.resources.text,
             )
 
         fun html(action: Action<in HtmlReporter>) = action.execute(html)
@@ -121,14 +122,14 @@ class HtmlReporter(
     outputFile: RegularFileProperty,
     val useDarkMode: Property<Boolean>,
     internal val css: Property<TextResource>,
-    private val project: Project,
+    private val textResourceFactory: TextResourceFactory,
 ) : Reporter(enabled, outputFile) {
     fun stylesheet(css: String) {
-        this.css.set(project.resources.text.fromString(css))
+        this.css.set(textResourceFactory.fromString(css))
     }
 
     fun stylesheet(css: File) {
-        this.css.set(project.resources.text.fromFile(css))
+        this.css.set(textResourceFactory.fromFile(css))
     }
 }
 

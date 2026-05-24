@@ -18,8 +18,8 @@ package com.cmgapps.license.reporter
 
 import com.cmgapps.license.model.Library
 import groovy.lang.Closure
-import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.reporting.Report
 import org.gradle.api.reporting.SingleFileReport
 import java.io.OutputStream
@@ -29,14 +29,14 @@ interface LicenseReport {
 }
 
 abstract class LicensesSingleFileReport(
-    project: Project,
+    layout: ProjectLayout,
     task: Task,
     private val type: ReportType,
 ) : LicenseReport,
     SingleFileReport {
     init {
         required.convention(false)
-        outputLocation.convention(project.layout.buildDirectory.file("reports/licenses/${task.name}/licenses.${type.extension}"))
+        outputLocation.convention(layout.buildDirectory.file("reports/licenses/${task.name}/licenses.${type.extension}"))
     }
 
     abstract fun writeLicenses(outputStream: OutputStream)

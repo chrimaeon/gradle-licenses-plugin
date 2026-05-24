@@ -96,7 +96,7 @@ private class TestCsvReport(
     override var libraries: List<Library>,
     project: Project = ProjectBuilder.builder().build().project,
 ) : CsvReport(
-        project,
+        project.layout,
         project.tasks.register("licensesTask").get(),
     ) {
     override fun getRequired(): Property<Boolean> =

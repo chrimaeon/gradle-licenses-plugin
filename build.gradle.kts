@@ -90,10 +90,12 @@ testing {
                 implementation(libs.xmlunit.core)
                 implementation(libs.xmlunit.matchers)
                 implementation(libs.networknt.jsonschemavalidator)
+                implementation(libs.java.diff.utils)
             }
 
             targets.configureEach {
                 testTask.configure {
+                    jvmArgs("-Xmx2g", "-Xms512m")
                     shouldRunAfter(test)
                 }
             }
@@ -197,6 +199,7 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
+        jvmArgs("-Xmx2g", "-Xms512m")
     }
 
     wrapper {
@@ -205,6 +208,7 @@ tasks {
     }
 
     val updateReadme by registering {
+        description = "Updates the version in the README.md"
         val readmeFile = rootDir.resolve("README.md")
         val version: String by project
 
@@ -230,7 +234,6 @@ tasks {
     }
 }
 
-@Suppress("UnstableApiUsage")
 dependencies {
     compileOnly(libs.android.gradle.plugin)
     compileOnly(libs.kotlin.multiplatform.plugin)

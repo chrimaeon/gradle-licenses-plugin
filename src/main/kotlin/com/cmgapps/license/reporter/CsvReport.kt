@@ -8,17 +8,17 @@ package com.cmgapps.license.reporter
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
-import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ProjectLayout
 import java.io.OutputStream
 import javax.inject.Inject
 
 abstract class CsvReport
     @Inject
     constructor(
-        project: Project,
+        layout: ProjectLayout,
         task: Task,
-    ) : LicensesSingleFileReport(project, task, ReportType.CSV) {
+    ) : LicensesSingleFileReport(layout, task, ReportType.CSV) {
         override fun writeLicenses(outputStream: OutputStream) {
             outputStream.bufferedWriter().use { writer ->
                 CSVPrinter(

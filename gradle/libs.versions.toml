@@ -29,3 +29,4 @@ xmlunit-core = { module = "org.xmlunit:xmlunit-core", version.ref = "xmlunit" }
 xmlunit-matchers = { module = "org.xmlunit:xmlunit-matchers", version.ref = "xmlunit" }
 
 networknt-jsonschemavalidator = "com.networknt:json-schema-validator:3.0.0"
+java-diff-utils = "io.github.java-diff-utils:java-diff-utils:4.12"

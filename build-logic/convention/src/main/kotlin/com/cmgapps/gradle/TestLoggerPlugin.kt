@@ -41,7 +41,7 @@ class TestLoggerPlugin : Plugin<Project> {
                         desc: TestDescriptor,
                         result: TestResult,
                     ) {
-                        target.logger.logResults(desc, result)
+                        task.logger.logResults(desc, result)
                     }
                 }
 

@@ -28,7 +28,11 @@ class CustomReportShould {
     @Test
     fun `generate report`() {
         val project = ProjectBuilder.builder().build()
-        object : CustomReport(project, project.tasks.register("licenseReport").get()) {
+        object : CustomReport(
+            project.layout,
+            project.tasks.register("licenseReport").get(),
+            project.objects,
+        ) {
             override var libraries: List<Library> = testLibraries
 
             override fun getRequired(): Property<Boolean> = project.objects.property(Boolean::class.java)

@@ -16,6 +16,8 @@
 
 package com.cmgapps.license.util
 
+import com.github.difflib.DiffUtils
+import com.github.difflib.UnifiedDiffUtils
 import org.gradle.testkit.runner.GradleRunner
 import org.hamcrest.Description
 import org.hamcrest.Matcher
@@ -116,17 +118,19 @@ private fun hasSameContentAs(
             val expectedText = readText(expected, charset, normalizeLineEndings)
             val actualText = readText(actual, charset, normalizeLineEndings)
 
-            if (expectedText == actualText) return true
+            if (expectedText == actualText) {
+                return true
+            }
 
-            val diffIndex = firstDiffIndex(expectedText, actualText)
+            val expectedLines = expectedText.lines()
+            val patch = DiffUtils.diff(expectedLines, actualText.lines())
+            val unifiedDiff =
+                UnifiedDiffUtils.generateUnifiedDiff(expected.path, actual.path, expectedLines, patch, 0)
+
             mismatchDescription
-                .appendText("content differed")
-                .appendText(", first difference at index ")
-                .appendValue(diffIndex)
-                .appendText(", expected length=")
-                .appendValue(expectedText.length)
-                .appendText(", actual length=")
-                .appendValue(actualText.length)
+                .appendText("content differed:\n")
+
+            unifiedDiff.forEach { line: String? -> mismatchDescription.appendText("$line\n") }
 
             return false
         }
@@ -138,16 +142,5 @@ private fun hasSameContentAs(
         ): String {
             val text = file.readText(charset)
             return if (normalizeLineEndings) text.replace("\r\n", "\n") else text
-        }
-
-        private fun firstDiffIndex(
-            a: String,
-            b: String,
-        ): Int {
-            val min = minOf(a.length, b.length)
-            for (i in 0 until min) {
-                if (a[i] != b[i]) return i
-            }
-            return min
         }
     }

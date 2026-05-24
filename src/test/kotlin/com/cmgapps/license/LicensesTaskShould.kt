@@ -19,6 +19,21 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
 
+private fun initTaskPomFiles(
+    task: LicensesTask,
+    project: Project,
+) {
+    val configs =
+        buildSet {
+            project.configurations.findByName("compile")?.let { add(it) }
+            project.configurations.findByName("api")?.let { add(it) }
+            project.configurations.findByName("implementation")?.let { add(it) }
+        }
+    val (resolved, all) = LicensesPlugin.collectAllPomFiles(project, configs)
+    task.resolvedPomFiles.from(resolved)
+    task.pomFiles.from(all)
+}
+
 class LicensesTaskShould {
     @TempDir
     lateinit var testProjectDir: Path
@@ -58,6 +73,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(
@@ -100,6 +116,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(
@@ -137,6 +154,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(
@@ -178,6 +196,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(
@@ -218,6 +237,7 @@ class LicensesTaskShould {
                         .set(true)
                 }.get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(
@@ -247,6 +267,7 @@ class LicensesTaskShould {
                         .set(true)
                 }.get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(
@@ -272,6 +293,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(
@@ -300,6 +322,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(outputFile.readText(), `is`("Fake dependency name"))
@@ -310,6 +333,7 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.html")
         val task = project.tasks.register("licensesReport", LicensesTask::class.java).get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(
@@ -363,6 +387,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(File(reportFolder).listFiles()?.size, `is`(7))
@@ -384,6 +409,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(
@@ -420,6 +446,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(
@@ -445,6 +472,7 @@ class LicensesTaskShould {
                         container.csv.outputLocation.set(outputFile)
                     }
                 }.get()
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(
@@ -476,6 +504,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(
@@ -503,6 +532,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
+        initTaskPomFiles(task, project)
         task.licensesReport()
 
         assertThat(

@@ -266,7 +266,7 @@ private class TestHtmlReport(
         objects =
             project
                 .objects,
-        project = project,
+        layout = project.layout,
         task = project.tasks.register("licenseReport").get(),
     ) {
     override fun getRequired(): Property<Boolean> =

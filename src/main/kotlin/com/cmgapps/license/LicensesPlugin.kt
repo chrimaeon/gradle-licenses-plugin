@@ -21,18 +21,23 @@ import com.cmgapps.license.reporter.CustomReport
 import com.cmgapps.license.reporter.HtmlReport
 import com.cmgapps.license.reporter.ReportType
 import org.apache.maven.artifact.versioning.ComparableVersion
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ExternalDependency
+import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.reporting.SingleFileReport
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
+import java.io.File
 
 private const val MIN_KOTLIN_VERSION = "2.0.0"
 
-@Suppress("unused")
 class LicensesPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
@@ -83,6 +88,10 @@ class LicensesPlugin : Plugin<Project> {
                 LicensesTask::class.java,
             ) { task ->
                 task.addBasicConfiguration(licenseExtension, licenseReportExtension)
+                val configs = collectJavaConfigurations(project, licenseExtension.additionalProjects)
+                val (resolved, all) = collectAllPomFiles(project, configs)
+                task.resolvedPomFiles.from(resolved)
+                task.pomFiles.from(all)
             }
         }
 
@@ -120,6 +129,19 @@ class LicensesPlugin : Plugin<Project> {
                         task.variant = variant.name
                         task.buildType = variant.buildType!!
                         task.productFlavors = variant.productFlavors.map { it.second }
+
+                        val baseConfigs = collectJavaConfigurations(project, extension.additionalProjects)
+                        val androidConfigs =
+                            collectAndroidConfigurations(
+                                project,
+                                extension.additionalProjects,
+                                task.buildType,
+                                task.productFlavors,
+                                task.variant,
+                            )
+                        val (resolved, all) = collectAllPomFiles(project, baseConfigs + androidConfigs)
+                        task.resolvedPomFiles.from(resolved)
+                        task.pomFiles.from(all)
                     }
                 }
         }
@@ -150,6 +172,13 @@ class LicensesPlugin : Plugin<Project> {
                 ) { task ->
                     task.addBasicConfiguration(extension, reportExtension)
                     task.targetNames = listOf("common", targetName)
+
+                    val baseConfigs = collectJavaConfigurations(project, extension.additionalProjects)
+                    val kmpConfigs =
+                        collectKmpConfigurations(project, extension.additionalProjects, task.targetNames)
+                    val (resolved, all) = collectAllPomFiles(project, baseConfigs + kmpConfigs)
+                    task.resolvedPomFiles.from(resolved)
+                    task.pomFiles.from(all)
                 }
             }
 
@@ -168,7 +197,152 @@ class LicensesPlugin : Plugin<Project> {
             ) { task ->
                 task.addBasicConfiguration(extension, reportExtension)
                 task.targetNames = targetNames
+
+                val baseConfigs = collectJavaConfigurations(project, extension.additionalProjects)
+                val kmpConfigs = collectKmpConfigurations(project, extension.additionalProjects, task.targetNames)
+                val (resolved, all) = collectAllPomFiles(project, baseConfigs + kmpConfigs)
+                task.resolvedPomFiles.from(resolved)
+                task.pomFiles.from(all)
             }
+        }
+
+        @JvmStatic
+        private fun collectJavaConfigurations(
+            project: Project,
+            additionalProjectPaths: Set<String>,
+        ): Set<Configuration> {
+            val allProjects = resolveProjects(project, additionalProjectPaths)
+            return buildSet {
+                allProjects.forEach { proj ->
+                    proj.configurations.findByName("compile")?.let { add(it) }
+                    proj.configurations.findByName("api")?.let { add(it) }
+                    proj.configurations.findByName("implementation")?.let { add(it) }
+                }
+            }
+        }
+
+        @JvmStatic
+        private fun collectAndroidConfigurations(
+            project: Project,
+            additionalProjectPaths: Set<String>,
+            buildType: String,
+            productFlavors: List<String>,
+            variant: String,
+        ): Set<Configuration> {
+            val allProjects = resolveProjects(project, additionalProjectPaths)
+            return buildSet {
+                allProjects.forEach { proj ->
+                    addAll(addAndroidConfiguration(proj, buildType))
+                    productFlavors.forEach { flavor ->
+                        if (variant.uppercaseFirstChar().contains(flavor.uppercaseFirstChar())) {
+                            addAll(addAndroidConfiguration(proj, flavor))
+                        }
+                    }
+                }
+            }
+        }
+
+        @JvmStatic
+        private fun addAndroidConfiguration(
+            project: Project,
+            type: String,
+        ): Set<Configuration> =
+            buildSet {
+                project.configurations.find { it.name == "${type}Compile" }?.let { add(it) }
+                project.configurations.find { it.name == "${type}Api" }?.let { add(it) }
+                project.configurations.find { it.name == "${type}Implementation" }?.let { add(it) }
+            }
+
+        @JvmStatic
+        private fun collectKmpConfigurations(
+            project: Project,
+            additionalProjectPaths: Set<String>,
+            targetNames: List<String>,
+        ): Set<Configuration> {
+            val allProjects = resolveProjects(project, additionalProjectPaths)
+            return buildSet {
+                allProjects.forEach { proj ->
+                    targetNames.forEach { name ->
+                        proj.configurations.find { it.name == "${name}MainApi" }?.let { add(it) }
+                        proj.configurations.find { it.name == "${name}MainImplementation" }?.let { add(it) }
+                    }
+                }
+            }
+        }
+
+        @JvmStatic
+        private fun resolveProjects(
+            project: Project,
+            additionalProjectPaths: Set<String>,
+        ): Set<Project> {
+            val allProjects: Set<Project> = project.rootProject.allprojects
+            return setOf(project) +
+                additionalProjectPaths
+                    .map { path ->
+                        allProjects.find { it.path == path }
+                            ?: throw IllegalArgumentException("additionalProject $path not found")
+                    }.toSet()
+        }
+
+        /**
+         * Resolves all POM files for the given configurations at configuration time,
+         * including parent POM chains. Returns a FileCollection of all POM files.
+         */
+        @JvmStatic
+        internal fun collectAllPomFiles(
+            project: Project,
+            configurations: Set<Configuration>,
+        ): Pair<FileCollection, FileCollection> {
+            val reader = MavenXpp3Reader()
+            val allPomFiles = mutableMapOf<String, File>()
+            val toResolve = mutableSetOf<Dependency>()
+            val initialKeys = mutableSetOf<String>()
+            val processed = mutableSetOf<String>()
+
+            // Collect initial @pom coordinates from configurations
+            configurations.forEach { config ->
+                config.incoming.dependencies
+                    .filterIsInstance<ExternalDependency>()
+                    .forEach { dep ->
+                        val key = "${dep.group}:${dep.name}:${dep.version}"
+                        initialKeys.add(key)
+                        toResolve.add(project.dependencies.create("$key@pom"))
+                    }
+            }
+
+            // Iteratively resolve POMs and their parent chains
+            while (toResolve.isNotEmpty()) {
+                val detached =
+                    project.configurations
+                        .detachedConfiguration(*toResolve.toTypedArray())
+                        .apply {
+                            isCanBeResolved = true
+                            isTransitive = false
+                        }
+                toResolve.clear()
+
+                detached.resolvedConfiguration.lenientConfiguration.artifacts.forEach { artifact ->
+                    val id = artifact.moduleVersion.id
+                    val key = "${id.group}:${id.name}:${id.version}"
+                    if (processed.add(key)) {
+                        allPomFiles[key] = artifact.file
+                        try {
+                            val model = artifact.file.inputStream().use { reader.read(it) }
+                            model.parent?.let { parent ->
+                                val parentKey = "${parent.groupId}:${parent.artifactId}:${parent.version}"
+                                if (!processed.contains(parentKey)) {
+                                    toResolve.add(project.dependencies.create("$parentKey@pom"))
+                                }
+                            }
+                        } catch (_: Exception) {
+                            // skip unparseable POMs
+                        }
+                    }
+                }
+            }
+
+            val resolvedRootFiles = allPomFiles.filterKeys { key -> initialKeys.contains(key) }.values
+            return Pair(project.files(resolvedRootFiles), project.files(allPomFiles.values))
         }
 
         @JvmStatic

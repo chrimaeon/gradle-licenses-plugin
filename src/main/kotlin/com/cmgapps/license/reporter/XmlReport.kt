@@ -6,17 +6,17 @@
 
 package com.cmgapps.license.reporter
 
-import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ProjectLayout
 import java.io.OutputStream
 import javax.inject.Inject
 
 abstract class XmlReport
     @Inject
     constructor(
-        project: Project,
+        layout: ProjectLayout,
         task: Task,
-    ) : LicensesSingleFileReport(project, task, ReportType.XML) {
+    ) : LicensesSingleFileReport(layout, task, ReportType.XML) {
         override fun writeLicenses(outputStream: OutputStream) {
             outputStream.bufferedWriter().use {
                 it.write(

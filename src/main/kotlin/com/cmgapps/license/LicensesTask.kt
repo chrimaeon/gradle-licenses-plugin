@@ -28,23 +28,24 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.NamedDomainObjectSet
-import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ExternalDependency
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.reporting.ReportContainer
 import org.gradle.api.reporting.Reporting
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFiles
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.net.URI
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.function.IntFunction
 import javax.inject.Inject
 
 interface LicenseReportContainer : ReportContainer<LicensesSingleFileReport> {
@@ -73,18 +74,19 @@ interface LicenseReportContainer : ReportContainer<LicensesSingleFileReport> {
 internal abstract class LicenseReportContainerImpl
     @Inject
     constructor(
-        private val project: Project,
-        task: Provider<Task>,
-    ) : NamedDomainObjectSet<LicensesSingleFileReport> by project.objects.namedDomainObjectSet(LicensesSingleFileReport::class.java),
+        private val objects: ObjectFactory,
+        layout: ProjectLayout,
+        task: Task,
+    ) : NamedDomainObjectSet<LicensesSingleFileReport> by objects.namedDomainObjectSet(LicensesSingleFileReport::class.java),
         LicenseReportContainer {
         init {
-            addReporter(TextReport::class.java, project, task.get())
-            addReporter(JsonReport::class.java, project, task.get())
-            addReporter(HtmlReport::class.java, project, task.get(), project.logger, project.objects)
-            addReporter(XmlReport::class.java, project, task.get())
-            addReporter(MarkdownReport::class.java, project, task.get(), project.logger)
-            addReporter(CsvReport::class.java, project, task.get())
-            addReporter(CustomReport::class.java, project, task.get())
+            addReporter(TextReport::class.java, layout, task)
+            addReporter(JsonReport::class.java, layout, task)
+            addReporter(HtmlReport::class.java, layout, task, task.logger, objects)
+            addReporter(XmlReport::class.java, layout, task)
+            addReporter(MarkdownReport::class.java, layout, task, task.logger)
+            addReporter(CsvReport::class.java, layout, task)
+            addReporter(CustomReport::class.java, layout, task, objects)
         }
 
         override fun getEnabled(): NamedDomainObjectSet<LicensesSingleFileReport> = enabledReports
@@ -104,7 +106,7 @@ internal abstract class LicenseReportContainerImpl
             clazz: Class<out LicensesSingleFileReport>,
             vararg params: Any,
         ) {
-            add(project.objects.newInstance(clazz, *params))
+            add(objects.newInstance(clazz, *params))
         }
 
         override val plainText: TextReport
@@ -127,6 +129,9 @@ internal abstract class LicenseReportContainerImpl
 
         override val custom: CustomReport
             get() = getByName(ReportType.CUSTOM.name) as CustomReport
+
+        @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
+        override fun <T> toArray(generator: IntFunction<Array<out T?>?>): Array<out T?>? = super<LicenseReportContainer>.toArray(generator)
     }
 
 abstract class LicensesTask
@@ -136,33 +141,18 @@ abstract class LicensesTask
     ) : DefaultTask(),
         Reporting<LicenseReportContainer> {
         private val reports: LicenseReportContainer =
-            objects.newInstance(LicenseReportContainerImpl::class.java, project, project.provider { this })
-
-        private val tempConfigurationNameCounter = AtomicInteger(1)
-
-        companion object {
-            private const val POM_CONFIGURATION = "licensesPoms"
-            private const val TEMP_POM_CONFIGURATION = "licensesTempPoms"
-        }
+            objects.newInstance(LicenseReportContainerImpl::class.java, this)
 
         @get:Input
         var additionalProjects: SetProperty<String> = objects.setProperty(String::class.java)
 
-        @get:Internal
-        protected val allProjects: Set<Project> by lazy {
-            val allProjects = project.rootProject.allprojects
+        @get:InputFiles
+        @get:PathSensitive(PathSensitivity.NONE)
+        abstract val pomFiles: ConfigurableFileCollection
 
-            setOf(project) +
-                additionalProjects
-                    .get()
-                    .map { moduleName ->
-                        allProjects.find {
-                            it.path == moduleName
-                        } ?: throw IllegalArgumentException("additionalProject $moduleName not found")
-                    }.toSet()
-        }
-
-        private lateinit var pomConfiguration: Configuration
+        @get:InputFiles
+        @get:PathSensitive(PathSensitivity.NONE)
+        abstract val resolvedPomFiles: ConfigurableFileCollection
 
         @get:OutputFiles
         val outputFiles: Map<String, RegularFileProperty>
@@ -173,7 +163,10 @@ abstract class LicensesTask
 
         override fun reports(closure: Closure<*>): LicenseReportContainer =
             reports.apply {
-                project.configure(this, closure)
+                @Suppress("UNCHECKED_CAST")
+                (closure as Closure<LicenseReportContainer>).delegate = this
+                closure.resolveStrategy = Closure.DELEGATE_FIRST
+                closure.call(this)
             }
 
         override fun reports(configureAction: Action<in LicenseReportContainer>): LicenseReportContainer =
@@ -183,57 +176,20 @@ abstract class LicensesTask
 
         @TaskAction
         fun licensesReport() {
-            pomConfiguration =
-                project.configurations.create(POM_CONFIGURATION).apply {
-                    isCanBeResolved = true
-                    isCanBeConsumed = false
-                }
-
-            collectDependencies()
-            val libraries = generateLibraries()
+            val allPomFileSet: Set<File> = pomFiles.files
+            val resolvedPomFileSet: Set<File> = resolvedPomFiles.files
+            val libraries = generateLibraries(resolvedPomFileSet, allPomFileSet)
             createReport(libraries)
-            project.configurations.remove(pomConfiguration)
         }
 
-        protected open fun collectDependencies() {
-            buildSet {
-                allProjects.forEach { project ->
-                    project.configurations.findByName("compile")?.let {
-                        add(project.configurations.getByName(it.name))
-                    }
-
-                    project.configurations.findByName("api")?.let {
-                        add(project.configurations.getByName(it.name))
-                    }
-
-                    project.configurations.findByName("implementation")?.let {
-                        add(project.configurations.getByName(it.name))
-                    }
-                }
-            }.let {
-                addConfigurations(it)
-            }
-        }
-
-        protected fun addConfigurations(configurations: Set<Configuration>) {
-            configurations.forEach { configuration ->
-                configuration.incoming.dependencies
-                    .withType(ExternalDependency::class.java)
-                    .map { dep ->
-                        "${dep.group}:${dep.name}:${dep.version}@pom"
-                    }.forEach { pom ->
-                        project.dependencies.add(POM_CONFIGURATION, pom)?.let {
-                            pomConfiguration.dependencies.add(it)
-                        }
-                    }
-            }
-        }
-
-        private fun generateLibraries(): List<Library> =
-            pomConfiguration.resolvedConfiguration.lenientConfiguration.artifacts
-                .map {
-                    val model = getPomModel(it.file)
-                    val licenses = model.findLicenses()
+        private fun generateLibraries(
+            resolvedPomFileSet: Set<File>,
+            allPomFileSet: Set<File>,
+        ): List<Library> =
+            resolvedPomFileSet
+                .map { file ->
+                    val model = getPomModel(file)
+                    val licenses = model.findLicenses(allPomFileSet)
 
                     if (licenses.isEmpty()) {
                         logger.warn("${model.name} dependency does not have a license.")
@@ -241,12 +197,13 @@ abstract class LicensesTask
 
                     Library(
                         MavenCoordinates(
-                            model.findGroupId().orEmpty(),
-                            model.findArtifactId().orEmpty(),
-                            model.findVersion()?.let { version -> ComparableVersion(version) } ?: ComparableVersion(""),
+                            model.findGroupId(allPomFileSet).orEmpty(),
+                            model.findArtifactId(allPomFileSet).orEmpty(),
+                            model.findVersion(allPomFileSet)?.let { version -> ComparableVersion(version) }
+                                ?: ComparableVersion(""),
                         ),
                         model.name,
-                        model.findDescription(),
+                        model.findDescription(allPomFileSet),
                         licenses,
                     )
                 }.sortedWith(
@@ -259,7 +216,7 @@ abstract class LicensesTask
                 file.inputStream().use(::read)
             }
 
-        private fun Model.findLicenses(): List<License> {
+        private fun Model.findLicenses(pomFileSet: Set<File>): List<License> {
             if (licenses.isNotEmpty()) {
                 return licenses.mapNotNull { license ->
                     val url = license.url
@@ -267,7 +224,7 @@ abstract class LicensesTask
                     try {
                         // check for valid url
                         URI(url)
-                    } catch (ignore: Exception) {
+                    } catch (_: Exception) {
                         logger.warn("$name dependency has an invalid license URL; skipping license")
                         return@mapNotNull null
                     }
@@ -284,48 +241,29 @@ abstract class LicensesTask
 
             if (parent != null) {
                 logger.info("Checking parent POM file.")
-                return parent.getModel().findLicenses()
+                return parent.getModel(pomFileSet).findLicenses(pomFileSet)
             }
 
             return emptyList()
         }
 
-        private fun Parent.getModel(): Model {
-            val dependency = "$groupId:$artifactId:$version@pom"
-
-            val configName = TEMP_POM_CONFIGURATION + tempConfigurationNameCounter.getAndIncrement()
-            val configuration =
-                project.configurations
-                    .create(configName)
-                    .apply {
-                        isCanBeResolved = true
-                        isCanBeConsumed = false
-                        isTransitive = false
-                    }
-
-            project.dependencies.add(configName, dependency)
-
+        private fun Parent.getModel(pomFileSet: Set<File>): Model {
             val pomFile =
-                configuration.incoming
-                    .artifacts.artifactFiles.singleFile
-
-            project.configurations.remove(configuration)
-
+                pomFileSet.find { file ->
+                    file.name == "$artifactId-$version.pom" &&
+                        file.path.contains(groupId.replace(".", "[./]").toRegex())
+                } ?: error("Parent POM $groupId:$artifactId:$version not found in resolved POM files")
             return getPomModel(pomFile)
         }
 
-        private fun Model.findVersion(): String? =
+        private fun Model.findVersion(pomFileSet: Set<File>): String? =
             when {
                 version != null -> {
                     version
                 }
 
                 parent != null -> {
-                    if (parent.version != null) {
-                        parent.version
-                    } else {
-                        parent.getModel().findVersion()
-                    }
+                    parent.version ?: parent.getModel(pomFileSet).findVersion(pomFileSet)
                 }
 
                 else -> {
@@ -333,25 +271,21 @@ abstract class LicensesTask
                 }
             }
 
-        private fun Model.findDescription(): String? =
+        private fun Model.findDescription(pomFileSet: Set<File>): String? =
             when {
                 description != null -> description
-                parent != null -> parent.getModel().findDescription()
+                parent != null -> parent.getModel(pomFileSet).findDescription(pomFileSet)
                 else -> null
             }
 
-        private fun Model.findGroupId(): String? =
+        private fun Model.findGroupId(pomFileSet: Set<File>): String? =
             when {
                 groupId != null -> {
                     groupId
                 }
 
                 parent != null -> {
-                    if (parent.groupId != null) {
-                        parent.groupId
-                    } else {
-                        parent.getModel().findGroupId()
-                    }
+                    parent.groupId ?: parent.getModel(pomFileSet).findGroupId(pomFileSet)
                 }
 
                 else -> {
@@ -359,18 +293,14 @@ abstract class LicensesTask
                 }
             }
 
-        private fun Model.findArtifactId(): String? =
+        private fun Model.findArtifactId(pomFileSet: Set<File>): String? =
             when {
                 artifactId != null -> {
                     artifactId
                 }
 
                 parent != null -> {
-                    if (parent.artifactId != null) {
-                        parent.artifactId
-                    } else {
-                        parent.getModel().findArtifactId()
-                    }
+                    parent.artifactId ?: parent.getModel(pomFileSet).findArtifactId(pomFileSet)
                 }
 
                 else -> {
@@ -413,42 +343,6 @@ abstract class AndroidLicensesTask
 
         @Internal
         lateinit var productFlavors: List<String>
-
-        override fun collectDependencies() {
-            super.collectDependencies()
-
-            buildSet {
-                allProjects.forEach { project ->
-                    addAll(addConfiguration(project, buildType))
-
-                    productFlavors.forEach { flavor ->
-                        // Works for productFlavors and productFlavors with dimensions
-                        if (variant.uppercaseFirstChar().contains(flavor.uppercaseFirstChar())) {
-                            addAll(addConfiguration(project, flavor))
-                        }
-                    }
-                }
-            }.let {
-                addConfigurations(it)
-            }
-        }
-
-        private fun addConfiguration(
-            project: Project,
-            type: String,
-        ) = buildSet {
-            project.configurations.find { it.name == "${type}Compile" }?.let {
-                add(it)
-            }
-
-            project.configurations.find { it.name == "${type}Api" }?.let {
-                add(it)
-            }
-
-            project.configurations.find { it.name == "${type}Implementation" }?.let {
-                add(it)
-            }
-        }
     }
 
 abstract class KotlinMultiplatformTask
@@ -458,23 +352,6 @@ abstract class KotlinMultiplatformTask
     ) : LicensesTask(objects) {
         @get:Internal
         internal lateinit var targetNames: List<String>
-
-        override fun collectDependencies() {
-            super.collectDependencies()
-
-            val configurations = mutableSetOf<Configuration>()
-
-            targetNames.forEach { name ->
-                project.configurations.find { it.name == "${name}MainApi" }?.let {
-                    configurations.add(it)
-                }
-                project.configurations.find { it.name == "${name}MainImplementation" }?.let {
-                    configurations.add(it)
-                }
-            }
-
-            addConfigurations(configurations)
-        }
     }
 
 private fun getLicenseId(

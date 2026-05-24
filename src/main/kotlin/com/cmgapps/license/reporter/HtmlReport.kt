@@ -10,8 +10,8 @@ import com.cmgapps.license.helper.logLicenseWarning
 import com.cmgapps.license.helper.text
 import com.cmgapps.license.helper.toLicensesMap
 import com.cmgapps.license.model.LicenseId
-import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.logging.Logger
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -22,11 +22,11 @@ import javax.inject.Inject
 abstract class HtmlReport
     @Inject
     constructor(
-        project: Project,
+        layout: ProjectLayout,
         task: Task,
         private val logger: Logger,
         objects: ObjectFactory,
-    ) : LicensesSingleFileReport(project, task, ReportType.HTML) {
+    ) : LicensesSingleFileReport(layout, task, ReportType.HTML) {
         companion object {
             private const val DEFAULT_PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
             private const val DEFAULT_BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
