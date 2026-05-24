@@ -119,25 +119,22 @@ class LicensesPlugin : Plugin<Project> {
             val androidComponentsExtension =
                 project.extensions.getByType(com.android.build.api.variant.AndroidComponentsExtension::class.java)
             androidComponentsExtension
-                .onVariants(androidComponentsExtension.selector().all()) { variant ->
+                .onVariants { variant ->
 
                     project.tasks.register(
                         "license${variant.name.uppercaseFirstChar()}Report",
-                        AndroidLicensesTask::class.java,
+                        LicensesTask::class.java,
                     ) { task ->
                         task.addBasicConfiguration(extension, reportExtension)
-                        task.variant = variant.name
-                        task.buildType = variant.buildType!!
-                        task.productFlavors = variant.productFlavors.map { it.second }
 
                         val baseConfigs = collectJavaConfigurations(project, extension.additionalProjects)
                         val androidConfigs =
                             collectAndroidConfigurations(
                                 project,
                                 extension.additionalProjects,
-                                task.buildType,
-                                task.productFlavors,
-                                task.variant,
+                                variant.buildType!!,
+                                variant.productFlavors.map { it.second },
+                                variant.name,
                             )
                         val (resolved, all) = collectAllPomFiles(project, baseConfigs + androidConfigs)
                         task.resolvedPomFiles.from(resolved)
@@ -168,14 +165,13 @@ class LicensesPlugin : Plugin<Project> {
 
                 project.tasks.register(
                     "licenseMultiplatform${targetName.uppercaseFirstChar()}Report",
-                    KotlinMultiplatformTask::class.java,
+                    LicensesTask::class.java,
                 ) { task ->
                     task.addBasicConfiguration(extension, reportExtension)
-                    task.targetNames = listOf("common", targetName)
 
                     val baseConfigs = collectJavaConfigurations(project, extension.additionalProjects)
                     val kmpConfigs =
-                        collectKmpConfigurations(project, extension.additionalProjects, task.targetNames)
+                        collectKmpConfigurations(project, extension.additionalProjects, listOf("common", targetName))
                     val (resolved, all) = collectAllPomFiles(project, baseConfigs + kmpConfigs)
                     task.resolvedPomFiles.from(resolved)
                     task.pomFiles.from(all)
@@ -193,13 +189,12 @@ class LicensesPlugin : Plugin<Project> {
 
             project.tasks.register(
                 "licenseMultiplatformReport",
-                KotlinMultiplatformTask::class.java,
+                LicensesTask::class.java,
             ) { task ->
                 task.addBasicConfiguration(extension, reportExtension)
-                task.targetNames = targetNames
 
                 val baseConfigs = collectJavaConfigurations(project, extension.additionalProjects)
-                val kmpConfigs = collectKmpConfigurations(project, extension.additionalProjects, task.targetNames)
+                val kmpConfigs = collectKmpConfigurations(project, extension.additionalProjects, targetNames)
                 val (resolved, all) = collectAllPomFiles(project, baseConfigs + kmpConfigs)
                 task.resolvedPomFiles.from(resolved)
                 task.pomFiles.from(all)

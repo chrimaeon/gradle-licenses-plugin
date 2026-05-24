@@ -337,32 +337,6 @@ abstract class LicensesTask
         }
     }
 
-@CacheableTask
-abstract class AndroidLicensesTask
-    @Inject
-    constructor(
-        objects: ObjectFactory,
-    ) : LicensesTask(objects) {
-        @Input
-        lateinit var variant: String
-
-        @Input
-        lateinit var buildType: String
-
-        @Internal
-        lateinit var productFlavors: List<String>
-    }
-
-@CacheableTask
-abstract class KotlinMultiplatformTask
-    @Inject
-    constructor(
-        objects: ObjectFactory,
-    ) : LicensesTask(objects) {
-        @get:Internal
-        internal lateinit var targetNames: List<String>
-    }
-
 private fun getLicenseId(
     licenseUrl: String,
     licenseName: String,
