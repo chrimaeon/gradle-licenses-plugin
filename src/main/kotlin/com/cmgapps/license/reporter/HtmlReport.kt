@@ -10,6 +10,7 @@ import com.cmgapps.license.helper.logLicenseWarning
 import com.cmgapps.license.helper.text
 import com.cmgapps.license.helper.toLicensesMap
 import com.cmgapps.license.model.LicenseId
+import org.apache.commons.text.StringEscapeUtils
 import org.gradle.api.Task
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.logging.Logger
@@ -84,7 +85,7 @@ abstract class HtmlReport
                                     }
 
                                     else -> {
-                                        pre { +(license.id.text) }
+                                        pre { +(StringEscapeUtils.escapeHtml4(license.id.text)) }
                                     }
                                 }
                             }

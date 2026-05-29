@@ -226,7 +226,8 @@ dependencies {
     implementation(libs.maven.model)
     implementation(libs.maven.artifact)
     implementation(libs.kotlin.serialization)
-    implementation(libs.apache.commonsCsv)
+    implementation(libs.apache.commons.csv)
+    implementation(libs.apache.commons.text)
 
     testImplementation(libs.jUnit) {
         exclude(group = "org.hamcrest")
