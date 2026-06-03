@@ -11,6 +11,7 @@ import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
 import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
 import java.util.Properties
@@ -31,6 +32,10 @@ private val jvmTargetVersion = JvmTarget.JVM_17
 
 kotlin {
     jvmToolchain(jvmTargetVersion.target.toInt())
+    abiValidation {
+        @OptIn(ExperimentalAbiValidation::class)
+        enabled = true
+    }
 }
 
 val pomProperties =
