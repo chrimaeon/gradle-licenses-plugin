@@ -12,26 +12,11 @@ This Gradle plugin provides tasks to generate a file with the licenses used from
 
 #### Using the plugins DSL
 
-<details open="open">
-<summary>Kotlin</summary>
-
 ```kotlin
 plugins {
     id("com.cmgapps.licenses") version "6.0.0"
 }
 ```
-</details>
-
-<details>
-<summary>Groovy</summary>
-
-```groovy
-plugins {
-    id 'com.cmgapps.licenses' version '6.0.0'
-}
-```
-</details>
-
 ### Tasks
 
 Applying the plugin will create tasks to generate the license report
@@ -46,8 +31,8 @@ For `"com.android.application"`, `"com.android.library"`, `"com.android.feature"
 
 For `"org.jetbrains.kotlin.multiplatform"`
 
-* `licenseMultiplatformReport` collects licenses from all targets
-* `licenseMultiplatform<target>Report` collects licenses from `common` and the specified `<target>`
+* `licenseMultiplatformReport` runs the report tasks for all targets
+* `licenseMultiplatform<target>Report` collects licenses from the specified `<target>`
 
 ### Configuration
 
@@ -90,7 +75,7 @@ The plugin can output different formats.
         }
         ```
       
-    * In the default CSS style, Dark Mode for supported browsers is also enabled by default. It adds a `<meta name="color-scheme" content="dark light">` and a custom css theme.      
+    * In the default CSS style, Dark Mode for supported browsers is also enabled by default. It adds a `<meta name="color-scheme" content="dark light">` and a custom CSS theme.      
 
       It can be disabled via
       ```kotlin
@@ -116,10 +101,9 @@ The plugin can output different formats.
     fun generate(libraries: Map<com.cmgapps.license.model.MavenCoordinates, com.cmgapps.license.model.Library>): String
   }
   ```
-  
-  <details open="open">
-  <summary>Kotlin</summary>
     
+  Sample
+
   ```kotlin
     licenses {
         custom {
@@ -131,8 +115,6 @@ The plugin can output different formats.
         }
     }
     ```
-  </details>
-
 ## License
 
 ```text
