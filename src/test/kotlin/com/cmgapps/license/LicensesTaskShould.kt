@@ -9,6 +9,7 @@ package com.cmgapps.license
 import com.cmgapps.license.reporter.CustomReport
 import com.cmgapps.license.reporter.ReportType
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
@@ -18,21 +19,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
-
-private fun initTaskPomFiles(
-    task: LicensesTask,
-    project: Project,
-) {
-    val configs =
-        buildSet {
-            project.configurations.findByName("compile")?.let { add(it) }
-            project.configurations.findByName("api")?.let { add(it) }
-            project.configurations.findByName("implementation")?.let { add(it) }
-        }
-    val (resolved, all) = LicensesPlugin.collectAllPomFiles(project, configs)
-    task.resolvedPomFiles.from(resolved)
-    task.pomFiles.from(all)
-}
 
 class LicensesTaskShould {
     @TempDir
@@ -54,9 +40,6 @@ class LicensesTaskShould {
             project.repositories.maven { it.setUrl(mavenRepoUrl) },
         )
         project.plugins.apply("java")
-
-        project.configurations.create("api")
-        project.configurations.create("compile")
         project.dependencies.add("implementation", "group:name:1.0.0")
     }
 
@@ -73,7 +56,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
-        initTaskPomFiles(task, project)
+        task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
         assertThat(
@@ -116,7 +99,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
-        initTaskPomFiles(task, project)
+        task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
         assertThat(
@@ -154,7 +137,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
-        initTaskPomFiles(task, project)
+        task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
         assertThat(
@@ -196,7 +179,8 @@ class LicensesTaskShould {
                     }
                 }.get()
 
-        initTaskPomFiles(task, project)
+        task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
+
         task.licensesReport()
 
         assertThat(
@@ -237,7 +221,7 @@ class LicensesTaskShould {
                         .set(true)
                 }.get()
 
-        initTaskPomFiles(task, project)
+        task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
         assertThat(
@@ -267,7 +251,7 @@ class LicensesTaskShould {
                         .set(true)
                 }.get()
 
-        initTaskPomFiles(task, project)
+        task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
         assertThat(
@@ -293,7 +277,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
-        initTaskPomFiles(task, project)
+        task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
         assertThat(
@@ -314,15 +298,16 @@ class LicensesTaskShould {
                     it.reports { container ->
                         container.custom.required.set(true)
                         container.custom.outputLocation.set(outputFile)
-                        container.custom.generator.set { list ->
-                            list.joinToString { lib ->
-                                lib.name ?: lib.mavenCoordinates.identifierWithoutVersion
-                            }
+                        container.custom.generator.set { libraries ->
+                            libraries
+                                .map { (coordinates, lib) ->
+                                    lib.name ?: coordinates.identifierWithoutVersion
+                                }.joinToString()
                         }
                     }
                 }.get()
 
-        initTaskPomFiles(task, project)
+        task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
         assertThat(outputFile.readText(), `is`("Fake dependency name"))
@@ -333,7 +318,7 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.html")
         val task = project.tasks.register("licensesReport", LicensesTask::class.java).get()
 
-        initTaskPomFiles(task, project)
+        task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
         assertThat(
@@ -373,10 +358,11 @@ class LicensesTaskShould {
                         container.csv.required.set(true)
 
                         container.custom.required.set(true)
-                        container.custom.generator.set { list ->
-                            list.joinToString { lib ->
-                                lib.name ?: lib.mavenCoordinates.identifierWithoutVersion
-                            }
+                        container.custom.generator.set { libraries ->
+                            libraries
+                                .map { (coordinates, lib) ->
+                                    lib.name ?: coordinates.identifierWithoutVersion
+                                }.joinToString()
                         }
 
                         container.html.required.set(true)
@@ -387,7 +373,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
-        initTaskPomFiles(task, project)
+        task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
         assertThat(File(reportFolder).listFiles()?.size, `is`(7))
@@ -397,8 +383,8 @@ class LicensesTaskShould {
     fun `sort libraries`() {
         val outputFile = File(reportFolder, "licenses.txt")
 
-        project.dependencies.add("api", "group:another:2.0.0")
-        project.dependencies.add("compile", "group:other:1.0.0")
+        project.dependencies.add("implementation", "group:another:2.0.0")
+        project.dependencies.add("implementation", "group:other:1.0.0")
         val task =
             project.tasks
                 .register("licensesReport", LicensesTask::class.java) {
@@ -409,7 +395,7 @@ class LicensesTaskShould {
                     }
                 }.get()
 
-        initTaskPomFiles(task, project)
+        task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
         assertThat(
@@ -425,61 +411,6 @@ class LicensesTaskShould {
                     "└─ Fake dependency other:1.0.0\n" +
                     "   ├─ License: Some license\n" +
                     "   └─ URL: http://website.tld/",
-            ),
-        )
-    }
-
-    @Test
-    fun `handle android project`() {
-        val outputFile = File(reportFolder, "licenses.txt")
-
-        val task =
-            project.tasks
-                .register("licensesReport", AndroidLicensesTask::class.java) { task ->
-                    task.buildType = "debug"
-                    task.variant = "google"
-                    task.productFlavors = listOf("google", "amazon")
-                    task.reports { container ->
-                        container.html.required.set(false)
-                        container.csv.required.set(true)
-                        container.csv.outputLocation.set(outputFile)
-                    }
-                }.get()
-
-        initTaskPomFiles(task, project)
-        task.licensesReport()
-
-        assertThat(
-            outputFile.readText(),
-            `is`(
-                "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
-                    "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/\r\n",
-            ),
-        )
-    }
-
-    @Test
-    fun `handle multiplatform project`() {
-        val outputFile = File(reportFolder, "licenses.csv")
-
-        val task =
-            project.tasks
-                .register("licensesReport", KotlinMultiplatformTask::class.java) { task ->
-                    task.targetNames = listOf("jvm", "js")
-                    task.reports { container ->
-                        container.html.required.set(false)
-                        container.csv.required.set(true)
-                        container.csv.outputLocation.set(outputFile)
-                    }
-                }.get()
-        initTaskPomFiles(task, project)
-        task.licensesReport()
-
-        assertThat(
-            outputFile.readText(),
-            `is`(
-                "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
-                    "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/\r\n",
             ),
         )
     }
@@ -504,15 +435,15 @@ class LicensesTaskShould {
                     }
                 }.get()
 
-        initTaskPomFiles(task, project)
+        task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
         assertThat(
             outputFile.readText(),
             `is`(
                 "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
-                    "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/\r\n" +
-                    "Has Parent,1.0.0,group:has-parent:1.0.0,,Apache-2.0,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt\r\n",
+                    "Has Parent,1.0.0,group:has-parent:1.0.0,,Apache-2.0,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt\r\n" +
+                    "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/\r\n",
             ),
         )
     }
@@ -526,13 +457,18 @@ class LicensesTaskShould {
                         container.forEach { report ->
                             report.required.set(true)
                             if (report is CustomReport) {
-                                report.generator.set { list -> list.joinToString() }
+                                report.generator.set { libraries ->
+                                    libraries
+                                        .map { (coordinates, lib) ->
+                                            lib.name ?: coordinates.identifierWithoutVersion
+                                        }.joinToString()
+                                }
                             }
                         }
                     }
                 }.get()
 
-        initTaskPomFiles(task, project)
+        task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
         assertThat(

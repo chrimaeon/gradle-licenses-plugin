@@ -10,12 +10,12 @@ plugins {
 }
 
 licenses {
-    additionalProjects(":module2")
     reports {
         html.enabled.set(true)
     }
 }
 
 dependencies {
+    implementation(project(":module2"))
     implementation("group:name:1.0.0")
 }

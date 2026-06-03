@@ -10,38 +10,37 @@ import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import com.cmgapps.license.model.LicenseId
 import com.cmgapps.license.model.MavenCoordinates
-import org.apache.maven.artifact.versioning.ComparableVersion
 
 internal val testLibraries =
-    listOf(
-        Library(
-            MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
-            "Test lib 1",
-            "proper description",
-            listOf(
-                License(
-                    LicenseId.APACHE,
-                    name = "Apache 2.0",
-                    url = "https://www.apache.org/licenses/LICENSE-2.0.txt",
-                ),
-                License(
-                    LicenseId.MIT,
-                    name = "MIT License",
-                    url = "https://opensource.org/licenses/MIT",
-                ),
-            ),
-        ),
-        Library(
-            MavenCoordinates("group.test2", "artifact", ComparableVersion("2.3.4")),
-            "Test lib 2",
-            "descriptions of lib 2",
-            listOf(
-                License(
-                    LicenseId.APACHE,
-                    // have different name to check mapping by id
-                    name = "The Apache Software License, Version 2.0",
-                    url = "https://www.apache.org/licenses/LICENSE-2.0.txt",
+    mapOf(
+        MavenCoordinates("test.group", "test.artifact", "1.0") to
+            Library(
+                "Test lib 1",
+                "proper description",
+                setOf(
+                    License(
+                        LicenseId.APACHE,
+                        name = "Apache 2.0",
+                        url = "https://www.apache.org/licenses/LICENSE-2.0.txt",
+                    ),
+                    License(
+                        LicenseId.MIT,
+                        name = "MIT License",
+                        url = "https://opensource.org/licenses/MIT",
+                    ),
                 ),
             ),
-        ),
+        MavenCoordinates("group.test2", "artifact", "2.3.4") to
+            Library(
+                "Test lib 2",
+                "descriptions of lib 2",
+                setOf(
+                    License(
+                        LicenseId.APACHE,
+                        // have different name to check mapping by id
+                        name = "The Apache Software License, Version 2.0",
+                        url = "https://www.apache.org/licenses/LICENSE-2.0.txt",
+                    ),
+                ),
+            ),
     )

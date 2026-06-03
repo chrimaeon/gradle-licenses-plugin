@@ -17,6 +17,7 @@
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.model.Library
+import com.cmgapps.license.model.MavenCoordinates
 import groovy.lang.Closure
 import org.gradle.api.Task
 import org.gradle.api.file.ProjectLayout
@@ -25,7 +26,7 @@ import org.gradle.api.reporting.SingleFileReport
 import java.io.OutputStream
 
 interface LicenseReport {
-    var libraries: List<Library>
+    var libraries: Map<MavenCoordinates, Library>
 }
 
 abstract class LicensesSingleFileReport(
@@ -36,7 +37,17 @@ abstract class LicensesSingleFileReport(
     SingleFileReport {
     init {
         required.convention(false)
-        outputLocation.convention(layout.buildDirectory.file("reports/licenses/${task.name}/licenses.${type.extension}"))
+        val path =
+            buildString {
+                append("reports/licenses/")
+                append(task.name)
+                append("/licenses")
+                if (type.extension.isNotBlank()) {
+                    append(".${type.extension}")
+                }
+            }
+
+        outputLocation.convention(layout.buildDirectory.file(path))
     }
 
     abstract fun writeLicenses(outputStream: OutputStream)
@@ -55,7 +66,7 @@ abstract class LicensesSingleFileReport(
 
 @FunctionalInterface
 fun interface CustomReportGenerator {
-    fun generate(libraries: List<Library>): String
+    fun generate(libraries: Map<MavenCoordinates, Library>): String
 }
 
 enum class ReportType(

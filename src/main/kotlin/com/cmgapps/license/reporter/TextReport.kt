@@ -24,14 +24,14 @@ abstract class TextReport
                     buildString {
                         append("Licenses\n")
                         val libLength = libraries.size
-                        libraries.forEachIndexed { libIndex, library ->
+                        libraries.entries.forEachIndexed { libIndex, (coordinates, library) ->
                             appendPrefix(libIndex, libLength)
                             if (library.name == null) {
-                                append(library.mavenCoordinates.toString())
+                                append(coordinates.toString())
                             } else {
                                 append(library.name)
                                 append(':')
-                                append(library.mavenCoordinates.version)
+                                append(coordinates.version)
                             }
                             appendLicenses(libIndex, libLength, library.licenses)
                             if (libIndex < libLength - 1) {
@@ -57,7 +57,7 @@ abstract class TextReport
         private fun StringBuilder.appendLicenses(
             libIndex: Int,
             libLength: Int,
-            licenses: List<License>,
+            licenses: Collection<License>,
         ) {
             val licensesLength = licenses.size
 

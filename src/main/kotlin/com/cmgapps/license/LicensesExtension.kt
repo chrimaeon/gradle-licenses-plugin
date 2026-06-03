@@ -28,22 +28,7 @@ import java.io.File
 import javax.inject.Inject
 
 @Suppress("unused")
-abstract class LicensesExtension {
-    var additionalProjects = emptySet<String>()
-        private set
-
-    fun additionalProjects(vararg modules: String) {
-        additionalProjects = setOf(*modules)
-    }
-
-    fun additionalProjects(modules: Collection<String>) {
-        additionalProjects =
-            when (modules) {
-                is Set -> modules
-                else -> modules.toSet()
-            }
-    }
-}
+abstract class LicensesExtension
 
 abstract class LicenseReportsExtension
     @Inject

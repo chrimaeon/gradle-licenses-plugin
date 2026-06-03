@@ -59,21 +59,21 @@ abstract class HtmlReport
                                 +NOTICE_LIBRARIES
                             }
 
-                            libraries.toLicensesMap().forEach { (license, libraries) ->
+                            libraries.toLicensesMap().forEach { (license, pairs) ->
                                 ul {
-                                    libraries
+                                    pairs
                                         .asSequence()
-                                        .sortedBy { it.name ?: it.mavenCoordinates.identifierWithoutVersion }
-                                        .forEach { library ->
+                                        .sortedBy { (coordinates, library) -> library.name ?: coordinates.identifierWithoutVersion }
+                                        .forEach { (coordinates, library) ->
                                             li {
-                                                +(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
+                                                +(library.name ?: coordinates.identifierWithoutVersion)
                                             }
                                         }
                                 }
 
                                 when (license.id) {
                                     LicenseId.UNKNOWN -> {
-                                        logger.logLicenseWarning(license, libraries)
+                                        logger.logLicenseWarning(license, pairs)
                                         div("license") {
                                             p {
                                                 +license.name

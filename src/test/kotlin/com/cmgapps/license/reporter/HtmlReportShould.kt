@@ -15,7 +15,7 @@ import com.cmgapps.license.util.TestStream
 import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.getFileContent
 import com.cmgapps.license.util.testLibraries
-import org.apache.maven.artifact.versioning.ComparableVersion
+import org.apache.commons.text.StringEscapeUtils
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logger
@@ -64,13 +64,13 @@ class HtmlReportShould {
                     "<li>Test lib 2</li>" +
                     "</ul>" +
                     "<pre>" +
-                    getFileContent("apache-2.0.txt") +
+                    StringEscapeUtils.escapeHtml4(getFileContent("apache-2.0.txt")) +
                     "</pre>" +
                     "<ul>" +
                     "<li>Test lib 1</li>" +
                     "</ul>" +
                     "<pre>" +
-                    getFileContent("mit.txt") +
+                    StringEscapeUtils.escapeHtml4(getFileContent("mit.txt")) +
                     "</pre>" +
                     "</body>" +
                     "</html>",
@@ -106,13 +106,13 @@ class HtmlReportShould {
                     "<li>Test lib 2</li>" +
                     "</ul>" +
                     "<pre>" +
-                    getFileContent("apache-2.0.txt") +
+                    StringEscapeUtils.escapeHtml4(getFileContent("apache-2.0.txt")) +
                     "</pre>" +
                     "<ul>" +
                     "<li>Test lib 1</li>" +
                     "</ul>" +
                     "<pre>" +
-                    getFileContent("mit.txt") +
+                    StringEscapeUtils.escapeHtml4(getFileContent("mit.txt")) +
                     "</pre>" +
                     "</body>" +
                     "</html>",
@@ -124,34 +124,34 @@ class HtmlReportShould {
     fun `generate HTML report with unknown licenses`() {
         TestHtmlReport(
             testLibraries +
-                listOf(
-                    LibraryModel(
-                        MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
-                        name = "Lib with invalid license",
-                        description = null,
-                        licenses =
-                            listOf(
-                                License(LicenseId.UNKNOWN, name = "foo", url = "https://www.license.foo"),
-                            ),
-                    ),
-                    LibraryModel(
-                        MavenCoordinates("test.group2", "test.artifact2", ComparableVersion("1.0")),
-                        name = "Lib with invalid license 2",
-                        description = null,
-                        licenses =
-                            listOf(
-                                License(LicenseId.UNKNOWN, name = "foo2", url = "https://www.license2.foo"),
-                            ),
-                    ),
-                    LibraryModel(
-                        MavenCoordinates("test.group3", "test.artifact3", ComparableVersion("1.0")),
-                        name = "Lib with invalid license 3",
-                        description = null,
-                        licenses =
-                            listOf(
-                                License(LicenseId.UNKNOWN, name = "foo2", url = "https://www.license2.foo"),
-                            ),
-                    ),
+                mapOf(
+                    MavenCoordinates("test.group.invalid", "test.artifact", "1.0") to
+                        LibraryModel(
+                            name = "Lib with invalid license",
+                            description = null,
+                            licenses =
+                                setOf(
+                                    License(LicenseId.UNKNOWN, name = "foo", url = "https://www.license.foo"),
+                                ),
+                        ),
+                    MavenCoordinates("test.group2.invalid", "test.artifact2", "1.0") to
+                        LibraryModel(
+                            name = "Lib with invalid license 2",
+                            description = null,
+                            licenses =
+                                setOf(
+                                    License(LicenseId.UNKNOWN, name = "foo2", url = "https://www.license2.foo"),
+                                ),
+                        ),
+                    MavenCoordinates("test.group3.invalid", "test.artifact3", "1.0") to
+                        LibraryModel(
+                            name = "Lib with invalid license 3",
+                            description = null,
+                            licenses =
+                                setOf(
+                                    License(LicenseId.UNKNOWN, name = "foo2", url = "https://www.license2.foo"),
+                                ),
+                        ),
                 ),
         ).apply {
             useDarkMode.set(false)
@@ -177,13 +177,13 @@ class HtmlReportShould {
                     "<li>Test lib 2</li>" +
                     "</ul>" +
                     "<pre>" +
-                    getFileContent("apache-2.0.txt") +
+                    StringEscapeUtils.escapeHtml4(getFileContent("apache-2.0.txt")) +
                     "</pre>" +
                     "<ul>" +
                     "<li>Test lib 1</li>" +
                     "</ul>" +
                     "<pre>" +
-                    getFileContent("mit.txt") +
+                    StringEscapeUtils.escapeHtml4(getFileContent("mit.txt")) +
                     "</pre>" +
                     "<ul>" +
                     "<li>Lib with invalid license</li>" +
@@ -205,34 +205,34 @@ class HtmlReportShould {
         val logger = mock<Logger>()
 
         TestHtmlReport(
-            listOf(
-                LibraryModel(
-                    MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
-                    name = "Lib with invalid license",
-                    description = null,
-                    licenses =
-                        listOf(
-                            License(LicenseId.UNKNOWN, name = "foo", url = "https://www.license.foo"),
-                        ),
-                ),
-                LibraryModel(
-                    MavenCoordinates("test.group2", "test.artifact2", ComparableVersion("1.0")),
-                    name = "Lib with invalid license 2",
-                    description = null,
-                    licenses =
-                        listOf(
-                            License(LicenseId.UNKNOWN, name = "foo2", url = "https://www.license2.foo"),
-                        ),
-                ),
-                LibraryModel(
-                    MavenCoordinates("test.group3", "test.artifact3", ComparableVersion("1.0")),
-                    name = "Lib with invalid license 3",
-                    description = null,
-                    licenses =
-                        listOf(
-                            License(LicenseId.UNKNOWN, name = "foo2", url = "https://www.license2.foo"),
-                        ),
-                ),
+            mapOf(
+                MavenCoordinates("test.group", "test.artifact", "1.0") to
+                    LibraryModel(
+                        name = "Lib with invalid license",
+                        description = null,
+                        licenses =
+                            setOf(
+                                License(LicenseId.UNKNOWN, name = "foo", url = "https://www.license.foo"),
+                            ),
+                    ),
+                MavenCoordinates("test.group2", "test.artifact2", "1.0") to
+                    LibraryModel(
+                        name = "Lib with invalid license 2",
+                        description = null,
+                        licenses =
+                            setOf(
+                                License(LicenseId.UNKNOWN, name = "foo2", url = "https://www.license2.foo"),
+                            ),
+                    ),
+                MavenCoordinates("test.group3", "test.artifact3", "1.0") to
+                    LibraryModel(
+                        name = "Lib with invalid license 3",
+                        description = null,
+                        licenses =
+                            setOf(
+                                License(LicenseId.UNKNOWN, name = "foo2", url = "https://www.license2.foo"),
+                            ),
+                    ),
             ),
             logger = logger,
         ).writeLicenses(outputStream)
@@ -258,7 +258,7 @@ class HtmlReportShould {
 }
 
 private class TestHtmlReport(
-    override var libraries: List<Library>,
+    override var libraries: Map<MavenCoordinates, Library>,
     logger: Logger = Logging.getLogger("TestHtmlReport"),
     project: Project = ProjectBuilder.builder().build(),
 ) : HtmlReport(

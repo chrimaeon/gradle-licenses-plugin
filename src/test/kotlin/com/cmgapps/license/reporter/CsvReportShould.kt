@@ -14,7 +14,6 @@ import com.cmgapps.license.util.OutputStreamExtension
 import com.cmgapps.license.util.TestStream
 import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.testLibraries
-import org.apache.maven.artifact.versioning.ComparableVersion
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -67,13 +66,20 @@ class CsvReportShould {
         val license = License(LicenseId.UNKNOWN, "License name with a \" in it", "just a plain url")
         val library =
             Library(
-                MavenCoordinates("groupC", "articfactA", ComparableVersion("version with a \n in it")),
                 name = "Name with a , in it",
                 description = "description with \r in it",
-                listOf(license),
+                setOf(license),
             )
 
-        TestCsvReport(listOf(library)).writeLicenses(outputStream)
+        TestCsvReport(
+            mapOf(
+                MavenCoordinates(
+                    "groupC",
+                    "articfactA",
+                    "version with a \n in it",
+                ) to library,
+            ),
+        ).writeLicenses(outputStream)
 
         assertThat(
             outputStream.asString(),
@@ -93,7 +99,7 @@ class CsvReportShould {
 }
 
 private class TestCsvReport(
-    override var libraries: List<Library>,
+    override var libraries: Map<MavenCoordinates, Library>,
     project: Project = ProjectBuilder.builder().build().project,
 ) : CsvReport(
         project.layout,

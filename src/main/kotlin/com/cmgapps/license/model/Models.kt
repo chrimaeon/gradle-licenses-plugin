@@ -6,13 +6,7 @@
 
 package com.cmgapps.license.model
 
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 import org.apache.commons.csv.CSVFormat
 import org.apache.maven.artifact.versioning.ComparableVersion
 
@@ -20,19 +14,28 @@ import org.apache.maven.artifact.versioning.ComparableVersion
 data class MavenCoordinates(
     val groupId: String,
     val artifactId: String,
-    @Serializable(ComparableVersionSerializer::class) val version: ComparableVersion,
-) : Comparable<MavenCoordinates> {
+    val version: String,
+) : Comparable<MavenCoordinates>,
+    java.io.Serializable {
     override fun compareTo(other: MavenCoordinates): Int = COMPARATOR.compare(this, other)
 
     val identifierWithoutVersion = "$groupId:$artifactId"
 
-    override fun toString(): String = identifierWithoutVersion + if (version.toString().isNotEmpty()) ":$version" else ""
+    override fun toString(): String = identifierWithoutVersion + if (version.isNotEmpty()) ":$version" else ""
+
+    fun pomCoordinate() = "$groupId:$artifactId:$version@pom"
 
     companion object {
         @JvmStatic
         private val COMPARATOR =
             compareBy(MavenCoordinates::groupId)
                 .thenBy(MavenCoordinates::artifactId)
+                .thenByDescending { ComparableVersion(it.version) }
+
+        @Suppress("FunctionName")
+        @JvmStatic
+        fun NameComparator() =
+            compareBy(MavenCoordinates::identifierWithoutVersion)
                 .thenByDescending(MavenCoordinates::version)
     }
 }
@@ -97,7 +100,7 @@ data class License(
     val id: LicenseId,
     val name: String,
     val url: String,
-) {
+) : java.io.Serializable {
     override fun hashCode(): Int =
         if (id == LicenseId.UNKNOWN) {
             var result = id.hashCode()
@@ -124,29 +127,7 @@ data class License(
 
 @Serializable
 data class Library(
-    val mavenCoordinates: MavenCoordinates,
     val name: String?,
     val description: String?,
-    val licenses: List<License>,
-) {
-    companion object {
-        @Suppress("FunctionName")
-        @JvmStatic
-        fun NameComparator(): Comparator<Library> =
-            compareBy<Library> { it.name ?: it.mavenCoordinates.identifierWithoutVersion }
-                .thenByDescending { it.mavenCoordinates.version }
-    }
-}
-
-object ComparableVersionSerializer : KSerializer<ComparableVersion> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ComparableVersion", PrimitiveKind.STRING)
-
-    override fun deserialize(decoder: Decoder): ComparableVersion = ComparableVersion(decoder.decodeString())
-
-    override fun serialize(
-        encoder: Encoder,
-        value: ComparableVersion,
-    ) {
-        encoder.encodeString(value.toString())
-    }
-}
+    val licenses: Set<License>,
+) : java.io.Serializable

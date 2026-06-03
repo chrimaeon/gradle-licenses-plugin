@@ -11,6 +11,7 @@ package com.cmgapps.license.helper
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import com.cmgapps.license.model.LicenseId
+import com.cmgapps.license.model.MavenCoordinates
 import org.gradle.api.logging.Logger
 
 internal val LicenseId.filename: String
@@ -41,19 +42,19 @@ internal val LicenseId.text: String
         return this::class.java.getResource("/licenses/${this.filename}")!!.readText()
     }
 
-internal fun List<Library>.toLicensesMap(): Map<License, List<Library>> =
+internal fun Map<MavenCoordinates, Library>.toLicensesMap(): Map<License, List<Pair<MavenCoordinates, Library>>> =
     this
         .asSequence()
-        .flatMap { library -> library.licenses.map { license -> license to library } }
-        .groupBy({ (license, _) -> license }, { (_, library) -> library })
+        .flatMap { (coordinates, library) -> library.licenses.map { license -> license to (coordinates to library) } }
+        .groupBy({ (license, _) -> license }, { (_, pair) -> pair })
 
 fun Logger.logLicenseWarning(
     license: License,
-    libraries: List<Library>,
+    libraries: List<Pair<MavenCoordinates, Library>>,
 ) = this.warn(
     """
         |No mapping found for license: '${license.name}' with url '${license.url}'
-        |used by ${libraries.joinToString { "'${it.mavenCoordinates}'" }}
+        |used by ${libraries.map { it.first }.joinToString { "'$it'" }}
         |
         |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
     """.trimMargin(),

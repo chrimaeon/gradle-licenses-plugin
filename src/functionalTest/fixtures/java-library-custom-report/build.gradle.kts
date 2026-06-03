@@ -14,7 +14,9 @@ licenses {
         custom {
             enabled = true
             outputFile = buildDir.resolve("reports").resolve("custom.licenses")
-            generator.set { list -> list.joinToString(separator = "\n") }
+            generator.set { libraries ->
+                libraries.map { (coordinates, library) -> "$coordinates -> $library" }.joinToString("\n")
+            }
         }
     }
 }

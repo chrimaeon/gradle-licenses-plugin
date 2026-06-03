@@ -19,3 +19,5 @@ pluginManagement {
 }
 
 rootProject.name = "gradle-licenses-plugin-sample-kotlin"
+
+include(":nested")

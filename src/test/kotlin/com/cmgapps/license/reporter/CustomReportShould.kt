@@ -6,7 +6,6 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.model.Library
 import com.cmgapps.license.util.OutputStreamExtension
 import com.cmgapps.license.util.TestStream
 import com.cmgapps.license.util.asString
@@ -33,14 +32,17 @@ class CustomReportShould {
             project.tasks.register("licenseReport").get(),
             project.objects,
         ) {
-            override var libraries: List<Library> = testLibraries
+            override var libraries = testLibraries
 
             override fun getRequired(): Property<Boolean> = project.objects.property(Boolean::class.java)
 
             override fun getOutputLocation(): RegularFileProperty = project.objects.fileProperty()
         }.apply {
-            generator.set { libs ->
-                libs.joinToString()
+            generator.set { libraries ->
+                libraries
+                    .map { (coordinates, library) ->
+                        "Library(mavenCoordinates=$coordinates, name=${library.name}, description=${library.description}, licenses=${library.licenses})"
+                    }.joinToString()
             }
         }.writeLicenses(outputStream)
 

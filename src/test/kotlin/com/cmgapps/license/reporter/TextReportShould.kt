@@ -12,7 +12,6 @@ import com.cmgapps.license.util.OutputStreamExtension
 import com.cmgapps.license.util.TestStream
 import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.testLibraries
-import org.apache.maven.artifact.versioning.ComparableVersion
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -55,19 +54,19 @@ class TextReportShould {
     @Test
     fun `generate report with undefined licenses`() {
         TestTextReport(
-            listOf(
-                Library(
-                    MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
-                    "Test lib 1",
-                    "proper description",
-                    emptyList(),
-                ),
-                Library(
-                    MavenCoordinates("group.test2", "artifact", ComparableVersion("2.3.4")),
-                    "Test lib 2",
-                    "descriptions of lib 2",
-                    emptyList(),
-                ),
+            mapOf(
+                MavenCoordinates("test.group", "test.artifact", "1.0") to
+                    Library(
+                        "Test lib 1",
+                        "proper description",
+                        emptySet(),
+                    ),
+                MavenCoordinates("group.test2", "artifact", "2.3.4") to
+                    Library(
+                        "Test lib 2",
+                        "descriptions of lib 2",
+                        emptySet(),
+                    ),
             ),
         ).writeLicenses(outputStream)
         assertThat(
@@ -86,7 +85,7 @@ class TextReportShould {
 }
 
 private class TestTextReport(
-    override var libraries: List<Library>,
+    override var libraries: Map<MavenCoordinates, Library>,
     project: Project = ProjectBuilder.builder().build(),
 ) : TextReport(project.layout, project.tasks.register("licenseReport").get()) {
     override fun getRequired(): Property<Boolean> =

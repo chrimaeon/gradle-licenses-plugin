@@ -6,7 +6,6 @@
 
 package com.cmgapps.license.model
 
-import org.apache.maven.artifact.versioning.ComparableVersion
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.greaterThan
 import org.hamcrest.Matchers.`is`
@@ -19,7 +18,7 @@ class MavenCoordinatesShould {
             MavenCoordinates(
                 groupId = "groupId",
                 artifactId = "artifactId",
-                version = ComparableVersion("1.0.0"),
+                version = "1.0.0",
             ).toString(),
             `is`("groupId:artifactId:1.0.0"),
         )
@@ -31,7 +30,7 @@ class MavenCoordinatesShould {
             MavenCoordinates(
                 groupId = "groupId",
                 artifactId = "artifactId",
-                version = ComparableVersion(""),
+                version = "",
             ).toString(),
             `is`("groupId:artifactId"),
         )
@@ -43,13 +42,13 @@ class MavenCoordinatesShould {
             MavenCoordinates(
                 groupId = "groupId",
                 artifactId = "artifactId",
-                version = ComparableVersion("1.0"),
+                version = "1.0",
             ),
             greaterThan(
                 MavenCoordinates(
                     groupId = "groupId",
                     artifactId = "artifactId",
-                    version = ComparableVersion("2.0"),
+                    version = "2.0",
                 ),
             ),
         )

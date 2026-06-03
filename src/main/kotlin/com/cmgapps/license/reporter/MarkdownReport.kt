@@ -29,17 +29,17 @@ abstract class MarkdownReport
                     buildString {
                         append("# Open source licenses\n")
                         append("## Notice for packages")
-                        libraries.toLicensesMap().forEach { (license, libraries) ->
-                            libraries.asSequence().sortedBy { it.name }.forEach { library ->
+                        libraries.toLicensesMap().forEach { (license, pairs) ->
+                            pairs.asSequence().sortedBy { it.second.name }.forEach { (coordinates, library) ->
                                 append('\n')
                                 append("* ")
-                                append(library.name ?: library.mavenCoordinates.identifierWithoutVersion)
+                                append(library.name ?: coordinates.identifierWithoutVersion)
                             }
 
                             append("\n```\n")
                             when (license.id) {
                                 LicenseId.UNKNOWN -> {
-                                    logger.logLicenseWarning(license, libraries)
+                                    logger.logLicenseWarning(license, pairs)
                                     append(license.name)
                                     append("\n")
                                     append(license.url)

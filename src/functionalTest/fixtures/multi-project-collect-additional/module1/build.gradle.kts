@@ -10,8 +10,12 @@ plugins {
 }
 
 licenses {
-    additionalProjects(":module2", ":modules:submodule")
     reports {
         html.enabled.set(true)
     }
+}
+
+dependencies {
+    implementation(project(":module2"))
+    implementation(project(":modules:submodule"))
 }

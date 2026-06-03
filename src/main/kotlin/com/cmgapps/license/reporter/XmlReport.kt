@@ -21,13 +21,13 @@ abstract class XmlReport
             outputStream.bufferedWriter().use {
                 it.write(
                     libraries {
-                        for (library in libraries) {
+                        for ((coordinates, library) in libraries) {
                             library(
-                                id = library.mavenCoordinates.toString(),
-                                version = library.mavenCoordinates.version.toString(),
+                                id = coordinates.toString(),
+                                version = coordinates.version,
                             ) {
                                 name {
-                                    +(library.name ?: library.mavenCoordinates.toString())
+                                    +(library.name ?: coordinates.toString())
                                 }
 
                                 description {

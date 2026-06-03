@@ -15,7 +15,6 @@ import com.cmgapps.license.util.TestStream
 import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.getFileContent
 import com.cmgapps.license.util.testLibraries
-import org.apache.maven.artifact.versioning.ComparableVersion
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logger
@@ -64,34 +63,34 @@ class MarkdownReportShould {
     @Test
     fun `generate Markdown report for libs without matching license`() {
         TestMarkdownReport(
-            listOf(
-                Library(
-                    MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
-                    name = "Lib with invalid license",
-                    description = null,
-                    licenses =
-                        listOf(
-                            License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
-                        ),
-                ),
-                Library(
-                    MavenCoordinates("test.group2", "test.artifact2", ComparableVersion("1.0")),
-                    name = "Lib with invalid license 2",
-                    description = null,
-                    licenses =
-                        listOf(
-                            License(LicenseId.UNKNOWN, name = "foo2", url = "http://www.license2.foo"),
-                        ),
-                ),
-                Library(
-                    MavenCoordinates("test.group3", "test.artifact3", ComparableVersion("1.0")),
-                    name = "Lib with invalid license 3",
-                    description = null,
-                    licenses =
-                        listOf(
-                            License(LicenseId.UNKNOWN, name = "foo2", url = "http://www.license2.foo"),
-                        ),
-                ),
+            mapOf(
+                MavenCoordinates("test.group", "test.artifact", "1.0") to
+                    Library(
+                        name = "Lib with invalid license",
+                        description = null,
+                        licenses =
+                            setOf(
+                                License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
+                            ),
+                    ),
+                MavenCoordinates("test.group2", "test.artifact2", "1.0") to
+                    Library(
+                        name = "Lib with invalid license 2",
+                        description = null,
+                        licenses =
+                            setOf(
+                                License(LicenseId.UNKNOWN, name = "foo2", url = "http://www.license2.foo"),
+                            ),
+                    ),
+                MavenCoordinates("test.group3", "test.artifact3", "1.0") to
+                    Library(
+                        name = "Lib with invalid license 3",
+                        description = null,
+                        licenses =
+                            setOf(
+                                License(LicenseId.UNKNOWN, name = "foo2", url = "http://www.license2.foo"),
+                            ),
+                    ),
             ),
         ).writeLicenses(outputStream)
         assertThat(
@@ -123,16 +122,16 @@ class MarkdownReportShould {
         val logger = mock<Logger>()
 
         TestMarkdownReport(
-            listOf(
-                Library(
-                    MavenCoordinates("test.group", "test.artifact", ComparableVersion("1.0")),
-                    name = "Lib with invalid license",
-                    description = null,
-                    licenses =
-                        listOf(
-                            License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
-                        ),
-                ),
+            mapOf(
+                MavenCoordinates("test.group", "test.artifact", "1.0") to
+                    Library(
+                        name = "Lib with invalid license",
+                        description = null,
+                        licenses =
+                            setOf(
+                                License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
+                            ),
+                    ),
             ),
             logger,
         ).writeLicenses(outputStream)
@@ -149,7 +148,7 @@ class MarkdownReportShould {
 }
 
 private class TestMarkdownReport(
-    override var libraries: List<Library>,
+    override var libraries: Map<MavenCoordinates, Library>,
     logger: Logger = Logging.getLogger("TestMarkdownReport"),
     project: Project = ProjectBuilder.builder().build(),
 ) : MarkdownReport(project.layout, project.tasks.register("licenseReport").get(), logger) {

@@ -229,6 +229,7 @@ dependencies {
     compileOnly(libs.kotlin.multiplatform.plugin)
 
     implementation(libs.maven.model)
+    implementation(libs.maven.model.builder)
     implementation(libs.maven.artifact)
     implementation(libs.kotlin.serialization)
     implementation(libs.apache.commons.csv)

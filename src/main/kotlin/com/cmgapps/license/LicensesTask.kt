@@ -6,7 +6,6 @@
 
 package com.cmgapps.license
 
-import com.cmgapps.license.helper.uppercaseFirstChar
 import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.License
 import com.cmgapps.license.model.LicenseId
@@ -21,31 +20,47 @@ import com.cmgapps.license.reporter.ReportType
 import com.cmgapps.license.reporter.TextReport
 import com.cmgapps.license.reporter.XmlReport
 import groovy.lang.Closure
-import org.apache.maven.artifact.versioning.ComparableVersion
+import org.apache.maven.model.Dependency
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader
+import org.apache.maven.model.Repository
+import org.apache.maven.model.building.DefaultModelBuilderFactory
+import org.apache.maven.model.building.DefaultModelBuildingRequest
+import org.apache.maven.model.building.FileModelSource
+import org.apache.maven.model.building.ModelBuildingRequest
+import org.apache.maven.model.building.ModelSource2
+import org.apache.maven.model.resolution.ModelResolver
 import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.NamedDomainObjectSet
 import org.gradle.api.Task
-import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.artifacts.component.ComponentIdentifier
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
+import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.artifacts.result.ResolvedComponentResult
+import org.gradle.api.artifacts.result.ResolvedDependencyResult
+import org.gradle.api.artifacts.result.ResolvedVariantResult
+import org.gradle.api.attributes.Attribute
+import org.gradle.api.attributes.Category.CATEGORY_ATTRIBUTE
+import org.gradle.api.attributes.Category.ENFORCED_PLATFORM
+import org.gradle.api.attributes.Category.REGULAR_PLATFORM
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.logging.Logger
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.SetProperty
+import org.gradle.api.provider.MapProperty
+import org.gradle.api.provider.Provider
 import org.gradle.api.reporting.ReportContainer
 import org.gradle.api.reporting.Reporting
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFiles
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import java.io.File
-import java.net.URI
 import java.util.function.IntFunction
 import javax.inject.Inject
 
@@ -133,11 +148,6 @@ internal abstract class LicenseReportContainerImpl
 
         @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
         override fun <T> toArray(generator: IntFunction<Array<out T?>?>): Array<out T?>? = super<LicenseReportContainer>.toArray(generator)
-
-        @Suppress("UnstableApiUsage")
-        override fun disallowChanges() {
-            super<LicenseReportContainer>.disallowChanges()
-        }
     }
 
 @CacheableTask
@@ -151,15 +161,7 @@ abstract class LicensesTask
             objects.newInstance(LicenseReportContainerImpl::class.java, this)
 
         @get:Input
-        var additionalProjects: SetProperty<String> = objects.setProperty(String::class.java)
-
-        @get:InputFiles
-        @get:PathSensitive(PathSensitivity.NONE)
-        abstract val pomFiles: ConfigurableFileCollection
-
-        @get:InputFiles
-        @get:PathSensitive(PathSensitivity.NONE)
-        abstract val resolvedPomFiles: ConfigurableFileCollection
+        internal abstract val coordinatesWithLibrary: MapProperty<MavenCoordinates, Library>
 
         @get:OutputFiles
         val outputFiles: Map<String, RegularFileProperty>
@@ -181,141 +183,133 @@ abstract class LicensesTask
                 configureAction.execute(this)
             }
 
+        fun configurationToCheck(configuration: Configuration) {
+            loadDependenciesFromConfiguration(configuration.incoming.resolutionResult.rootComponent)
+        }
+
+        fun configurationToCheck(configuration: Provider<Configuration>) {
+            loadDependenciesFromConfiguration(
+                configuration.flatMap { it.incoming.resolutionResult.rootComponent },
+            )
+        }
+
+        private fun loadDependenciesFromConfiguration(root: Provider<ResolvedComponentResult>) {
+            val dependencies = project.dependencies
+            val configurations = project.configurations
+            val pomInfos: Provider<Map<MavenCoordinates, Library>> =
+                root.map { root ->
+                    val directDependencies = loadMavenCoordinates(logger, root)
+                    val directPomFiles =
+                        directDependencies.fetchPomFiles(root.variants, dependencies, configurations)
+                    directPomFiles.getPomInfo(root.variants, dependencies, configurations)
+                }
+
+            this.coordinatesWithLibrary.set(pomInfos)
+        }
+
         @TaskAction
         fun licensesReport() {
-            val allPomFileSet: Set<File> = pomFiles.files
-            val resolvedPomFileSet: Set<File> = resolvedPomFiles.files
-            val libraries = generateLibraries(resolvedPomFileSet, allPomFileSet)
-            createReport(libraries)
+            createReport(coordinatesWithLibrary.get().toSortedMap())
         }
 
-        private fun generateLibraries(
-            resolvedPomFileSet: Set<File>,
-            allPomFileSet: Set<File>,
-        ): List<Library> =
-            resolvedPomFileSet
-                .map { file ->
-                    val model = getPomModel(file)
-                    val licenses = model.findLicenses(allPomFileSet)
-
-                    if (licenses.isEmpty()) {
-                        logger.warn("${model.name} dependency does not have a license.")
+        protected fun Iterable<MavenCoordinatesWithPomFile>.getPomInfo(
+            variants: List<ResolvedVariantResult>,
+            dependencies: DependencyHandler,
+            configurations: ConfigurationContainer,
+        ): Map<MavenCoordinates, Library> {
+            val builder = DefaultModelBuilderFactory().newInstance()
+            val resolver =
+                object : ModelResolver {
+                    fun resolve(dependencyCoordinates: MavenCoordinates): FileModelSource {
+                        val pomFile =
+                            setOf(dependencyCoordinates)
+                                .fetchPomFiles(variants, dependencies, configurations)
+                                .single()
+                                .pomFile
+                        return FileModelSource(pomFile)
                     }
 
-                    Library(
-                        MavenCoordinates(
-                            model.findGroupId(allPomFileSet).orEmpty(),
-                            model.findArtifactId(allPomFileSet).orEmpty(),
-                            model.findVersion(allPomFileSet)?.let { version -> ComparableVersion(version) }
-                                ?: ComparableVersion(""),
-                        ),
-                        model.name,
-                        model.findDescription(allPomFileSet),
-                        licenses,
-                    )
-                }.sortedWith(
-                    compareBy<Library> { it.name ?: it.mavenCoordinates.identifierWithoutVersion }
-                        .thenByDescending { it.mavenCoordinates.version },
-                ).toList()
+                    override fun resolveModel(
+                        groupId: String,
+                        artifactId: String,
+                        version: String,
+                    ): ModelSource2 = resolve(MavenCoordinates(groupId, artifactId, version))
 
-        private fun getPomModel(file: File): Model =
-            MavenXpp3Reader().run {
-                file.inputStream().use(::read)
-            }
+                    override fun resolveModel(parent: Parent): ModelSource2 =
+                        resolve(MavenCoordinates(parent.groupId, parent.artifactId, parent.version))
 
-        private fun Model.findLicenses(pomFileSet: Set<File>): List<License> {
-            if (licenses.isNotEmpty()) {
-                return licenses.mapNotNull { license ->
-                    val url = license.url
-                    val name = license.name.trim().uppercaseFirstChar()
-                    try {
-                        // check for valid url
-                        URI(url)
-                    } catch (_: Exception) {
-                        logger.warn("$name dependency has an invalid license URL; skipping license")
-                        return@mapNotNull null
+                    override fun resolveModel(dependency: Dependency): ModelSource2 =
+                        resolve(
+                            MavenCoordinates(dependency.groupId, dependency.artifactId, dependency.version),
+                        )
+
+                    override fun addRepository(repository: Repository) {
+                        // NO-OP
                     }
 
-                    License(
-                        getLicenseId(url, name),
-                        name = name,
-                        url = url,
-                    )
+                    override fun addRepository(
+                        repository: Repository,
+                        replace: Boolean,
+                    ) {
+                        // NO-OP
+                    }
+
+                    override fun newCopy(): ModelResolver = this
                 }
+
+            return associate { (coordinates, file) ->
+                val req =
+                    DefaultModelBuildingRequest().apply {
+                        isProcessPlugins = false
+                        pomFile = file
+                        isTwoPhaseBuilding = true
+                        modelResolver = resolver
+                        validationLevel = ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL
+                    }
+                val result = builder.build(req)
+                coordinates to loadPomInfo(result.effectiveModel) { modelId -> result.getRawModel(modelId) }
             }
-
-            logger.info("Project $name has no license in POM file.")
-
-            if (parent != null) {
-                logger.info("Checking parent POM file.")
-                return parent.getModel(pomFileSet).findLicenses(pomFileSet)
-            }
-
-            return emptyList()
         }
 
-        private fun Parent.getModel(pomFileSet: Set<File>): Model {
-            val pomFile =
-                pomFileSet.find { file ->
-                    file.name == "$artifactId-$version.pom" &&
-                        file.path.contains(groupId.replace(".", "[./]").toRegex())
-                } ?: error("Parent POM $groupId:$artifactId:$version not found in resolved POM files")
-            return getPomModel(pomFile)
+        protected fun Set<MavenCoordinates>.fetchPomFiles(
+            variants: List<ResolvedVariantResult>,
+            dependencies: DependencyHandler,
+            configurations: ConfigurationContainer,
+        ): List<MavenCoordinatesWithPomFile> {
+            val pomDependencies = map { dependencies.create(it.pomCoordinate()) }.toTypedArray()
+
+            val withVariants =
+                configurations
+                    .detachedConfiguration(*pomDependencies)
+                    .apply {
+                        for (variant in variants) {
+                            attributes {
+                                val variantAttrs = variant.attributes
+                                for (attrs in variantAttrs.keySet()) {
+                                    @Suppress("UNCHECKED_CAST")
+                                    it.attribute(attrs as Attribute<Any>, variantAttrs.getAttribute(attrs)!!)
+                                }
+                            }
+                        }
+                    }.artifacts()
+
+            val withoutVariants = configurations.detachedConfiguration(*pomDependencies).artifacts()
+
+            return (withVariants + withoutVariants)
+                .map {
+                    // Cast is safe because all resolved artifacts are pom files.
+                    val coordinates =
+                        (it.id.componentIdentifier as ModuleComponentIdentifier).toMavenCoordinates()
+                    MavenCoordinatesWithPomFile(coordinates, it.file)
+                }.distinctBy { it.dependencyCoordinates }
         }
 
-        private fun Model.findVersion(pomFileSet: Set<File>): String? =
-            when {
-                version != null -> {
-                    version
-                }
-
-                parent != null -> {
-                    parent.version ?: parent.getModel(pomFileSet).findVersion(pomFileSet)
-                }
-
-                else -> {
-                    null
-                }
+        private fun Configuration.artifacts() =
+            resolvedConfiguration.lenientConfiguration.allModuleDependencies.flatMap {
+                it.allModuleArtifacts
             }
 
-        private fun Model.findDescription(pomFileSet: Set<File>): String? =
-            when {
-                description != null -> description
-                parent != null -> parent.getModel(pomFileSet).findDescription(pomFileSet)
-                else -> null
-            }
-
-        private fun Model.findGroupId(pomFileSet: Set<File>): String? =
-            when {
-                groupId != null -> {
-                    groupId
-                }
-
-                parent != null -> {
-                    parent.groupId ?: parent.getModel(pomFileSet).findGroupId(pomFileSet)
-                }
-
-                else -> {
-                    null
-                }
-            }
-
-        private fun Model.findArtifactId(pomFileSet: Set<File>): String? =
-            when {
-                artifactId != null -> {
-                    artifactId
-                }
-
-                parent != null -> {
-                    parent.artifactId ?: parent.getModel(pomFileSet).findArtifactId(pomFileSet)
-                }
-
-                else -> {
-                    null
-                }
-            }
-
-        private fun createReport(libraries: List<Library>) {
+        private fun createReport(libraries: Map<MavenCoordinates, Library>) {
             if (libraries.isEmpty()) {
                 return
             }
@@ -327,7 +321,7 @@ abstract class LicensesTask
         }
 
         private fun LicensesSingleFileReport.write() {
-            with(outputLocation.get().asFile) {
+            with(this.outputLocation.get().asFile) {
                 parentFile.mkdirs()
                 outputStream().use {
                     writeLicenses(it)
@@ -347,4 +341,139 @@ private fun getLicenseId(
         licenseMap.containsKey(licenseName) -> licenseMap.getOrDefault(licenseName, LicenseId.UNKNOWN)
         else -> LicenseId.UNKNOWN
     }
+}
+
+private fun ModuleComponentIdentifier.toMavenCoordinates(): MavenCoordinates =
+    MavenCoordinates(
+        groupId = group,
+        artifactId = module,
+        version = version,
+    )
+
+data class MavenCoordinatesWithPomFile(
+    val dependencyCoordinates: MavenCoordinates,
+    val pomFile: File,
+)
+
+private fun loadMavenCoordinates(
+    logger: Logger,
+    root: ResolvedComponentResult,
+): Set<MavenCoordinates> {
+    val coordinates = mutableSetOf<MavenCoordinates>()
+
+    loadMavenCoordinates(
+        logger,
+        root,
+        coordinates,
+        mutableSetOf(),
+        depth = 1,
+    )
+
+    return coordinates
+}
+
+private fun loadMavenCoordinates(
+    logger: Logger,
+    root: ResolvedComponentResult,
+    destination: MutableSet<MavenCoordinates>,
+    seen: MutableSet<ComponentIdentifier>,
+    depth: Int,
+) {
+    val id = root.id
+
+    when {
+        id is ProjectComponentIdentifier -> {
+            logDependencyInfo(logger, depth, id, " ignoring because project dependency")
+            for (dependency in root.dependencies) {
+                if (dependency is ResolvedDependencyResult) {
+                    val selected = dependency.selected
+                    if (seen.add(selected.id)) {
+                        loadMavenCoordinates(
+                            logger,
+                            selected,
+                            destination,
+                            seen,
+                            depth + 1,
+                        )
+                    }
+                }
+            }
+        }
+
+        root.isPlatform() -> {
+            // Platform (POM) dependency, do nothing.
+            logDependencyInfo(logger, depth, id, " ignoring because platform dependency")
+        }
+
+        id is ModuleComponentIdentifier -> {
+            var ignoreSuffix: String? = null
+            if (id.group == "" && id.version == "") {
+                // Assuming flat-dir repository dependency, do nothing.
+                ignoreSuffix = " ignoring because flat-dir repository artifact has no metadata"
+            } else {
+                destination += id.toMavenCoordinates()
+            }
+            logDependencyInfo(logger, depth, id, ignoreSuffix)
+        }
+
+        else -> {
+            error("Unknown dependency ${id::class.java}: $id")
+        }
+    }
+}
+
+fun logDependencyInfo(
+    logger: Logger,
+    depth: Int,
+    id: ComponentIdentifier,
+    ignoreSuffix: String? = null,
+) {
+    if (logger.isInfoEnabled) {
+        logger.info(
+            buildString {
+                repeat(depth) { append("  ") }
+                append(id)
+                if (ignoreSuffix != null) {
+                    append(ignoreSuffix)
+                }
+            },
+        )
+    }
+}
+
+private fun ResolvedComponentResult.isPlatform(): Boolean {
+    val singleVariant = variants.singleOrNull() ?: return false
+    // https://github.com/gradle/gradle/issues/8854
+    val stringAttribute = Attribute.of(CATEGORY_ATTRIBUTE.name, String::class.java)
+    val category = singleVariant.attributes.getAttribute(stringAttribute) ?: return false
+    return when (category) {
+        ENFORCED_PLATFORM,
+        REGULAR_PLATFORM,
+        -> true
+
+        else -> false
+    }
+}
+
+internal fun loadPomInfo(
+    pom: Model,
+    getRawModel: (String) -> Model?,
+): Library {
+    val parentRawModel =
+        pom.parent?.let { getRawModel("${it.groupId}:${it.artifactId}:${it.version}") }
+
+    return Library(
+        name = pom.name ?: parentRawModel?.name,
+        licenses =
+            (pom.licenses.takeUnless { it.isEmpty() } ?: parentRawModel?.licenses)?.mapTo(
+                mutableSetOf(),
+            ) {
+                License(
+                    name = it.name,
+                    url = it.url,
+                    id = getLicenseId(it.name, it.url),
+                )
+            } ?: emptySet(),
+        description = pom.description,
+    )
 }

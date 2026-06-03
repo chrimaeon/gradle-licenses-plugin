@@ -1,6 +1,6 @@
 Licenses
-├─ Fake dependency name:1.0.0
-│  ├─ License: Some license
-│  └─ URL: http://website.tld/
-└─ com.google.firebase:firebase-core:10.0.1
-   └─ License: Undefined
+├─ com.google.firebase:firebase-core:10.0.1
+│  └─ License: Undefined
+└─ Fake dependency name:1.0.0
+   ├─ License: Some license
+   └─ URL: http://website.tld/

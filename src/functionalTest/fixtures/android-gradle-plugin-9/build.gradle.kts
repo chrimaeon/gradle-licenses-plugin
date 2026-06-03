@@ -43,7 +43,9 @@ licenses {
                     .file("reports/licenses.txt")
                     .get()
                     .asFile
-            generator.set { list -> list.map { it.name }.joinToString(separator = "\n") }
+            generator.set { libraries ->
+                libraries.map { (_, library) -> "${library.name}" }.joinToString("\n")
+            }
         }
     }
 }

@@ -28,12 +28,12 @@ abstract class CsvReport
                         .setHeader(*HEADER)
                         .get(),
                 ).use { printer ->
-                    libraries.forEach { library ->
+                    libraries.forEach { (coordinates, library) ->
                         library.licenses.forEach { license ->
                             printer.printRecord(
                                 library.name,
-                                library.mavenCoordinates.version,
-                                library.mavenCoordinates,
+                                coordinates.version,
+                                coordinates,
                                 library.description,
                                 license.id.spdxLicenseIdentifier,
                                 license.name,

@@ -16,7 +16,10 @@
 
 package com.cmgapps.license.reporter
 
+import com.cmgapps.license.model.License
+import com.cmgapps.license.model.MavenCoordinates
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToStream
 import org.gradle.api.Task
@@ -37,6 +40,24 @@ abstract class JsonReport
 
         @OptIn(ExperimentalSerializationApi::class)
         override fun writeLicenses(outputStream: OutputStream) {
-            json.encodeToStream(libraries, outputStream)
+            json.encodeToStream(
+                libraries.map { (coordinates, library) ->
+                    JsonLibrary(
+                        coordinates,
+                        library.name,
+                        library.description,
+                        library.licenses,
+                    )
+                },
+                outputStream,
+            )
         }
     }
+
+@Serializable
+class JsonLibrary(
+    val mavenCoordinates: MavenCoordinates,
+    val name: String?,
+    val description: String?,
+    val licenses: Set<License>,
+)

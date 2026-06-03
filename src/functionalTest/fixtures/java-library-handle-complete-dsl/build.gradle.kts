@@ -16,7 +16,12 @@ licenses {
         }
         custom {
             enabled.set(true)
-            generator.set({ licenses -> licenses.joinToString(separator = "\n") { "${it.name} -> ${it.licenses.first().name}" } })
+//            generator.set({ licenses -> licenses.joinToString(separator = "\n") { "${it.name} -> ${it.licenses.first().name}" } })
+            generator.set { libraries ->
+                libraries
+                    .map { (coordinates, library) -> "${library.name} -> ${library.licenses.first().name}" }
+                    .joinToString("\n")
+            }
         }
         html {
             enabled.set(true)

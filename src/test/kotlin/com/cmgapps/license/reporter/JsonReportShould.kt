@@ -7,6 +7,7 @@
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.model.Library
+import com.cmgapps.license.model.MavenCoordinates
 import com.cmgapps.license.util.OutputStreamExtension
 import com.cmgapps.license.util.TestStream
 import com.cmgapps.license.util.asString
@@ -79,7 +80,7 @@ class JsonReportShould {
 }
 
 private class TestJsonReport(
-    override var libraries: List<Library>,
+    override var libraries: Map<MavenCoordinates, Library>,
     project: Project = ProjectBuilder.builder().build(),
 ) : JsonReport(project.layout, project.tasks.register("licenseReport").get()) {
     override fun getRequired(): Property<Boolean> =

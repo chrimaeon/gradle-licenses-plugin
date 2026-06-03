@@ -32,46 +32,6 @@ plugins {
 ```
 </details>
 
-#### Using the legacy plugin application
-
-<details open="open">
-<summary>Kotlin</summary>
-
-```kotlin
-buildscript {
-    repositories {
-        maven {
-            url = uri("https://plugins.gradle.org/m2/")
-        }
-    }
-    dependencies {
-        classpath("com.cmgapps:gradle-licenses-plugin:6.0.0")
-    }
-}
-
-apply(plugin = "com.cmgapps.licenses")
-```
-</details>
-
-<details>
-<summary>Groovy</summary>
-
-```groovy
-buildscript {
-    repositories {
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-    }
-    dependencies {
-        classpath 'com.cmgapps:gradle-licenses-plugin:6.0.0'
-    }
-}
-
-apply plugin: 'com.cmgapps.licenses'
-```
-</details>
-
 ### Tasks
 
 Applying the plugin will create tasks to generate the license report
@@ -149,7 +109,13 @@ The plugin can output different formats.
 * `Mardown`
   generates a Markdown file
 * `Custom`
-  add your own reporter as a lambda function
+  add your own reporter as
+  ```kotlin
+  package com.cmgapps.license.reporter
+  fun interface CustomReportGenerator {
+    fun generate(libraries: Map<com.cmgapps.license.model.MavenCoordinates, com.cmgapps.license.model.Library>): String
+  }
+  ```
   
   <details open="open">
   <summary>Kotlin</summary>
@@ -159,55 +125,18 @@ The plugin can output different formats.
         custom {
             enabled.set(true)
             outputFile.set(buildDir.resolve("reports").resolve("licenses.txt"))
-            generateor.set { list -> list.map { it.name }.joinToString() }
+            generator.set { libraries ->
+                libraries.map { (coordinates, library) -> "$coordinates -> $library" }.joinToString("\n")
+            }
         }
     }
     ```
   </details>
 
-  <details>
-  <summary>Groovy</summary>
-  
-  ```groovy
-    licenses {
-        custom {
-            enabled.set(true)
-            outputFile.set(file("$buildDir/reports/licenses/licenses.txt"))
-            def builder = { list -> list.collect { it.name }.join(', ') } as com.cmgapps.license.reporter.CustomReportGenerator
-            generator.set(builder)
-        }
-   }
-   ```
-   </details>
-
-#### Multi-project Builds
-
-For multi-project build, you can add projects you want to collect license information from in the main project.
-
-<details open="open">
-<summary>Kotlin</summary>
-
-```kotlin
-licenses {
-    additionalProjects(":module2", ":module3")
-}
-```
-</details>
-
-<details>
-<summary>Groovy</summary>
-
-```groovy
-licenses {
-    additionalProjects ':module2', ':module3'
-}
-```
-</details>
-
 ## License
 
 ```text
-Copyright (c) 2018-2024. Christian Grach <christian.grach@cmgapps.com>
+Copyright (c) 2018-2026. Christian Grach <christian.grach@cmgapps.com>
 
 SPDX-License-Identifier: Apache-2.0
 ```

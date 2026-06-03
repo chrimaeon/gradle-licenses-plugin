@@ -21,20 +21,18 @@ import com.cmgapps.license.reporter.CustomReport
 import com.cmgapps.license.reporter.HtmlReport
 import com.cmgapps.license.reporter.ReportType
 import org.apache.maven.artifact.versioning.ComparableVersion
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.ExternalDependency
-import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.ExtensionAware
+import org.gradle.api.plugins.JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME
+import org.gradle.api.provider.Provider
 import org.gradle.api.reporting.SingleFileReport
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
-import java.io.File
 
 private const val MIN_KOTLIN_VERSION = "2.0.0"
 
@@ -49,17 +47,22 @@ class LicensesPlugin : Plugin<Project> {
                     LicenseReportsExtension::class.java,
                 )
 
-            plugins.withId("java") {
-                configureJavaProject(project, licenseExtension, licenseReportExtension)
+            pluginManager.withPlugin("org.gradle.java") {
+                // Special case: KMP with JVM withJava():
+                // withKotlinMultiPlatformPlugin did already run, so the jvm target is already set, ignore
+                // another setup.
+                if (!project.pluginManager.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
+                    configureJavaProject(project, licenseReportExtension)
+                }
             }
 
-            plugins.withId("org.jetbrains.kotlin.multiplatform") {
-                configureMultiplatformProject(project, licenseExtension, licenseReportExtension)
+            pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+                configureMultiplatformProject(project, licenseReportExtension)
             }
 
             ANDROID_IDS.forEach { id ->
-                plugins.withId(id) {
-                    configureAndroidProject(project, licenseExtension, licenseReportExtension)
+                pluginManager.withPlugin(id) {
+                    configureAndroidProject(project, licenseReportExtension)
                 }
             }
         }
@@ -80,30 +83,26 @@ class LicensesPlugin : Plugin<Project> {
         @JvmStatic
         private fun configureJavaProject(
             project: Project,
-            licenseExtension: LicensesExtension,
             licenseReportExtension: LicenseReportsExtension,
         ) {
             project.tasks.register(
                 "licenseReport",
                 LicensesTask::class.java,
             ) { task ->
-                task.addBasicConfiguration(licenseExtension, licenseReportExtension)
-                val configs = collectJavaConfigurations(project, licenseExtension.additionalProjects)
-                val (resolved, all) = collectAllPomFiles(project, configs)
-                task.resolvedPomFiles.from(resolved)
-                task.pomFiles.from(all)
+                task.addBasicConfiguration(licenseReportExtension)
+                val configuration = project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME)
+                task.configurationToCheck(configuration)
             }
         }
 
         @JvmStatic
         private fun configureAndroidProject(
             project: Project,
-            extension: LicensesExtension,
             reportExtension: LicenseReportsExtension,
         ) {
             // check for AGP 7.0+ 'androidComponent' extension
             if (findClass("com.android.build.api.variant.AndroidComponentsExtension") != null) {
-                configureAgp7Project(project, extension, reportExtension)
+                configureAgp7Project(project, reportExtension)
             } else {
                 throw GradleException("Minimum Android Gradle Plugin Version is 7.0+")
             }
@@ -112,7 +111,6 @@ class LicensesPlugin : Plugin<Project> {
         @JvmStatic
         private fun configureAgp7Project(
             project: Project,
-            extension: LicensesExtension,
             reportExtension: LicenseReportsExtension,
         ) {
             project.logger.info("Using AGP 7.0+ AndroidComponentsExtension")
@@ -125,20 +123,8 @@ class LicensesPlugin : Plugin<Project> {
                         "license${variant.name.uppercaseFirstChar()}Report",
                         LicensesTask::class.java,
                     ) { task ->
-                        task.addBasicConfiguration(extension, reportExtension)
-
-                        val baseConfigs = collectJavaConfigurations(project, extension.additionalProjects)
-                        val androidConfigs =
-                            collectAndroidConfigurations(
-                                project,
-                                extension.additionalProjects,
-                                variant.buildType!!,
-                                variant.productFlavors.map { it.second },
-                                variant.name,
-                            )
-                        val (resolved, all) = collectAllPomFiles(project, baseConfigs + androidConfigs)
-                        task.resolvedPomFiles.from(resolved)
-                        task.pomFiles.from(all)
+                        task.addBasicConfiguration(reportExtension)
+                        task.configurationToCheck(variant.runtimeConfiguration)
                     }
                 }
         }
@@ -146,7 +132,6 @@ class LicensesPlugin : Plugin<Project> {
         @JvmStatic
         private fun configureMultiplatformProject(
             project: Project,
-            extension: LicensesExtension,
             reportExtension: LicenseReportsExtension,
         ) {
             val kotlinVersion = ComparableVersion(project.getKotlinPluginVersion())
@@ -155,208 +140,51 @@ class LicensesPlugin : Plugin<Project> {
                 throw GradleException("Using Multiplatform Gradle Plugin v$kotlinVersion not supported")
             }
 
-            val kotlinMultiplatformExtension = project.extensions.getByName("kotlin") as KotlinMultiplatformExtension
+            val kotlinMultiplatformExtension = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
+
+            val targetRuntimeConfiguration = mutableListOf<Provider<Configuration>>()
+
+            val rootTask = project.tasks.register("licenseMultiplatformReport")
 
             kotlinMultiplatformExtension.targets.configureEach { target ->
                 val targetName = target.name
                 if (target.platformType == KotlinPlatformType.common) {
+                    // All common dependencies end up in platform targets.
                     return@configureEach
                 }
 
-                project.tasks.register(
-                    "licenseMultiplatform${targetName.uppercaseFirstChar()}Report",
-                    LicensesTask::class.java,
-                ) { task ->
-                    task.addBasicConfiguration(extension, reportExtension)
+                val task =
+                    project.tasks.register(
+                        "licenseMultiplatform${targetName.uppercaseFirstChar()}Report",
+                        LicensesTask::class.java,
+                    ) { task ->
+                        task.addBasicConfiguration(reportExtension)
+                        val compilation = target.compilations.getByName(KotlinCompilation.MAIN_COMPILATION_NAME)
+                        // Fallback to compile dependencies when runtime isn't supported, e.g. Kotlin/Native.
+                        val runtimeConfigurationName =
+                            compilation.runtimeDependencyConfigurationName
+                                ?: compilation.compileDependencyConfigurationName
 
-                    val baseConfigs = collectJavaConfigurations(project, extension.additionalProjects)
-                    val kmpConfigs =
-                        collectKmpConfigurations(project, extension.additionalProjects, listOf("common", targetName))
-                    val (resolved, all) = collectAllPomFiles(project, baseConfigs + kmpConfigs)
-                    task.resolvedPomFiles.from(resolved)
-                    task.pomFiles.from(all)
-                }
-            }
-
-            val targetNames = mutableListOf("common")
-            kotlinMultiplatformExtension.targets.configureEach { target ->
-                if (target.platformType == KotlinPlatformType.common) {
-                    return@configureEach
-                }
-
-                targetNames.add(target.name)
-            }
-
-            project.tasks.register(
-                "licenseMultiplatformReport",
-                LicensesTask::class.java,
-            ) { task ->
-                task.addBasicConfiguration(extension, reportExtension)
-
-                val baseConfigs = collectJavaConfigurations(project, extension.additionalProjects)
-                val kmpConfigs = collectKmpConfigurations(project, extension.additionalProjects, targetNames)
-                val (resolved, all) = collectAllPomFiles(project, baseConfigs + kmpConfigs)
-                task.resolvedPomFiles.from(resolved)
-                task.pomFiles.from(all)
-            }
-        }
-
-        @JvmStatic
-        private fun collectJavaConfigurations(
-            project: Project,
-            additionalProjectPaths: Set<String>,
-        ): Set<Configuration> {
-            val allProjects = resolveProjects(project, additionalProjectPaths)
-            return buildSet {
-                allProjects.forEach { proj ->
-                    proj.configurations.findByName("compile")?.let { add(it) }
-                    proj.configurations.findByName("api")?.let { add(it) }
-                    proj.configurations.findByName("implementation")?.let { add(it) }
-                }
-            }
-        }
-
-        @JvmStatic
-        private fun collectAndroidConfigurations(
-            project: Project,
-            additionalProjectPaths: Set<String>,
-            buildType: String,
-            productFlavors: List<String>,
-            variant: String,
-        ): Set<Configuration> {
-            val allProjects = resolveProjects(project, additionalProjectPaths)
-            return buildSet {
-                allProjects.forEach { proj ->
-                    addAll(addAndroidConfiguration(proj, buildType))
-                    productFlavors.forEach { flavor ->
-                        if (variant.uppercaseFirstChar().contains(flavor.uppercaseFirstChar())) {
-                            addAll(addAndroidConfiguration(proj, flavor))
-                        }
+                        val runtimeConfiguration = project.configurations.named(runtimeConfigurationName)
+                        targetRuntimeConfiguration.add(runtimeConfiguration)
+                        task.configurationToCheck(runtimeConfiguration)
                     }
-                }
+
+                rootTask.configure { it.dependsOn(task) }
             }
         }
 
         @JvmStatic
-        private fun addAndroidConfiguration(
-            project: Project,
-            type: String,
-        ): Set<Configuration> =
-            buildSet {
-                project.configurations.find { it.name == "${type}Compile" }?.let { add(it) }
-                project.configurations.find { it.name == "${type}Api" }?.let { add(it) }
-                project.configurations.find { it.name == "${type}Implementation" }?.let { add(it) }
-            }
-
-        @JvmStatic
-        private fun collectKmpConfigurations(
-            project: Project,
-            additionalProjectPaths: Set<String>,
-            targetNames: List<String>,
-        ): Set<Configuration> {
-            val allProjects = resolveProjects(project, additionalProjectPaths)
-            return buildSet {
-                allProjects.forEach { proj ->
-                    targetNames.forEach { name ->
-                        proj.configurations.find { it.name == "${name}MainApi" }?.let { add(it) }
-                        proj.configurations.find { it.name == "${name}MainImplementation" }?.let { add(it) }
-                    }
-                }
-            }
-        }
-
-        @JvmStatic
-        private fun resolveProjects(
-            project: Project,
-            additionalProjectPaths: Set<String>,
-        ): Set<Project> {
-            val allProjects: Set<Project> = project.rootProject.allprojects
-            return setOf(project) +
-                additionalProjectPaths
-                    .map { path ->
-                        allProjects.find { it.path == path }
-                            ?: throw IllegalArgumentException("additionalProject $path not found")
-                    }.toSet()
-        }
-
-        /**
-         * Resolves all POM files for the given configurations at configuration time,
-         * including parent POM chains. Returns a FileCollection of all POM files.
-         */
-        @JvmStatic
-        internal fun collectAllPomFiles(
-            project: Project,
-            configurations: Set<Configuration>,
-        ): Pair<FileCollection, FileCollection> {
-            val reader = MavenXpp3Reader()
-            val allPomFiles = mutableMapOf<String, File>()
-            val toResolve = mutableSetOf<Dependency>()
-            val initialKeys = mutableSetOf<String>()
-            val processed = mutableSetOf<String>()
-
-            // Collect initial @pom coordinates from configurations
-            configurations.forEach { config ->
-                config.incoming.dependencies
-                    .filterIsInstance<ExternalDependency>()
-                    .forEach { dep ->
-                        val key = "${dep.group}:${dep.name}:${dep.version}"
-                        initialKeys.add(key)
-                        toResolve.add(project.dependencies.create("$key@pom"))
-                    }
-            }
-
-            // Iteratively resolve POMs and their parent chains
-            while (toResolve.isNotEmpty()) {
-                val detached =
-                    project.configurations
-                        .detachedConfiguration(*toResolve.toTypedArray())
-                        .apply {
-                            isCanBeResolved = true
-                            isTransitive = false
-                        }
-                toResolve.clear()
-
-                detached.resolvedConfiguration.lenientConfiguration.artifacts.forEach { artifact ->
-                    val id = artifact.moduleVersion.id
-                    val key = "${id.group}:${id.name}:${id.version}"
-                    if (processed.add(key)) {
-                        allPomFiles[key] = artifact.file
-                        try {
-                            val model = artifact.file.inputStream().use { reader.read(it) }
-                            model.parent?.let { parent ->
-                                val parentKey = "${parent.groupId}:${parent.artifactId}:${parent.version}"
-                                if (!processed.contains(parentKey)) {
-                                    toResolve.add(project.dependencies.create("$parentKey@pom"))
-                                }
-                            }
-                        } catch (_: Exception) {
-                            // skip unparseable POMs
-                        }
-                    }
-                }
-            }
-
-            val resolvedRootFiles = allPomFiles.filterKeys { key -> initialKeys.contains(key) }.values
-            return Pair(project.files(resolvedRootFiles), project.files(allPomFiles.values))
-        }
-
-        @JvmStatic
-        private fun LicensesTask.addBasicConfiguration(
-            extension: LicensesExtension,
-            reportExtension: LicenseReportsExtension,
-        ) {
-            val name = this.name
-            additionalProjects.set(extension.additionalProjects)
+        private fun LicensesTask.addBasicConfiguration(reportExtension: LicenseReportsExtension) {
             description = TASK_DESC
             group = TASK_GROUP
+
             reports.configureEach { report ->
                 when (report.name) {
                     ReportType.HTML.name -> {
                         report as HtmlReport
                         val reporter =
-                            reportExtension.html.apply {
-                                this.outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.html"))
-                            }
+                            reportExtension.html
                         report.configureReport(reporter)
                         report.css.set(reporter.css)
                         report.useDarkMode.set(reporter.useDarkMode)
@@ -364,50 +192,38 @@ class LicensesPlugin : Plugin<Project> {
 
                     ReportType.CSV.name -> {
                         val reporter =
-                            reportExtension.csv.apply {
-                                outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.csv"))
-                            }
+                            reportExtension.csv
                         report.configureReport(reporter)
                     }
 
                     ReportType.JSON.name -> {
                         val reporter =
-                            reportExtension.json.apply {
-                                outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.json"))
-                            }
+                            reportExtension.json
                         report.configureReport(reporter)
                     }
 
                     ReportType.MARKDOWN.name -> {
                         val reporter =
-                            reportExtension.markdown.apply {
-                                outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.md"))
-                            }
+                            reportExtension.markdown
                         report.configureReport(reporter)
                     }
 
                     ReportType.TEXT.name -> {
                         val reporter =
-                            reportExtension.plainText.apply {
-                                outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.txt"))
-                            }
+                            reportExtension.plainText
                         report.configureReport(reporter)
                     }
 
                     ReportType.XML.name -> {
                         val reporter =
-                            reportExtension.xml.apply {
-                                outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses.xml"))
-                            }
+                            reportExtension.xml
                         report.configureReport(reporter)
                     }
 
                     ReportType.CUSTOM.name -> {
                         report as CustomReport
                         val reporter =
-                            reportExtension.custom.apply {
-                                outputFile.convention(project.layout.buildDirectory.file("reports/licenses/$name/licenses"))
-                            }
+                            reportExtension.custom
 
                         report.generator.set(reporter.generator)
 
@@ -424,7 +240,9 @@ class LicensesPlugin : Plugin<Project> {
         @JvmStatic
         private fun SingleFileReport.configureReport(reporter: Reporter) {
             required.set(reporter.enabled)
-            this.outputLocation.set(reporter.outputFile)
+            if (reporter.outputFile.isPresent) {
+                outputLocation.set(reporter.outputFile)
+            }
         }
     }
 }
