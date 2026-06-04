@@ -57,10 +57,6 @@ jobs:
         working-directory: example/android
         run: ../../gradlew licenseDebugReport
 
-      - name: Check Groovy Example
-        working-directory: example/groovy
-        run: ../../gradlew licenseReport
-
       - name: Check Kotlin Example
         working-directory: example/kotlin
         run: ../../gradlew licenseReport
