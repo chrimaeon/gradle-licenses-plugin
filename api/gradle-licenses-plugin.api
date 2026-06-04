@@ -40,9 +40,6 @@ public abstract class com/cmgapps/license/LicenseReportsExtension {
 
 public abstract class com/cmgapps/license/LicensesExtension {
 	public fun <init> ()V
-	public final fun additionalProjects (Ljava/util/Collection;)V
-	public final fun additionalProjects ([Ljava/lang/String;)V
-	public final fun getAdditionalProjects ()Ljava/util/Set;
 }
 
 public final class com/cmgapps/license/LicensesPlugin : org/gradle/api/Plugin {
@@ -50,7 +47,6 @@ public final class com/cmgapps/license/LicensesPlugin : org/gradle/api/Plugin {
 	public fun <init> ()V
 	public synthetic fun apply (Ljava/lang/Object;)V
 	public fun apply (Lorg/gradle/api/Project;)V
-	public static final fun collectAllPomFiles$gradle_licenses_plugin (Lorg/gradle/api/Project;Ljava/util/Set;)Lkotlin/Pair;
 }
 
 public final class com/cmgapps/license/LicensesPlugin$Companion {
@@ -62,18 +58,16 @@ public final class com/cmgapps/license/LicensesPluginKt {
 
 public abstract class com/cmgapps/license/LicensesTask : org/gradle/api/DefaultTask, org/gradle/api/reporting/Reporting {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getAdditionalProjects ()Lorg/gradle/api/provider/SetProperty;
+	public final fun configurationToCheck (Lorg/gradle/api/artifacts/Configuration;)V
+	public final fun configurationToCheck (Lorg/gradle/api/provider/Provider;)V
 	public final fun getOutputFiles ()Ljava/util/Map;
-	public abstract fun getPomFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public fun getReports ()Lcom/cmgapps/license/LicenseReportContainer;
 	public synthetic fun getReports ()Lorg/gradle/api/reporting/ReportContainer;
-	public abstract fun getResolvedPomFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public final fun licensesReport ()V
 	public fun reports (Lgroovy/lang/Closure;)Lcom/cmgapps/license/LicenseReportContainer;
 	public synthetic fun reports (Lgroovy/lang/Closure;)Lorg/gradle/api/reporting/ReportContainer;
 	public fun reports (Lorg/gradle/api/Action;)Lcom/cmgapps/license/LicenseReportContainer;
 	public synthetic fun reports (Lorg/gradle/api/Action;)Lorg/gradle/api/reporting/ReportContainer;
-	public final fun setAdditionalProjects (Lorg/gradle/api/provider/SetProperty;)V
 }
 
 public final class com/cmgapps/license/OutputType : java/lang/Enum {
@@ -103,29 +97,17 @@ public final class com/cmgapps/license/helper/StringExtensionKt {
 	public static final fun uppercaseFirstChar (Ljava/lang/String;)Ljava/lang/String;
 }
 
-public final class com/cmgapps/license/model/ComparableVersionSerializer : kotlinx/serialization/KSerializer {
-	public static final field INSTANCE Lcom/cmgapps/license/model/ComparableVersionSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/apache/maven/artifact/versioning/ComparableVersion;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/apache/maven/artifact/versioning/ComparableVersion;)V
-}
-
-public final class com/cmgapps/license/model/Library {
+public final class com/cmgapps/license/model/Library : java/io/Serializable {
 	public static final field Companion Lcom/cmgapps/license/model/Library$Companion;
-	public fun <init> (Lcom/cmgapps/license/model/MavenCoordinates;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
-	public static final fun NameComparator ()Ljava/util/Comparator;
-	public final fun component1 ()Lcom/cmgapps/license/model/MavenCoordinates;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
+	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/util/List;
-	public final fun copy (Lcom/cmgapps/license/model/MavenCoordinates;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lcom/cmgapps/license/model/Library;
-	public static synthetic fun copy$default (Lcom/cmgapps/license/model/Library;Lcom/cmgapps/license/model/MavenCoordinates;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/cmgapps/license/model/Library;
+	public final fun component3 ()Ljava/util/Set;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)Lcom/cmgapps/license/model/Library;
+	public static synthetic fun copy$default (Lcom/cmgapps/license/model/Library;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;ILjava/lang/Object;)Lcom/cmgapps/license/model/Library;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDescription ()Ljava/lang/String;
-	public final fun getLicenses ()Ljava/util/List;
-	public final fun getMavenCoordinates ()Lcom/cmgapps/license/model/MavenCoordinates;
+	public final fun getLicenses ()Ljava/util/Set;
 	public final fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -142,11 +124,10 @@ public final synthetic class com/cmgapps/license/model/Library$$serializer : kot
 }
 
 public final class com/cmgapps/license/model/Library$Companion {
-	public final fun NameComparator ()Ljava/util/Comparator;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/cmgapps/license/model/License {
+public final class com/cmgapps/license/model/License : java/io/Serializable {
 	public static final field Companion Lcom/cmgapps/license/model/License$Companion;
 	public fun <init> (Lcom/cmgapps/license/model/LicenseId;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Lcom/cmgapps/license/model/LicenseId;
@@ -202,22 +183,24 @@ public final class com/cmgapps/license/model/LicenseSerializer : kotlinx/seriali
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 }
 
-public final class com/cmgapps/license/model/MavenCoordinates : java/lang/Comparable {
+public final class com/cmgapps/license/model/MavenCoordinates : java/io/Serializable, java/lang/Comparable {
 	public static final field Companion Lcom/cmgapps/license/model/MavenCoordinates$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lorg/apache/maven/artifact/versioning/ComparableVersion;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun NameComparator ()Ljava/util/Comparator;
 	public fun compareTo (Lcom/cmgapps/license/model/MavenCoordinates;)I
 	public synthetic fun compareTo (Ljava/lang/Object;)I
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Lorg/apache/maven/artifact/versioning/ComparableVersion;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lorg/apache/maven/artifact/versioning/ComparableVersion;)Lcom/cmgapps/license/model/MavenCoordinates;
-	public static synthetic fun copy$default (Lcom/cmgapps/license/model/MavenCoordinates;Ljava/lang/String;Ljava/lang/String;Lorg/apache/maven/artifact/versioning/ComparableVersion;ILjava/lang/Object;)Lcom/cmgapps/license/model/MavenCoordinates;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/cmgapps/license/model/MavenCoordinates;
+	public static synthetic fun copy$default (Lcom/cmgapps/license/model/MavenCoordinates;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/cmgapps/license/model/MavenCoordinates;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getArtifactId ()Ljava/lang/String;
 	public final fun getGroupId ()Ljava/lang/String;
 	public final fun getIdentifierWithoutVersion ()Ljava/lang/String;
-	public final fun getVersion ()Lorg/apache/maven/artifact/versioning/ComparableVersion;
+	public final fun getVersion ()Ljava/lang/String;
 	public fun hashCode ()I
+	public final fun pomCoordinate ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -232,6 +215,7 @@ public final synthetic class com/cmgapps/license/model/MavenCoordinates$$seriali
 }
 
 public final class com/cmgapps/license/model/MavenCoordinates$Companion {
+	public final fun NameComparator ()Ljava/util/Comparator;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
@@ -251,7 +235,7 @@ public abstract class com/cmgapps/license/reporter/CustomReport : com/cmgapps/li
 }
 
 public abstract interface class com/cmgapps/license/reporter/CustomReportGenerator {
-	public abstract fun generate (Ljava/util/List;)Ljava/lang/String;
+	public abstract fun generate (Ljava/util/Map;)Ljava/lang/String;
 }
 
 public abstract class com/cmgapps/license/reporter/HtmlReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
@@ -265,14 +249,37 @@ public abstract class com/cmgapps/license/reporter/HtmlReport : com/cmgapps/lice
 public final class com/cmgapps/license/reporter/HtmlReport$Companion {
 }
 
+public final class com/cmgapps/license/reporter/JsonLibrary {
+	public static final field Companion Lcom/cmgapps/license/reporter/JsonLibrary$Companion;
+	public fun <init> (Lcom/cmgapps/license/model/MavenCoordinates;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getLicenses ()Ljava/util/Set;
+	public final fun getMavenCoordinates ()Lcom/cmgapps/license/model/MavenCoordinates;
+	public final fun getName ()Ljava/lang/String;
+}
+
+public final synthetic class com/cmgapps/license/reporter/JsonLibrary$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/cmgapps/license/reporter/JsonLibrary$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/cmgapps/license/reporter/JsonLibrary;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/cmgapps/license/reporter/JsonLibrary;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+}
+
+public final class com/cmgapps/license/reporter/JsonLibrary$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public abstract class com/cmgapps/license/reporter/JsonReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
 	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;)V
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
 
 public abstract interface class com/cmgapps/license/reporter/LicenseReport {
-	public abstract fun getLibraries ()Ljava/util/List;
-	public abstract fun setLibraries (Ljava/util/List;)V
+	public abstract fun getLibraries ()Ljava/util/Map;
+	public abstract fun setLibraries (Ljava/util/Map;)V
 }
 
 public abstract class com/cmgapps/license/reporter/LicensesSingleFileReport : com/cmgapps/license/reporter/LicenseReport, org/gradle/api/reporting/SingleFileReport {

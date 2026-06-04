@@ -15,7 +15,7 @@
 
 ### Removed
 
-- removes `additionalProjects` extension property; projects that are refereced as a dependency will be auto collected
+- Removes `additionalProjects` extension property; projects that are refereced as a dependency will be auto collected
 
 ### Fixed
 

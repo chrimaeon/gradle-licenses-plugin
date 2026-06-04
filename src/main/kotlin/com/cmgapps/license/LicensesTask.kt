@@ -212,7 +212,7 @@ abstract class LicensesTask
             createReport(coordinatesWithLibrary.get().toSortedMap())
         }
 
-        protected fun Iterable<MavenCoordinatesWithPomFile>.getPomInfo(
+        private fun Iterable<MavenCoordinatesWithPomFile>.getPomInfo(
             variants: List<ResolvedVariantResult>,
             dependencies: DependencyHandler,
             configurations: ConfigurationContainer,
@@ -271,7 +271,7 @@ abstract class LicensesTask
             }
         }
 
-        protected fun Set<MavenCoordinates>.fetchPomFiles(
+        private fun Set<MavenCoordinates>.fetchPomFiles(
             variants: List<ResolvedVariantResult>,
             dependencies: DependencyHandler,
             configurations: ConfigurationContainer,
@@ -350,7 +350,7 @@ private fun ModuleComponentIdentifier.toMavenCoordinates(): MavenCoordinates =
         version = version,
     )
 
-data class MavenCoordinatesWithPomFile(
+private data class MavenCoordinatesWithPomFile(
     val dependencyCoordinates: MavenCoordinates,
     val pomFile: File,
 )
@@ -422,7 +422,7 @@ private fun loadMavenCoordinates(
     }
 }
 
-fun logDependencyInfo(
+private fun logDependencyInfo(
     logger: Logger,
     depth: Int,
     id: ComponentIdentifier,
