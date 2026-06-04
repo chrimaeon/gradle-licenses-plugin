@@ -40,7 +40,9 @@ licenses {
         custom {
             enabled = true
             outputFile = project.layout.buildDirectory.file("reports/licenses.txt")
-            generator.set { list -> list.map { it.name }.joinToString(separator = "\n") }
+            generator.set { libraries ->
+                libraries.map { (coordinates, library) -> "$coordinates -> $library" }.joinToString("\n")
+            }
         }
     }
 }

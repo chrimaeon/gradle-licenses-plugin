@@ -6,29 +6,33 @@
 
 package com.cmgapps.license
 
-import com.cmgapps.license.util.assertExpectedFiles
 import com.cmgapps.license.util.createBuildRunner
 import com.cmgapps.license.util.fixturesDir
 import org.gradle.testkit.runner.TaskOutcome
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.`is`
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.params.ParameterizedInvocationConstants
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
 import java.util.stream.Stream
 
-class LicensePluginJavaShould {
+class ConfigurationCacheShould {
+    @Disabled(
+        "every run has to recalculate graph because:\n" +
+            "Calculating task graph as configuration cache cannot be reused because an input to task ':gradle-licenses-plugin:jar' has changed.",
+    )
     @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} - Gradle Version = {0}")
     @MethodSource("gradleVersions")
     fun `apply Licenses plugin to various Gradle versions`(version: String) {
-        val result =
+        var result =
             createBuildRunner(
                 File(fixturesDir, "apply-license"),
+                args = arrayOf("--configuration-cache", "clean", ":licenseReport"),
             ).apply {
                 if (version != LATEST_VERSION) {
                     withGradleVersion(version)
@@ -40,34 +44,32 @@ class LicensePluginJavaShould {
             result.task(":licenseReport")?.outcome,
             `is`(TaskOutcome.SUCCESS),
         )
-    }
+        assertThat(
+            "Gradle version $version",
+            result.output,
+            containsString("Configuration cache entry stored."),
+        )
 
-    @Test
-    fun `generate report with no dependencies`() {
-        val result = createBuildRunner(File(fixturesDir, "apply-license-no-dependency")).build()
+        result =
+            createBuildRunner(
+                File(fixturesDir, "apply-license"),
+                args = arrayOf("--configuration-cache", ":licenseReport"),
+            ).apply {
+                if (version != LATEST_VERSION) {
+                    withGradleVersion(version)
+                }
+            }.build()
 
-        assertThat(result.task(":licenseReport")?.outcome, `is`(TaskOutcome.SUCCESS))
-    }
-
-    @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} {0}")
-    @ValueSource(
-        strings = [
-            "java-library-no-open-source-dependency",
-            "java-library-parent-pom-dependency",
-            "java-library-custom-license",
-            "java-library-no-name-license",
-            "java-library-html-no-dark-mode",
-            "java-library-text-report",
-            "java-library-custom-css-style",
-            "java-library-custom-report",
-            "java-library-handle-complete-dsl",
-        ],
-    )
-    fun `generate report for`(fixture: String) {
-        val fixtureDir = File(fixturesDir, fixture)
-        createBuildRunner(fixtureDir).build()
-
-        assertExpectedFiles(fixtureDir)
+        assertThat(
+            "Gradle version $version",
+            result.task(":licenseReport")?.outcome,
+            `is`(TaskOutcome.SUCCESS),
+        )
+        assertThat(
+            "Gradle version $version",
+            result.output,
+            containsString("Configuration cache entry reused."),
+        )
     }
 
     companion object {

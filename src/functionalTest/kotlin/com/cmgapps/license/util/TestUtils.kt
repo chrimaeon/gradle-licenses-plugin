@@ -48,13 +48,13 @@ fun <S, T> List<S>.cartesianProduct(other: List<T>): Stream<Arguments> =
 
 fun createBuildRunner(
     fixtureDir: File,
-    vararg tasks: String = arrayOf("clean", "licenseReport"),
+    vararg args: String = arrayOf("clean", "licenseReport"),
 ): GradleRunner =
     GradleRunner
         .create()
         .withDebug(true)
         .withArguments(
-            *tasks,
+            *args,
             "--info",
             "--stacktrace",
             "--continue",

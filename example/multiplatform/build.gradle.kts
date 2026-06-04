@@ -54,10 +54,12 @@ licenses {
         }
         json.enabled.set(true)
 
-//        custom {
-//            enabled true
-//            destination = buildDir.resolve("reports").resolve("licenses.txt")
-//            generate { list -> list.map { it.name }.joinToString() }
-//        }
+        custom {
+            enabled.set(true)
+            outputFile.set(buildDir.resolve("reports").resolve("licenses.txt"))
+            generator.set { libraries ->
+                libraries.map { (coordinates, library) -> "$coordinates -> $library" }.joinToString("\n")
+            }
+        }
     }
 }
