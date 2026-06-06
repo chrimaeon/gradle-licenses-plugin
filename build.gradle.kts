@@ -8,6 +8,7 @@
 
 import kotlinx.kover.gradle.plugin.dsl.AggregationType
 import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
+import kotlinx.kover.gradle.plugin.dsl.GroupingEntityType
 import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
@@ -77,30 +78,35 @@ tasks.withType<KotlinCompile>().configureEach {
 
 testing {
     suites {
-        val test by getting(JvmTestSuite::class) {
+        val test: JvmTestSuite by getting(JvmTestSuite::class) {
             useJUnitJupiter()
         }
 
-        register<JvmTestSuite>("functionalTest") {
-            dependencies {
-                implementation(project())
-                implementation(libs.jUnit) {
-                    exclude(group = "org.hamcrest")
+        val functionalTestSuite =
+            register<JvmTestSuite>("functionalTest") {
+                dependencies {
+                    implementation(project())
+                    implementation(libs.jUnit) {
+                        exclude(group = "org.hamcrest")
+                    }
+                    implementation(libs.hamcrest)
+                    implementation(gradleTestKit())
+                    implementation(libs.xmlunit.core)
+                    implementation(libs.xmlunit.matchers)
+                    implementation(libs.networknt.jsonschemavalidator)
+                    implementation(libs.java.diff.utils)
                 }
-                implementation(libs.hamcrest)
-                implementation(gradleTestKit())
-                implementation(libs.xmlunit.core)
-                implementation(libs.xmlunit.matchers)
-                implementation(libs.networknt.jsonschemavalidator)
-                implementation(libs.java.diff.utils)
+
+                targets.configureEach {
+                    testTask.configure {
+                        jvmArgs("-Xmx2g", "-Xms512m")
+                        shouldRunAfter(test)
+                    }
+                }
             }
 
-            targets.configureEach {
-                testTask.configure {
-                    jvmArgs("-Xmx2g", "-Xms512m")
-                    shouldRunAfter(test)
-                }
-            }
+        tasks.check {
+            dependsOn(functionalTestSuite)
         }
     }
 }
@@ -109,8 +115,8 @@ gradlePlugin {
     val scmUrl: String by pomProperties
     val pomDescription: String by pomProperties
 
-    website.set(projectUrl)
-    vcsUrl.set(scmUrl)
+    website = projectUrl
+    vcsUrl = scmUrl
 
     plugins {
         create("licensesPlugin") {
@@ -118,7 +124,7 @@ gradlePlugin {
             implementationClass = "com.cmgapps.license.LicensesPlugin"
             displayName = pomName
             description = pomDescription
-            tags.set(listOf("license-management", "android", "java", "java-library", "licenses"))
+            tags = listOf("license-management", "android", "java", "java-library", "licenses")
         }
     }
 
@@ -127,14 +133,15 @@ gradlePlugin {
 
 changelog {
     version = versionName
-    header = provider { version.get() }
-    versionPrefix = provider { "" }
-    repositoryUrl = provider { projectUrl }
+    header = versionName
+    versionPrefix = ""
+    repositoryUrl = projectUrl
 }
 
 kover {
     useJacoco = true
     jacocoVersion = libs.versions.jacoco
+
     currentProject {
         sources {
             excludedSourceSets.addAll(sourceSets["functionalTest"].name)
@@ -142,6 +149,17 @@ kover {
     }
 
     reports {
+        total {
+            log {
+                onCheck = true
+                header = "Total Test Line Coverage"
+                groupBy = GroupingEntityType.APPLICATION
+                aggregationForGroup = AggregationType.COVERED_PERCENTAGE
+                coverageUnits = CoverageUnit.LINE
+                format = "<value>% total line coverage"
+            }
+        }
+
         verify {
             rule("Minimal Line coverage") {
                 bound {
@@ -165,10 +183,6 @@ buildConfig {
 }
 
 tasks {
-    check {
-        dependsOn(testing.suites.named("functionalTest"))
-    }
-
     jar {
         manifest {
             attributes(
@@ -187,7 +201,7 @@ tasks {
         }
     }
 
-    withType<Test> {
+    withType<Test>().configureEach {
         useJUnitPlatform()
         jvmArgs("-Xmx2g", "-Xms512m")
     }
