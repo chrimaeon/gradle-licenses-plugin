@@ -33,10 +33,8 @@ private val jvmTargetVersion = JvmTarget.JVM_17
 
 kotlin {
     jvmToolchain(jvmTargetVersion.target.toInt())
-    abiValidation {
-        @OptIn(ExperimentalAbiValidation::class)
-        enabled = true
-    }
+    @OptIn(ExperimentalAbiValidation::class)
+    abiValidation()
 }
 
 val pomProperties =
