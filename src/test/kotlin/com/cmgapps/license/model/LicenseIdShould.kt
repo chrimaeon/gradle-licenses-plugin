@@ -148,10 +148,10 @@ class LicenseIdShould {
         @JvmStatic
         private fun provideLicenseIdMapping(): Stream<Arguments> =
             Stream.of(
-                Arguments.of(LicenseId.APACHE, 12),
+                Arguments.of(LicenseId.APACHE, 13),
                 Arguments.of(LicenseId.BSD_2, 6),
                 Arguments.of(LicenseId.BSD_3, 5),
-                Arguments.of(LicenseId.EPL_2, 6),
+                Arguments.of(LicenseId.EPL_2, 7),
                 Arguments.of(LicenseId.GPL_2, 7),
                 Arguments.of(LicenseId.GPL_3, 7),
                 Arguments.of(LicenseId.LGPL_2_1, 9),
