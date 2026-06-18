@@ -30,12 +30,6 @@ data class MavenCoordinates(
             compareBy(MavenCoordinates::groupId)
                 .thenBy(MavenCoordinates::artifactId)
                 .thenByDescending { ComparableVersion(it.version) }
-
-        @Suppress("FunctionName")
-        @JvmStatic
-        fun NameComparator() =
-            compareBy(MavenCoordinates::identifierWithoutVersion)
-                .thenByDescending(MavenCoordinates::version)
     }
 }
 
