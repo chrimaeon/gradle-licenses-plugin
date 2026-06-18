@@ -6,6 +6,8 @@
 
 package com.cmgapps.license.reporter
 
+import com.cmgapps.license.model.PomLicense
+import com.cmgapps.license.repository.SpdxIdRepository
 import org.gradle.api.Task
 import org.gradle.api.file.ProjectLayout
 import java.io.OutputStream
@@ -16,14 +18,15 @@ abstract class XmlReport
     constructor(
         layout: ProjectLayout,
         task: Task,
-    ) : LicensesSingleFileReport(layout, task, ReportType.XML) {
+        spdxIdRepository: SpdxIdRepository,
+    ) : LicensesSingleFileReport(layout, task, ReportType.XML, spdxIdRepository) {
         override fun writeLicenses(outputStream: OutputStream) {
             outputStream.bufferedWriter().use {
                 it.write(
                     libraries {
                         for ((coordinates, library) in libraries) {
                             library(
-                                id = coordinates.toString(),
+                                id = coordinates.identifierWithoutVersion,
                                 version = coordinates.version,
                             ) {
                                 name {
@@ -35,16 +38,7 @@ abstract class XmlReport
                                 }
 
                                 licenses {
-                                    for (license in library.licenses) {
-                                        license(
-                                            spdxLicenseIdentifier = license.id.spdxLicenseIdentifier,
-                                            url = license.url,
-                                        ) {
-                                            name {
-                                                +license.name
-                                            }
-                                        }
-                                    }
+                                    append(library.licenses, spdxIdRepository)
                                 }
                             }
                         }
@@ -53,6 +47,36 @@ abstract class XmlReport
             }
         }
     }
+
+private fun Licenses.append(
+    licenses: Set<PomLicense>,
+    spdxIdRepository: SpdxIdRepository,
+) {
+    for (license in licenses) {
+        val spdxIds = spdxIdRepository.getSpdxIds(url = license.url, name = license.name)
+
+        if (spdxIds.isEmpty()) {
+            license(
+                url = license.url ?: "",
+            ) {
+                name {
+                    +(license.name ?: "")
+                }
+            }
+        } else {
+            for (spdxId in spdxIds) {
+                license(
+                    spdxLicenseIdentifier = spdxId.id,
+                    url = spdxId.url,
+                ) {
+                    name {
+                        +spdxId.name
+                    }
+                }
+            }
+        }
+    }
+}
 
 internal class Libraries : Tag("libraries") {
     fun library(

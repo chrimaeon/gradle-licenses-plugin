@@ -6,6 +6,7 @@
 
 package com.cmgapps.license.reporter
 
+import com.cmgapps.license.repository.SpdxIdRepository
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
 import org.gradle.api.Task
@@ -18,7 +19,8 @@ abstract class CsvReport
     constructor(
         layout: ProjectLayout,
         task: Task,
-    ) : LicensesSingleFileReport(layout, task, ReportType.CSV) {
+        spdxIdRepository: SpdxIdRepository,
+    ) : LicensesSingleFileReport(layout, task, ReportType.CSV, spdxIdRepository) {
         override fun writeLicenses(outputStream: OutputStream) {
             outputStream.bufferedWriter().use { writer ->
                 CSVPrinter(
@@ -30,15 +32,31 @@ abstract class CsvReport
                 ).use { printer ->
                     libraries.forEach { (coordinates, library) ->
                         library.licenses.forEach { license ->
-                            printer.printRecord(
-                                library.name,
-                                coordinates.version,
-                                coordinates,
-                                library.description,
-                                license.id.spdxLicenseIdentifier,
-                                license.name,
-                                license.url,
-                            )
+                            val spdxIds = spdxIdRepository.getSpdxIds(url = license.url, name = license.name)
+
+                            if (spdxIds.isEmpty()) {
+                                printer.printRecord(
+                                    library.name,
+                                    coordinates.version,
+                                    coordinates.toString(),
+                                    library.description,
+                                    null,
+                                    license.name,
+                                    license.url,
+                                )
+                            } else {
+                                for (spdxId in spdxIds) {
+                                    printer.printRecord(
+                                        library.name,
+                                        coordinates.version,
+                                        coordinates,
+                                        library.description,
+                                        spdxId.id,
+                                        spdxId.name,
+                                        spdxId.url,
+                                    )
+                                }
+                            }
                         }
                     }
                     printer.flush()

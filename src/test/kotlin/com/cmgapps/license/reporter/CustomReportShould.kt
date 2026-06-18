@@ -7,6 +7,7 @@
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.util.OutputStreamExtension
+import com.cmgapps.license.util.TestSpdxIdRepository
 import com.cmgapps.license.util.TestStream
 import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.testLibraries
@@ -31,6 +32,7 @@ class CustomReportShould {
             project.layout,
             project.tasks.register("licenseReport").get(),
             project.objects,
+            TestSpdxIdRepository(),
         ) {
             override var libraries = testLibraries
 
@@ -49,24 +51,7 @@ class CustomReportShould {
         assertThat(
             outputStream.asString(),
             `is`(
-                "Library(" +
-                    "mavenCoordinates=test.group:test.artifact:1.0," +
-                    " name=Test lib 1," +
-                    " description=proper description," +
-                    " licenses=[" +
-                    "License(id=APACHE, name=Apache 2.0, " +
-                    "url=https://www.apache.org/licenses/LICENSE-2.0.txt)," +
-                    " License(id=MIT, name=MIT License, " +
-                    "url=https://opensource.org/licenses/MIT)" +
-                    "]), " +
-                    "Library(" +
-                    "mavenCoordinates=group.test2:artifact:2.3.4," +
-                    " name=Test lib 2," +
-                    " description=descriptions of lib 2," +
-                    " licenses=[" +
-                    "License(id=APACHE, name=The Apache Software License, Version 2.0," +
-                    " url=https://www.apache.org/licenses/LICENSE-2.0.txt)" +
-                    "])",
+                "Library(mavenCoordinates=test.apache.mit:apache.mit.artifact:1.0, name=Apache and MIT lib, description=Apache and MIT lib description, licenses=[License(id=Apache-2.0, name=Apache 2.0, url=https://www.apache.org/licenses/LICENSE-2.0.txt), License(id=MIT, name=MIT License, url=https://opensource.org/licenses/MIT)]), Library(mavenCoordinates=apache.test:lib.artifact:2.3.4, name=Apache lib, description=Apache lib description, licenses=[License(id=Apache-2.0, name=The Apache Software License, Version 2.0, url=https://www.apache.org/licenses/LICENSE-2.0.txt)]), Library(mavenCoordinates=lgpl.test:artifact.lib:5.6, name=LGPL lib, description=LGPL lib description, licenses=[License(id=LGPL-2.0, name=LGPL-2.0, url=https://www.gnu.org/licenses/old-licenses/lgpl-2.0-standalone.html)])",
             ),
         )
     }

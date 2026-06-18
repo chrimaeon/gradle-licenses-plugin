@@ -6,11 +6,11 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.model.PomLibrary
 import com.cmgapps.license.util.OutputStreamExtension
+import com.cmgapps.license.util.TestSpdxIdRepository
 import com.cmgapps.license.util.TestStream
-import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.testLibraries
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
@@ -31,22 +31,35 @@ class TextReportShould {
     fun `generate Text report`() {
         TestTextReport(testLibraries).writeLicenses(outputStream)
         assertThat(
-            outputStream.asString(),
+            outputStream.toString(),
             `is`(
                 """
-                Licenses
-                ├─ Test lib 1:1.0
-                │  ├─ License: Apache 2.0
-                │  ├─ SPDX-License-Identifier: Apache-2.0
-                │  ├─ URL: https://www.apache.org/licenses/LICENSE-2.0.txt
-                │  ├─ License: MIT License
-                │  ├─ SPDX-License-Identifier: MIT
-                │  └─ URL: https://opensource.org/licenses/MIT
-                └─ Test lib 2:2.3.4
-                   ├─ License: The Apache Software License, Version 2.0
-                   ├─ SPDX-License-Identifier: Apache-2.0
-                   └─ URL: https://www.apache.org/licenses/LICENSE-2.0.txt
-                """.trimIndent(),
+                |Licenses
+                |├─ Apache and MIT lib:1.0
+                |│  ├─ License: Apache License 2.0
+                |│  ├─ SPDX-License-Identifier: Apache-2.0
+                |│  ├─ URL: https://spdx.org/licenses/Apache-2.0.html
+                |│  ├─ License: MIT License
+                |│  ├─ SPDX-License-Identifier: MIT
+                |│  └─ URL: https://spdx.org/licenses/MIT.html
+                |├─ Apache lib:2.3.4
+                |│  ├─ License: Apache License 2.0
+                |│  ├─ SPDX-License-Identifier: Apache-2.0
+                |│  └─ URL: https://spdx.org/licenses/Apache-2.0.html
+                |└─ LGPL lib:5.6
+                |   ├─ License: GNU Library General Public License v2 only
+                |   ├─ SPDX-License-Identifier: LGPL-2.0
+                |   ├─ URL: https://spdx.org/licenses/LGPL-2.0.html
+                |   ├─ License: GNU Library General Public License v2 or later
+                |   ├─ SPDX-License-Identifier: LGPL-2.0+
+                |   ├─ URL: https://spdx.org/licenses/LGPL-2.0+.html
+                |   ├─ License: GNU Library General Public License v2 only
+                |   ├─ SPDX-License-Identifier: LGPL-2.0-only
+                |   ├─ URL: https://spdx.org/licenses/LGPL-2.0-only.html
+                |   ├─ License: GNU Library General Public License v2 or later
+                |   ├─ SPDX-License-Identifier: LGPL-2.0-or-later
+                |   └─ URL: https://spdx.org/licenses/LGPL-2.0-or-later.html
+                """.trimMargin(),
             ),
         )
     }
@@ -56,13 +69,13 @@ class TextReportShould {
         TestTextReport(
             mapOf(
                 MavenCoordinates("test.group", "test.artifact", "1.0") to
-                    Library(
+                    PomLibrary(
                         "Test lib 1",
                         "proper description",
                         emptySet(),
                     ),
                 MavenCoordinates("group.test2", "artifact", "2.3.4") to
-                    Library(
+                    PomLibrary(
                         "Test lib 2",
                         "descriptions of lib 2",
                         emptySet(),
@@ -70,7 +83,7 @@ class TextReportShould {
             ),
         ).writeLicenses(outputStream)
         assertThat(
-            outputStream.asString(),
+            outputStream.toString(),
             `is`(
                 """
                 Licenses
@@ -85,9 +98,9 @@ class TextReportShould {
 }
 
 private class TestTextReport(
-    override var libraries: Map<MavenCoordinates, Library>,
+    override var libraries: Map<MavenCoordinates, PomLibrary>,
     project: Project = ProjectBuilder.builder().build(),
-) : TextReport(project.layout, project.tasks.register("licenseReport").get()) {
+) : TextReport(project.layout, project.tasks.register("licenseReport").get(), TestSpdxIdRepository()) {
     override fun getRequired(): Property<Boolean> =
         ProjectBuilder
             .builder()

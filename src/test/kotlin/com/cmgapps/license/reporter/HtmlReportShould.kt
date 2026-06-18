@@ -6,16 +6,15 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.model.Library
-import com.cmgapps.license.model.License
-import com.cmgapps.license.model.LicenseId
+import com.cmgapps.gradle.spdx.SpdxId
 import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.model.PomLibrary
+import com.cmgapps.license.model.PomLicense
+import com.cmgapps.license.repository.SpdxIdRepository
 import com.cmgapps.license.util.OutputStreamExtension
 import com.cmgapps.license.util.TestStream
 import com.cmgapps.license.util.asString
-import com.cmgapps.license.util.getFileContent
 import com.cmgapps.license.util.testLibraries
-import org.apache.commons.text.StringEscapeUtils
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logger
@@ -29,7 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import java.io.ByteArrayOutputStream
-import com.cmgapps.license.model.Library as LibraryModel
+import com.cmgapps.license.model.PomLibrary as LibraryModel
 
 @ExtendWith(OutputStreamExtension::class)
 class HtmlReportShould {
@@ -60,17 +59,41 @@ class HtmlReportShould {
                     "<body>" +
                     "<h3>Notice for packages:</h3>" +
                     "<ul>" +
-                    "<li>Test lib 1</li>" +
-                    "<li>Test lib 2</li>" +
+                    "<li>Apache and MIT lib</li>" +
+                    "<li>Apache lib</li>" +
                     "</ul>" +
                     "<pre>" +
-                    StringEscapeUtils.escapeHtml4(getFileContent("apache-2.0.txt")) +
+                    "Apache-2.0 LICENSE" +
                     "</pre>" +
                     "<ul>" +
-                    "<li>Test lib 1</li>" +
+                    "<li>Apache and MIT lib</li>" +
                     "</ul>" +
                     "<pre>" +
-                    StringEscapeUtils.escapeHtml4(getFileContent("mit.txt")) +
+                    "MIT LICENSE" +
+                    "</pre>" +
+                    "<ul>" +
+                    "<li>LGPL lib</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    "LGPL-2.0 LICENSE" +
+                    "</pre>" +
+                    "<ul>" +
+                    "<li>LGPL lib</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    "LGPL-2.0+ LICENSE" +
+                    "</pre>" +
+                    "<ul>" +
+                    "<li>LGPL lib</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    "LGPL-2.0-only LICENSE" +
+                    "</pre>" +
+                    "<ul>" +
+                    "<li>LGPL lib</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    "LGPL-2.0-or-later LICENSE" +
                     "</pre>" +
                     "</body>" +
                     "</html>",
@@ -102,17 +125,41 @@ class HtmlReportShould {
                     "<body>" +
                     "<h3>Notice for packages:</h3>" +
                     "<ul>" +
-                    "<li>Test lib 1</li>" +
-                    "<li>Test lib 2</li>" +
+                    "<li>Apache and MIT lib</li>" +
+                    "<li>Apache lib</li>" +
                     "</ul>" +
                     "<pre>" +
-                    StringEscapeUtils.escapeHtml4(getFileContent("apache-2.0.txt")) +
+                    "Apache-2.0 LICENSE" +
                     "</pre>" +
                     "<ul>" +
-                    "<li>Test lib 1</li>" +
+                    "<li>Apache and MIT lib</li>" +
                     "</ul>" +
                     "<pre>" +
-                    StringEscapeUtils.escapeHtml4(getFileContent("mit.txt")) +
+                    "MIT LICENSE" +
+                    "</pre>" +
+                    "<ul>" +
+                    "<li>LGPL lib</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    "LGPL-2.0 LICENSE" +
+                    "</pre>" +
+                    "<ul>" +
+                    "<li>LGPL lib</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    "LGPL-2.0+ LICENSE" +
+                    "</pre>" +
+                    "<ul>" +
+                    "<li>LGPL lib</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    "LGPL-2.0-only LICENSE" +
+                    "</pre>" +
+                    "<ul>" +
+                    "<li>LGPL lib</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    "LGPL-2.0-or-later LICENSE" +
                     "</pre>" +
                     "</body>" +
                     "</html>",
@@ -131,7 +178,7 @@ class HtmlReportShould {
                             description = null,
                             licenses =
                                 setOf(
-                                    License(LicenseId.UNKNOWN, name = "foo", url = "https://www.license.foo"),
+                                    PomLicense(name = "foo", url = "https://www.license.foo"),
                                 ),
                         ),
                     MavenCoordinates("test.group2.invalid", "test.artifact2", "1.0") to
@@ -140,7 +187,7 @@ class HtmlReportShould {
                             description = null,
                             licenses =
                                 setOf(
-                                    License(LicenseId.UNKNOWN, name = "foo2", url = "https://www.license2.foo"),
+                                    PomLicense(name = "foo2", url = "https://www.license2.foo"),
                                 ),
                         ),
                     MavenCoordinates("test.group3.invalid", "test.artifact3", "1.0") to
@@ -149,7 +196,7 @@ class HtmlReportShould {
                             description = null,
                             licenses =
                                 setOf(
-                                    License(LicenseId.UNKNOWN, name = "foo2", url = "https://www.license2.foo"),
+                                    PomLicense(name = "foo2", url = "https://www.license2.foo"),
                                 ),
                         ),
                 ),
@@ -173,17 +220,41 @@ class HtmlReportShould {
                     "<body>" +
                     "<h3>Notice for packages:</h3>" +
                     "<ul>" +
-                    "<li>Test lib 1</li>" +
-                    "<li>Test lib 2</li>" +
+                    "<li>Apache and MIT lib</li>" +
+                    "<li>Apache lib</li>" +
                     "</ul>" +
                     "<pre>" +
-                    StringEscapeUtils.escapeHtml4(getFileContent("apache-2.0.txt")) +
+                    "Apache-2.0 LICENSE" +
                     "</pre>" +
                     "<ul>" +
-                    "<li>Test lib 1</li>" +
+                    "<li>Apache and MIT lib</li>" +
                     "</ul>" +
                     "<pre>" +
-                    StringEscapeUtils.escapeHtml4(getFileContent("mit.txt")) +
+                    "MIT LICENSE" +
+                    "</pre>" +
+                    "<ul>" +
+                    "<li>LGPL lib</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    "LGPL-2.0 LICENSE" +
+                    "</pre>" +
+                    "<ul>" +
+                    "<li>LGPL lib</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    "LGPL-2.0+ LICENSE" +
+                    "</pre>" +
+                    "<ul>" +
+                    "<li>LGPL lib</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    "LGPL-2.0-only LICENSE" +
+                    "</pre>" +
+                    "<ul>" +
+                    "<li>LGPL lib</li>" +
+                    "</ul>" +
+                    "<pre>" +
+                    "LGPL-2.0-or-later LICENSE" +
                     "</pre>" +
                     "<ul>" +
                     "<li>Lib with invalid license</li>" +
@@ -212,7 +283,7 @@ class HtmlReportShould {
                         description = null,
                         licenses =
                             setOf(
-                                License(LicenseId.UNKNOWN, name = "foo", url = "https://www.license.foo"),
+                                PomLicense(name = "foo", url = "https://www.license.foo"),
                             ),
                     ),
                 MavenCoordinates("test.group2", "test.artifact2", "1.0") to
@@ -221,7 +292,7 @@ class HtmlReportShould {
                         description = null,
                         licenses =
                             setOf(
-                                License(LicenseId.UNKNOWN, name = "foo2", url = "https://www.license2.foo"),
+                                PomLicense(name = "foo2", url = "https://www.license2.foo"),
                             ),
                     ),
                 MavenCoordinates("test.group3", "test.artifact3", "1.0") to
@@ -230,7 +301,7 @@ class HtmlReportShould {
                         description = null,
                         licenses =
                             setOf(
-                                License(LicenseId.UNKNOWN, name = "foo2", url = "https://www.license2.foo"),
+                                PomLicense(name = "foo2", url = "https://www.license2.foo"),
                             ),
                     ),
             ),
@@ -257,8 +328,22 @@ class HtmlReportShould {
     }
 }
 
+private class TestHtmlSpdxIdRepository : SpdxIdRepository {
+    override fun getSpdxIds(
+        url: String?,
+        name: String?,
+    ): List<SpdxId> =
+        when {
+            url?.contains("apache") ?: false -> listOf(SpdxId.Apache_20)
+            url?.contains("mit") ?: false -> listOf(SpdxId.MIT)
+            else -> emptyList()
+        }
+
+    override fun SpdxId.licenseText(): String = "$id LICENSE"
+}
+
 private class TestHtmlReport(
-    override var libraries: Map<MavenCoordinates, Library>,
+    override var libraries: Map<MavenCoordinates, PomLibrary>,
     logger: Logger = Logging.getLogger("TestHtmlReport"),
     project: Project = ProjectBuilder.builder().build(),
 ) : HtmlReport(
@@ -268,6 +353,7 @@ private class TestHtmlReport(
                 .objects,
         layout = project.layout,
         task = project.tasks.register("licenseReport").get(),
+        spdxIdRepository = TestHtmlSpdxIdRepository(),
     ) {
     override fun getRequired(): Property<Boolean> =
         ProjectBuilder

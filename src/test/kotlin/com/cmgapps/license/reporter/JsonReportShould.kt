@@ -6,9 +6,10 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.model.PomLibrary
 import com.cmgapps.license.util.OutputStreamExtension
+import com.cmgapps.license.util.TestSpdxIdRepository
 import com.cmgapps.license.util.TestStream
 import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.testLibraries
@@ -34,55 +35,86 @@ class JsonReportShould {
             outputStream.asString(),
             `is`(
                 """
-                [
-                    {
-                        "mavenCoordinates": {
-                            "groupId": "test.group",
-                            "artifactId": "test.artifact",
-                            "version": "1.0"
-                        },
-                        "name": "Test lib 1",
-                        "description": "proper description",
-                        "licenses": [
-                            {
-                                "spdxLicenseIdentifier": "Apache-2.0",
-                                "name": "Apache 2.0",
-                                "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
-                            },
-                            {
-                                "spdxLicenseIdentifier": "MIT",
-                                "name": "MIT License",
-                                "url": "https://opensource.org/licenses/MIT"
-                            }
-                        ]
-                    },
-                    {
-                        "mavenCoordinates": {
-                            "groupId": "group.test2",
-                            "artifactId": "artifact",
-                            "version": "2.3.4"
-                        },
-                        "name": "Test lib 2",
-                        "description": "descriptions of lib 2",
-                        "licenses": [
-                            {
-                                "spdxLicenseIdentifier": "Apache-2.0",
-                                "name": "The Apache Software License, Version 2.0",
-                                "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
-                            }
-                        ]
-                    }
-                ]
-                """.trimIndent(),
+                |[
+                |    {
+                |        "mavenCoordinates": {
+                |            "groupId": "test.apache.mit",
+                |            "artifactId": "apache.mit.artifact",
+                |            "version": "1.0"
+                |        },
+                |        "name": "Apache and MIT lib",
+                |        "description": "Apache and MIT lib description",
+                |        "licenses": [
+                |            {
+                |                "spdxLicenseIdentifier": "Apache-2.0",
+                |                "name": "Apache License 2.0",
+                |                "url": "https://spdx.org/licenses/Apache-2.0.html"
+                |            },
+                |            {
+                |                "spdxLicenseIdentifier": "MIT",
+                |                "name": "MIT License",
+                |                "url": "https://spdx.org/licenses/MIT.html"
+                |            }
+                |        ]
+                |    },
+                |    {
+                |        "mavenCoordinates": {
+                |            "groupId": "apache.test",
+                |            "artifactId": "lib.artifact",
+                |            "version": "2.3.4"
+                |        },
+                |        "name": "Apache lib",
+                |        "description": "Apache lib description",
+                |        "licenses": [
+                |            {
+                |                "spdxLicenseIdentifier": "Apache-2.0",
+                |                "name": "Apache License 2.0",
+                |                "url": "https://spdx.org/licenses/Apache-2.0.html"
+                |            }
+                |        ]
+                |    },
+                |    {
+                |        "mavenCoordinates": {
+                |            "groupId": "lgpl.test",
+                |            "artifactId": "artifact.lib",
+                |            "version": "5.6"
+                |        },
+                |        "name": "LGPL lib",
+                |        "description": "LGPL lib description",
+                |        "licenses": [
+                |            {
+                |                "spdxLicenseIdentifier": "LGPL-2.0",
+                |                "name": "GNU Library General Public License v2 only",
+                |                "url": "https://spdx.org/licenses/LGPL-2.0.html"
+                |            },
+                |            {
+                |                "spdxLicenseIdentifier": "LGPL-2.0+",
+                |                "name": "GNU Library General Public License v2 or later",
+                |                "url": "https://spdx.org/licenses/LGPL-2.0+.html"
+                |            },
+                |            {
+                |                "spdxLicenseIdentifier": "LGPL-2.0-only",
+                |                "name": "GNU Library General Public License v2 only",
+                |                "url": "https://spdx.org/licenses/LGPL-2.0-only.html"
+                |            },
+               |            {
+                |                "spdxLicenseIdentifier": "LGPL-2.0-or-later",
+                |                "name": "GNU Library General Public License v2 or later",
+                |                "url": "https://spdx.org/licenses/LGPL-2.0-or-later.html"
+                |            }
+                |        ]
+                |    }
+                |]
+                """.trimMargin(),
             ),
         )
     }
 }
 
 private class TestJsonReport(
-    override var libraries: Map<MavenCoordinates, Library>,
+    override var libraries: Map<MavenCoordinates, PomLibrary>,
     project: Project = ProjectBuilder.builder().build(),
-) : JsonReport(project.layout, project.tasks.register("licenseReport").get()) {
+) : JsonReport(project.layout, project.tasks.register("licenseReport").get(), TestSpdxIdRepository()) {
     override fun getRequired(): Property<Boolean> =
         ProjectBuilder
             .builder()

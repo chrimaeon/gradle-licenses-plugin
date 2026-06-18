@@ -1,5 +1,5 @@
 Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url
-Retrofit,2.3.0,com.squareup.retrofit2:retrofit:2.3.0,,Apache-2.0,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
-Bar,1.0.0,group:bar:1.0.0,Fake dependency description,Apache-2.0,Apache-2.0,http://www.apache.org/licenses/LICENSE-2.0.txt
+Retrofit,2.3.0,com.squareup.retrofit2:retrofit:2.3.0,,Apache-2.0,Apache License 2.0,https://spdx.org/licenses/Apache-2.0.html
+Bar,1.0.0,group:bar:1.0.0,Fake dependency description,Apache-2.0,Apache License 2.0,https://spdx.org/licenses/Apache-2.0.html
 Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/
 ,1.0.0,group:noname:1.0.0,Fake dependency description,,Some license,http://website.tld/

@@ -6,6 +6,7 @@
 
 @file:Suppress("UnstableApiUsage")
 
+import com.cmgapps.gradle.spdx.GenerateSpdxIdsTask
 import kotlinx.kover.gradle.plugin.dsl.AggregationType
 import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
 import kotlinx.kover.gradle.plugin.dsl.GroupingEntityType
@@ -27,6 +28,7 @@ plugins {
     id("testlogger")
     id("ktlint")
     alias(libs.plugins.buildconfig)
+    alias(libs.plugins.poko)
 }
 
 private val jvmTargetVersion = JvmTarget.JVM_17
@@ -147,6 +149,14 @@ kover {
     }
 
     reports {
+        filters {
+            excludes {
+                classes(
+                    // generated SPDX Id's
+                    "com.cmgapps.gradle.spdx.*",
+                )
+            }
+        }
         total {
             log {
                 onCheck = true
@@ -234,6 +244,29 @@ tasks {
     patchChangelog {
         dependsOn(updateReadme)
     }
+
+    val jsonFolder = layout.projectDirectory.dir("src/main/resources")
+    val jsonFile = jsonFolder.file("licenses.json")
+
+    register("downloadSpdxJson", Copy::class) {
+        description = "Download the latest SPDX Identifier definitions"
+        group = "generateSpdx"
+
+        from(resources.text.fromUri("https://spdx.org/licenses/licenses.json").asFile()) {
+            rename { jsonFile.asFile.name }
+        }
+        into(jsonFolder)
+    }
+
+    val generateSpdxIds by
+        registering(GenerateSpdxIdsTask::class) {
+            description = "Generates SPDX IDs from a JSON file"
+            inputJson = jsonFile
+        }
+
+    sourceSets.main {
+        kotlin.srcDir(generateSpdxIds)
+    }
 }
 
 dependencies {
@@ -243,7 +276,7 @@ dependencies {
     implementation(libs.maven.model)
     implementation(libs.maven.model.builder)
     implementation(libs.maven.artifact)
-    implementation(libs.kotlin.serialization)
+    implementation(libs.kotlinx.serialization)
     implementation(libs.apache.commons.csv)
     implementation(libs.apache.commons.text)
 

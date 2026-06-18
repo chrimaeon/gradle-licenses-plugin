@@ -10,8 +10,8 @@
         "licenses": [
             {
                 "spdxLicenseIdentifier": "Apache-2.0",
-                "name": "Apache 2.0",
-                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                "name": "Apache License 2.0",
+                "url": "https://spdx.org/licenses/Apache-2.0.html"
             }
         ]
     }

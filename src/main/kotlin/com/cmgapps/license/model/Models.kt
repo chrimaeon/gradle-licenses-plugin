@@ -7,7 +7,6 @@
 package com.cmgapps.license.model
 
 import kotlinx.serialization.Serializable
-import org.apache.commons.csv.CSVFormat
 import org.apache.maven.artifact.versioning.ComparableVersion
 
 @Serializable
@@ -40,94 +39,13 @@ data class MavenCoordinates(
     }
 }
 
-enum class LicenseId(
-    val spdxLicenseIdentifier: String?,
-) {
-    APACHE("Apache-2.0"),
-    BSD_2("BSD-2-Clause"),
-    BSD_3("BSD-3-Clause"),
-    CDDL("CDDL-1.0"),
-    EPL_2("EPL-2.0"),
-    GPL_2("GPL-2.0-only"),
-    GPL_3("GPL-3.0-only"),
-    LGPL_2_1("LGPL-2.1-only"),
-    LGPL_3("LGPL-3.0-only"),
-    MIT("MIT"),
-    MPL_2("MPL-2.0"),
-    EPL_1("EPL-1.0"),
-    ISC("ISC"),
-    UNKNOWN(null),
-    ;
+data class PomLicense(
+    val name: String?,
+    val url: String?,
+) : java.io.Serializable
 
-    companion object {
-        @JvmStatic
-        fun fromSpdxLicenseIdentifier(spdxLicenseIdentifier: String?): LicenseId =
-            when (spdxLicenseIdentifier) {
-                "Apache-2.0" -> APACHE
-                "BSD-2-Clause" -> BSD_2
-                "BSD-3-Clause" -> BSD_3
-                "CDDL-1.0" -> CDDL
-                "EPL-2.0" -> EPL_2
-                "GPL-2.0-only" -> GPL_2
-                "GPL-3.0-only" -> GPL_3
-                "LGPL-2.1-only" -> LGPL_2_1
-                "LGPL-3.0-only" -> LGPL_3
-                "MIT" -> MIT
-                "MPL-2.0" -> MPL_2
-                "EPL-1.0" -> EPL_1
-                "ISC" -> ISC
-                else -> UNKNOWN
-            }
-
-        /**
-         * Map License name or URL to license id.
-         *
-         * Based on "popular and widely-used or with strong communities" found here: https://opensource.org/licenses/category.
-         * License text from: https://github.com/github/choosealicense.com/blob/gh-pages/_licenses.
-         */
-        internal val map: Map<String, LicenseId> by lazy {
-            CSVFormat.DEFAULT
-                .parse(this::class.java.getResourceAsStream("/license_map.csv")?.bufferedReader())
-                .associate {
-                    it[0] to LicenseId.valueOf(it[1])
-                }
-        }
-    }
-}
-
-@Serializable(with = LicenseSerializer::class)
-data class License(
-    val id: LicenseId,
-    val name: String,
-    val url: String,
-) : java.io.Serializable {
-    override fun hashCode(): Int =
-        if (id == LicenseId.UNKNOWN) {
-            var result = id.hashCode()
-            result = 31 * result + name.hashCode()
-            result = 31 * result + url.hashCode()
-            result
-        } else {
-            id.hashCode()
-        }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as License
-
-        if (id == LicenseId.UNKNOWN && other.id == LicenseId.UNKNOWN) {
-            return other.name == name && other.url == url
-        }
-
-        return id == other.id
-    }
-}
-
-@Serializable
-data class Library(
+data class PomLibrary(
     val name: String?,
     val description: String?,
-    val licenses: Set<License>,
+    val licenses: Set<PomLicense>,
 ) : java.io.Serializable

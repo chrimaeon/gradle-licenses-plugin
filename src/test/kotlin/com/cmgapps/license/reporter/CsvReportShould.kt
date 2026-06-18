@@ -6,11 +6,11 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.model.Library
-import com.cmgapps.license.model.License
-import com.cmgapps.license.model.LicenseId
 import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.model.PomLibrary
+import com.cmgapps.license.model.PomLicense
 import com.cmgapps.license.util.OutputStreamExtension
+import com.cmgapps.license.util.TestSpdxIdRepository
 import com.cmgapps.license.util.TestStream
 import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.testLibraries
@@ -36,26 +36,61 @@ class CsvReportShould {
             outputStream.asString(),
             `is`(
                 "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
-                    "Test lib 1," +
+                    "Apache and MIT lib," +
                     "1.0," +
-                    "test.group:test.artifact:1.0," +
-                    "proper description," +
-                    "Apache-2.0,Apache 2.0," +
-                    "https://www.apache.org/licenses/LICENSE-2.0.txt" +
+                    "test.apache.mit:apache.mit.artifact:1.0," +
+                    "Apache and MIT lib description," +
+                    "Apache-2.0," +
+                    "Apache License 2.0," +
+                    "https://spdx.org/licenses/Apache-2.0.html" +
                     "\r\n" +
-                    "Test lib 1," +
+                    "Apache and MIT lib," +
                     "1.0," +
-                    "test.group:test.artifact:1.0," +
-                    "proper description," +
+                    "test.apache.mit:apache.mit.artifact:1.0," +
+                    "Apache and MIT lib description," +
                     "MIT," +
-                    "MIT License,https://opensource.org/licenses/MIT" +
+                    "MIT License," +
+                    "https://spdx.org/licenses/MIT.html" +
                     "\r\n" +
-                    "Test lib 2," +
+                    "Apache lib," +
                     "2.3.4," +
-                    "group.test2:artifact:2.3.4," +
-                    "descriptions of lib 2," +
-                    "Apache-2.0,\"The Apache Software License, Version 2.0\"," +
-                    "https://www.apache.org/licenses/LICENSE-2.0.txt" +
+                    "apache.test:lib.artifact:2.3.4," +
+                    "Apache lib description," +
+                    "Apache-2.0," +
+                    "Apache License 2.0," +
+                    "https://spdx.org/licenses/Apache-2.0.html" +
+                    "\r\n" +
+                    "LGPL lib," +
+                    "5.6," +
+                    "lgpl.test:artifact.lib:5.6," +
+                    "LGPL lib description," +
+                    "LGPL-2.0," +
+                    "GNU Library General Public License v2 only," +
+                    "https://spdx.org/licenses/LGPL-2.0.html" +
+                    "\r\n" +
+                    "LGPL lib," +
+                    "5.6," +
+                    "lgpl.test:artifact.lib:5.6," +
+                    "LGPL lib description," +
+                    "LGPL-2.0+," +
+                    "GNU Library General Public License v2 or later," +
+                    "https://spdx.org/licenses/LGPL-2.0+.html" +
+                    "\r\n" +
+                    "LGPL lib," +
+                    "5.6," +
+                    "lgpl.test:artifact.lib:5.6," +
+                    "LGPL lib description," +
+                    "LGPL-2.0-only," +
+                    "GNU Library General Public License v2 only," +
+                    "https://spdx.org/licenses/LGPL-2.0-only.html" +
+                    "\r\n" +
+                    "LGPL lib," +
+                    "5.6," +
+                    "lgpl.test:artifact.lib:5.6," +
+                    "LGPL lib description," +
+                    "LGPL-2.0-or-later," +
+                    "GNU Library General Public License v2 or later," +
+                    "https://spdx.org/licenses/LGPL-2.0-or-later.html" +
                     "\r\n",
             ),
         )
@@ -63,9 +98,9 @@ class CsvReportShould {
 
     @Test
     fun `escape strings in report`() {
-        val license = License(LicenseId.UNKNOWN, "License name with a \" in it", "just a plain url")
-        val library =
-            Library(
+        val license = PomLicense(name = "License name with a \" in it", url = "just a plain url")
+        val pomLibrary =
+            PomLibrary(
                 name = "Name with a , in it",
                 description = "description with \r in it",
                 setOf(license),
@@ -77,7 +112,7 @@ class CsvReportShould {
                     "groupC",
                     "articfactA",
                     "version with a \n in it",
-                ) to library,
+                ) to pomLibrary,
             ),
         ).writeLicenses(outputStream)
 
@@ -99,11 +134,12 @@ class CsvReportShould {
 }
 
 private class TestCsvReport(
-    override var libraries: Map<MavenCoordinates, Library>,
+    override var libraries: Map<MavenCoordinates, PomLibrary>,
     project: Project = ProjectBuilder.builder().build().project,
 ) : CsvReport(
         project.layout,
         project.tasks.register("licensesTask").get(),
+        TestSpdxIdRepository(),
     ) {
     override fun getRequired(): Property<Boolean> =
         ProjectBuilder

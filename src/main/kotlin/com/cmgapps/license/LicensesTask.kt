@@ -6,10 +6,9 @@
 
 package com.cmgapps.license
 
-import com.cmgapps.license.model.Library
-import com.cmgapps.license.model.License
-import com.cmgapps.license.model.LicenseId
 import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.model.PomLibrary
+import com.cmgapps.license.model.PomLicense
 import com.cmgapps.license.reporter.CsvReport
 import com.cmgapps.license.reporter.CustomReport
 import com.cmgapps.license.reporter.HtmlReport
@@ -19,6 +18,8 @@ import com.cmgapps.license.reporter.MarkdownReport
 import com.cmgapps.license.reporter.ReportType
 import com.cmgapps.license.reporter.TextReport
 import com.cmgapps.license.reporter.XmlReport
+import com.cmgapps.license.repository.SpdxIdRepository
+import com.cmgapps.license.repository.internal.SpdxIdRepositoryImpl
 import groovy.lang.Closure
 import org.apache.maven.model.Dependency
 import org.apache.maven.model.Model
@@ -95,14 +96,16 @@ internal abstract class LicenseReportContainerImpl
         task: Task,
     ) : NamedDomainObjectSet<LicensesSingleFileReport> by objects.namedDomainObjectSet(LicensesSingleFileReport::class.java),
         LicenseReportContainer {
+        private val spdxIdRepository: SpdxIdRepository = SpdxIdRepositoryImpl(layout)
+
         init {
-            addReporter(TextReport::class.java, layout, task)
-            addReporter(JsonReport::class.java, layout, task)
-            addReporter(HtmlReport::class.java, layout, task, task.logger, objects)
-            addReporter(XmlReport::class.java, layout, task)
-            addReporter(MarkdownReport::class.java, layout, task, task.logger)
-            addReporter(CsvReport::class.java, layout, task)
-            addReporter(CustomReport::class.java, layout, task, objects)
+            addReporter(TextReport::class.java, layout, task, spdxIdRepository)
+            addReporter(JsonReport::class.java, layout, task, spdxIdRepository)
+            addReporter(HtmlReport::class.java, layout, task, task.logger, objects, spdxIdRepository)
+            addReporter(XmlReport::class.java, layout, task, spdxIdRepository)
+            addReporter(MarkdownReport::class.java, layout, task, task.logger, spdxIdRepository)
+            addReporter(CsvReport::class.java, layout, task, spdxIdRepository)
+            addReporter(CustomReport::class.java, layout, task, objects, spdxIdRepository)
         }
 
         override fun getEnabled(): NamedDomainObjectSet<LicensesSingleFileReport> = enabledReports
@@ -161,7 +164,7 @@ abstract class LicensesTask
             objects.newInstance(LicenseReportContainerImpl::class.java, this)
 
         @get:Input
-        internal abstract val coordinatesWithLibrary: MapProperty<MavenCoordinates, Library>
+        internal abstract val coordinatesWithPomLibrary: MapProperty<MavenCoordinates, PomLibrary>
 
         @get:OutputFiles
         val outputFiles: Map<String, RegularFileProperty>
@@ -196,7 +199,7 @@ abstract class LicensesTask
         private fun loadDependenciesFromConfiguration(root: Provider<ResolvedComponentResult>) {
             val dependencies = project.dependencies
             val configurations = project.configurations
-            val pomInfos: Provider<Map<MavenCoordinates, Library>> =
+            val pomInfos: Provider<Map<MavenCoordinates, PomLibrary>> =
                 root.map { root ->
                     val directDependencies = loadMavenCoordinates(logger, root)
                     val directPomFiles =
@@ -204,19 +207,19 @@ abstract class LicensesTask
                     directPomFiles.getPomInfo(root.variants, dependencies, configurations)
                 }
 
-            this.coordinatesWithLibrary.set(pomInfos)
+            this.coordinatesWithPomLibrary.set(pomInfos)
         }
 
         @TaskAction
         fun licensesReport() {
-            createReport(coordinatesWithLibrary.get().toSortedMap())
+            createReport(coordinatesWithPomLibrary.get().toSortedMap())
         }
 
         private fun Iterable<MavenCoordinatesWithPomFile>.getPomInfo(
             variants: List<ResolvedVariantResult>,
             dependencies: DependencyHandler,
             configurations: ConfigurationContainer,
-        ): Map<MavenCoordinates, Library> {
+        ): Map<MavenCoordinates, PomLibrary> {
             val builder = DefaultModelBuilderFactory().newInstance()
             val resolver =
                 object : ModelResolver {
@@ -309,7 +312,7 @@ abstract class LicensesTask
                 it.allModuleArtifacts
             }
 
-        private fun createReport(libraries: Map<MavenCoordinates, Library>) {
+        private fun createReport(libraries: Map<MavenCoordinates, PomLibrary>) {
             if (libraries.isEmpty()) {
                 return
             }
@@ -330,18 +333,6 @@ abstract class LicensesTask
             }
         }
     }
-
-private fun getLicenseId(
-    licenseUrl: String,
-    licenseName: String,
-): LicenseId {
-    val licenseMap = LicenseId.map
-    return when {
-        licenseMap.containsKey(licenseUrl) -> licenseMap.getOrDefault(licenseUrl, LicenseId.UNKNOWN)
-        licenseMap.containsKey(licenseName) -> licenseMap.getOrDefault(licenseName, LicenseId.UNKNOWN)
-        else -> LicenseId.UNKNOWN
-    }
-}
 
 private fun ModuleComponentIdentifier.toMavenCoordinates(): MavenCoordinates =
     MavenCoordinates(
@@ -458,21 +449,17 @@ private fun ResolvedComponentResult.isPlatform(): Boolean {
 internal fun loadPomInfo(
     pom: Model,
     getRawModel: (String) -> Model?,
-): Library {
+): PomLibrary {
     val parentRawModel =
         pom.parent?.let { getRawModel("${it.groupId}:${it.artifactId}:${it.version}") }
 
-    return Library(
+    return PomLibrary(
         name = pom.name ?: parentRawModel?.name,
         licenses =
             (pom.licenses.takeUnless { it.isEmpty() } ?: parentRawModel?.licenses)?.mapTo(
                 mutableSetOf(),
             ) {
-                License(
-                    name = it.name,
-                    url = it.url,
-                    id = getLicenseId(it.name, it.url),
-                )
+                PomLicense(it.name, it.url)
             } ?: emptySet(),
         description = pom.description,
     )

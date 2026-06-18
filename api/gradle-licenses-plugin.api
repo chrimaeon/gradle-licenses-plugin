@@ -1,3 +1,19 @@
+public final class com/cmgapps/gradle/spdx/SpdxId : java/io/Serializable {
+	public static final field Companion Lcom/cmgapps/gradle/spdx/SpdxId$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public static final fun findByIdentifier$com_cmgapps_gradle_licenses_plugin (Ljava/lang/String;)Lcom/cmgapps/gradle/spdx/SpdxId;
+	public final fun getDetailsUrl ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/cmgapps/gradle/spdx/SpdxId$Companion {
+}
+
 public final class com/cmgapps/license/CustomReporter : com/cmgapps/license/Reporter {
 	public fun <init> (Lorg/gradle/api/provider/Property;Lorg/gradle/api/file/RegularFileProperty;Lorg/gradle/api/provider/Property;)V
 	public final fun getGenerator ()Lorg/gradle/api/provider/Property;
@@ -89,100 +105,6 @@ public class com/cmgapps/license/Reporter {
 	public final fun getOutputFile ()Lorg/gradle/api/file/RegularFileProperty;
 }
 
-public final class com/cmgapps/license/helper/LicensesHelperKt {
-	public static final fun logLicenseWarning (Lorg/gradle/api/logging/Logger;Lcom/cmgapps/license/model/License;Ljava/util/List;)V
-}
-
-public final class com/cmgapps/license/helper/StringExtensionKt {
-	public static final fun uppercaseFirstChar (Ljava/lang/String;)Ljava/lang/String;
-}
-
-public final class com/cmgapps/license/model/Library : java/io/Serializable {
-	public static final field Companion Lcom/cmgapps/license/model/Library$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/util/Set;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)Lcom/cmgapps/license/model/Library;
-	public static synthetic fun copy$default (Lcom/cmgapps/license/model/Library;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;ILjava/lang/Object;)Lcom/cmgapps/license/model/Library;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDescription ()Ljava/lang/String;
-	public final fun getLicenses ()Ljava/util/Set;
-	public final fun getName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class com/cmgapps/license/model/Library$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lcom/cmgapps/license/model/Library$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/cmgapps/license/model/Library;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/cmgapps/license/model/Library;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-}
-
-public final class com/cmgapps/license/model/Library$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/cmgapps/license/model/License : java/io/Serializable {
-	public static final field Companion Lcom/cmgapps/license/model/License$Companion;
-	public fun <init> (Lcom/cmgapps/license/model/LicenseId;Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Lcom/cmgapps/license/model/LicenseId;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Lcom/cmgapps/license/model/LicenseId;Ljava/lang/String;Ljava/lang/String;)Lcom/cmgapps/license/model/License;
-	public static synthetic fun copy$default (Lcom/cmgapps/license/model/License;Lcom/cmgapps/license/model/LicenseId;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/cmgapps/license/model/License;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getId ()Lcom/cmgapps/license/model/LicenseId;
-	public final fun getName ()Ljava/lang/String;
-	public final fun getUrl ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/cmgapps/license/model/License$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/cmgapps/license/model/LicenseId : java/lang/Enum {
-	public static final field APACHE Lcom/cmgapps/license/model/LicenseId;
-	public static final field BSD_2 Lcom/cmgapps/license/model/LicenseId;
-	public static final field BSD_3 Lcom/cmgapps/license/model/LicenseId;
-	public static final field CDDL Lcom/cmgapps/license/model/LicenseId;
-	public static final field Companion Lcom/cmgapps/license/model/LicenseId$Companion;
-	public static final field EPL_1 Lcom/cmgapps/license/model/LicenseId;
-	public static final field EPL_2 Lcom/cmgapps/license/model/LicenseId;
-	public static final field GPL_2 Lcom/cmgapps/license/model/LicenseId;
-	public static final field GPL_3 Lcom/cmgapps/license/model/LicenseId;
-	public static final field ISC Lcom/cmgapps/license/model/LicenseId;
-	public static final field LGPL_2_1 Lcom/cmgapps/license/model/LicenseId;
-	public static final field LGPL_3 Lcom/cmgapps/license/model/LicenseId;
-	public static final field MIT Lcom/cmgapps/license/model/LicenseId;
-	public static final field MPL_2 Lcom/cmgapps/license/model/LicenseId;
-	public static final field UNKNOWN Lcom/cmgapps/license/model/LicenseId;
-	public static final fun fromSpdxLicenseIdentifier (Ljava/lang/String;)Lcom/cmgapps/license/model/LicenseId;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public final fun getSpdxLicenseIdentifier ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lcom/cmgapps/license/model/LicenseId;
-	public static fun values ()[Lcom/cmgapps/license/model/LicenseId;
-}
-
-public final class com/cmgapps/license/model/LicenseId$Companion {
-	public final fun fromSpdxLicenseIdentifier (Ljava/lang/String;)Lcom/cmgapps/license/model/LicenseId;
-}
-
-public final class com/cmgapps/license/model/LicenseSerializer : kotlinx/serialization/KSerializer {
-	public static final field INSTANCE Lcom/cmgapps/license/model/LicenseSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/cmgapps/license/model/License;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/cmgapps/license/model/License;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-}
-
 public final class com/cmgapps/license/model/MavenCoordinates : java/io/Serializable, java/lang/Comparable {
 	public static final field Companion Lcom/cmgapps/license/model/MavenCoordinates$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
@@ -219,9 +141,37 @@ public final class com/cmgapps/license/model/MavenCoordinates$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class com/cmgapps/license/model/PomLibrary : java/io/Serializable {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/Set;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)Lcom/cmgapps/license/model/PomLibrary;
+	public static synthetic fun copy$default (Lcom/cmgapps/license/model/PomLibrary;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;ILjava/lang/Object;)Lcom/cmgapps/license/model/PomLibrary;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getLicenses ()Ljava/util/Set;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/cmgapps/license/model/PomLicense : java/io/Serializable {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/cmgapps/license/model/PomLicense;
+	public static synthetic fun copy$default (Lcom/cmgapps/license/model/PomLicense;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/cmgapps/license/model/PomLicense;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract class com/cmgapps/license/reporter/CsvReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
 	public static final field Companion Lcom/cmgapps/license/reporter/CsvReport$Companion;
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;)V
+	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
 
@@ -229,7 +179,7 @@ public final class com/cmgapps/license/reporter/CsvReport$Companion {
 }
 
 public abstract class com/cmgapps/license/reporter/CustomReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lorg/gradle/api/model/ObjectFactory;)V
+	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lorg/gradle/api/model/ObjectFactory;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public final fun getGenerator ()Lorg/gradle/api/provider/Property;
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
@@ -238,42 +188,35 @@ public abstract interface class com/cmgapps/license/reporter/CustomReportGenerat
 	public abstract fun generate (Ljava/util/Map;)Ljava/lang/String;
 }
 
+public final class com/cmgapps/license/reporter/CustomReportGenerator$Library {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getLicenses ()Ljava/util/Set;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/cmgapps/license/reporter/CustomReportGenerator$License {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract class com/cmgapps/license/reporter/HtmlReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
-	public static final field Companion Lcom/cmgapps/license/reporter/HtmlReport$Companion;
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lorg/gradle/api/logging/Logger;Lorg/gradle/api/model/ObjectFactory;)V
+	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lorg/gradle/api/logging/Logger;Lorg/gradle/api/model/ObjectFactory;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public final fun getCss ()Lorg/gradle/api/provider/Property;
 	public final fun getUseDarkMode ()Lorg/gradle/api/provider/Property;
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
 
-public final class com/cmgapps/license/reporter/HtmlReport$Companion {
-}
-
-public final class com/cmgapps/license/reporter/JsonLibrary {
-	public static final field Companion Lcom/cmgapps/license/reporter/JsonLibrary$Companion;
-	public fun <init> (Lcom/cmgapps/license/model/MavenCoordinates;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
-	public final fun getDescription ()Ljava/lang/String;
-	public final fun getLicenses ()Ljava/util/Set;
-	public final fun getMavenCoordinates ()Lcom/cmgapps/license/model/MavenCoordinates;
-	public final fun getName ()Ljava/lang/String;
-}
-
-public final synthetic class com/cmgapps/license/reporter/JsonLibrary$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lcom/cmgapps/license/reporter/JsonLibrary$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/cmgapps/license/reporter/JsonLibrary;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/cmgapps/license/reporter/JsonLibrary;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-}
-
-public final class com/cmgapps/license/reporter/JsonLibrary$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
 public abstract class com/cmgapps/license/reporter/JsonReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;)V
+	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
 
@@ -283,17 +226,18 @@ public abstract interface class com/cmgapps/license/reporter/LicenseReport {
 }
 
 public abstract class com/cmgapps/license/reporter/LicensesSingleFileReport : com/cmgapps/license/reporter/LicenseReport, org/gradle/api/reporting/SingleFileReport {
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lcom/cmgapps/license/reporter/ReportType;)V
+	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lcom/cmgapps/license/reporter/ReportType;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public synthetic fun configure (Lgroovy/lang/Closure;)Ljava/lang/Object;
 	public fun configure (Lgroovy/lang/Closure;)Lorg/gradle/api/reporting/Report;
 	public fun getDisplayName ()Ljava/lang/String;
 	public fun getName ()Ljava/lang/String;
 	public fun getOutputType ()Lorg/gradle/api/reporting/Report$OutputType;
+	protected final fun getSpdxIdRepository ()Lcom/cmgapps/license/repository/SpdxIdRepository;
 	public abstract fun writeLicenses (Ljava/io/OutputStream;)V
 }
 
 public abstract class com/cmgapps/license/reporter/MarkdownReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lorg/gradle/api/logging/Logger;)V
+	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lorg/gradle/api/logging/Logger;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
 
@@ -312,12 +256,17 @@ public final class com/cmgapps/license/reporter/ReportType : java/lang/Enum {
 }
 
 public abstract class com/cmgapps/license/reporter/TextReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;)V
+	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
 
 public abstract class com/cmgapps/license/reporter/XmlReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;)V
+	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public fun writeLicenses (Ljava/io/OutputStream;)V
+}
+
+public abstract interface class com/cmgapps/license/repository/SpdxIdRepository {
+	public abstract fun getSpdxIds (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
+	public abstract fun licenseText (Lcom/cmgapps/gradle/spdx/SpdxId;)Ljava/lang/String;
 }
 

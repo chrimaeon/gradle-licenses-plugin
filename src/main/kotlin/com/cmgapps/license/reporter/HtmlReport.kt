@@ -7,9 +7,8 @@
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.helper.logLicenseWarning
-import com.cmgapps.license.helper.text
 import com.cmgapps.license.helper.toLicensesMap
-import com.cmgapps.license.model.LicenseId
+import com.cmgapps.license.repository.SpdxIdRepository
 import org.apache.commons.text.StringEscapeUtils
 import org.gradle.api.Task
 import org.gradle.api.file.ProjectLayout
@@ -27,18 +26,8 @@ abstract class HtmlReport
         task: Task,
         private val logger: Logger,
         objects: ObjectFactory,
-    ) : LicensesSingleFileReport(layout, task, ReportType.HTML) {
-        companion object {
-            private const val DEFAULT_PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
-            private const val DEFAULT_BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
-            private const val NIGHT_MODE_CSS =
-                "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}"
-            private const val DEFAULT_CSS = "$DEFAULT_BODY_CSS$DEFAULT_PRE_CSS"
-            private const val OPEN_SOURCE_LIBRARIES = "Open source licenses"
-
-            private const val NOTICE_LIBRARIES = "Notice for packages:"
-        }
-
+        spdxIdRepository: SpdxIdRepository,
+    ) : LicensesSingleFileReport(layout, task, ReportType.HTML, spdxIdRepository) {
         init {
             required.set(true)
         }
@@ -63,29 +52,28 @@ abstract class HtmlReport
                                 ul {
                                     pairs
                                         .asSequence()
-                                        .sortedBy { (coordinates, library) -> library.name ?: coordinates.identifierWithoutVersion }
-                                        .forEach { (coordinates, library) ->
+                                        .sortedBy { (coordinates, library) ->
+                                            library.name ?: coordinates.identifierWithoutVersion
+                                        }.forEach { (coordinates, library) ->
                                             li {
                                                 +(library.name ?: coordinates.identifierWithoutVersion)
                                             }
                                         }
                                 }
 
-                                when (license.id) {
-                                    LicenseId.UNKNOWN -> {
-                                        logger.logLicenseWarning(license, pairs)
-                                        div("license") {
-                                            p {
-                                                +license.name
-                                            }
-                                            a(license.url) {
-                                                +license.url
-                                            }
+                                if (license.id == "UNKNOWN") {
+                                    logger.logLicenseWarning(pairs)
+                                    div("license") {
+                                        p {
+                                            +(license.name)
+                                        }
+                                        a(license.url) {
+                                            +(license.url)
                                         }
                                     }
-
-                                    else -> {
-                                        pre { +(StringEscapeUtils.escapeHtml4(license.id.text)) }
+                                } else {
+                                    with(spdxIdRepository) {
+                                        pre { +(StringEscapeUtils.escapeHtml4(license.licenseText())) }
                                     }
                                 }
                             }
@@ -109,6 +97,17 @@ abstract class HtmlReport
             title {
                 +OPEN_SOURCE_LIBRARIES
             }
+        }
+
+        private companion object {
+            private const val DEFAULT_PRE_CSS = "pre,.license{background-color:#ddd;padding:1em}pre{white-space:pre-wrap}"
+            private const val DEFAULT_BODY_CSS = "body{font-family:sans-serif;background-color:#eee}"
+            private const val NIGHT_MODE_CSS =
+                "@media(prefers-color-scheme: dark){body{background-color: #303030}pre,.license {background-color: #242424}}"
+            private const val DEFAULT_CSS = "$DEFAULT_BODY_CSS$DEFAULT_PRE_CSS"
+            private const val OPEN_SOURCE_LIBRARIES = "Open source licenses"
+
+            private const val NOTICE_LIBRARIES = "Notice for packages:"
         }
     }
 

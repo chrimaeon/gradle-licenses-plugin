@@ -16,8 +16,9 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.model.Library
 import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.model.PomLibrary
+import com.cmgapps.license.repository.SpdxIdRepository
 import groovy.lang.Closure
 import org.gradle.api.Task
 import org.gradle.api.file.ProjectLayout
@@ -26,13 +27,14 @@ import org.gradle.api.reporting.SingleFileReport
 import java.io.OutputStream
 
 interface LicenseReport {
-    var libraries: Map<MavenCoordinates, Library>
+    var libraries: Map<MavenCoordinates, PomLibrary>
 }
 
 abstract class LicensesSingleFileReport(
     layout: ProjectLayout,
     task: Task,
     private val type: ReportType,
+    protected val spdxIdRepository: SpdxIdRepository,
 ) : LicenseReport,
     SingleFileReport {
     init {
@@ -67,6 +69,62 @@ abstract class LicensesSingleFileReport(
 @FunctionalInterface
 fun interface CustomReportGenerator {
     fun generate(libraries: Map<MavenCoordinates, Library>): String
+
+    class Library(
+        val name: String?,
+        val description: String?,
+        val licenses: Set<License>,
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Library
+
+            if (name != other.name) return false
+            if (description != other.description) return false
+            if (licenses != other.licenses) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = name?.hashCode() ?: 0
+            result = 31 * result + (description?.hashCode() ?: 0)
+            result = 31 * result + licenses.hashCode()
+            return result
+        }
+
+        override fun toString(): String = "Library(name=$name, description=$description, licenses=$licenses)"
+    }
+
+    class License(
+        val id: String?,
+        val name: String?,
+        val url: String?,
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as License
+
+            if (id != other.id) return false
+            if (name != other.name) return false
+            if (url != other.url) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = id?.hashCode() ?: 0
+            result = 31 * result + (name?.hashCode() ?: 0)
+            result = 31 * result + (url?.hashCode() ?: 0)
+            return result
+        }
+
+        override fun toString(): String = "License(id=$id, name=$name, url=$url)"
+    }
 }
 
 enum class ReportType(

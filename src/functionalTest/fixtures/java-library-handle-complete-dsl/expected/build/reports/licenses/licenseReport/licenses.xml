@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <libraries xmlns="https://www.cmgapps.com" xsi:schemaLocation="https://www.cmgapps.com https://www.cmgapps.com/xsd/licenses.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <library id="group:name:1.0.0" version="1.0.0">
+  <library id="group:name" version="1.0.0">
     <name>
       Fake dependency name
     </name>

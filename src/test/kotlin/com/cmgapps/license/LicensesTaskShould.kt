@@ -187,26 +187,26 @@ class LicensesTaskShould {
             outputFile.readText(),
             `is`(
                 """
-                <?xml version="1.0" encoding="UTF-8" ?>
-                <libraries xmlns="https://www.cmgapps.com" xsi:schemaLocation="https://www.cmgapps.com https://www.cmgapps.com/xsd/licenses.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-                  <library id="group:name:1.0.0" version="1.0.0">
-                    <name>
-                      Fake dependency name
-                    </name>
-                    <description>
-                      Fake dependency description
-                    </description>
-                    <licenses>
-                      <license url="http://website.tld/">
-                        <name>
-                          Some license
-                        </name>
-                      </license>
-                    </licenses>
-                  </library>
-                </libraries>
-                
-                """.trimIndent(),
+                |<?xml version="1.0" encoding="UTF-8" ?>
+                |<libraries xmlns="https://www.cmgapps.com" xsi:schemaLocation="https://www.cmgapps.com https://www.cmgapps.com/xsd/licenses.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                |  <library id="group:name" version="1.0.0">
+                |    <name>
+                |      Fake dependency name
+                |    </name>
+                |    <description>
+                |      Fake dependency description
+                |    </description>
+                |    <licenses>
+                |      <license url="http://website.tld/">
+                |        <name>
+                |          Some license
+                |        </name>
+                |      </license>
+                |    </licenses>
+                |  </library>
+                |</libraries>
+                |
+                """.trimMargin(),
             ),
         )
     }
@@ -442,7 +442,7 @@ class LicensesTaskShould {
             outputFile.readText(),
             `is`(
                 "Name,Version,MavenCoordinates,Description,SPDX-License-Identifier,License Name,License Url\r\n" +
-                    "Has Parent,1.0.0,group:has-parent:1.0.0,,Apache-2.0,Apache 2.0,http://www.apache.org/licenses/LICENSE-2.0.txt\r\n" +
+                    "Has Parent,1.0.0,group:has-parent:1.0.0,,Apache-2.0,Apache License 2.0,https://spdx.org/licenses/Apache-2.0.html\r\n" +
                     "Fake dependency name,1.0.0,group:name:1.0.0,Fake dependency description,,Some license,http://website.tld/\r\n",
             ),
         )

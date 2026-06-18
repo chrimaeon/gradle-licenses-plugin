@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <libraries xmlns="https://www.cmgapps.com" xsi:schemaLocation="https://www.cmgapps.com https://www.cmgapps.com/xsd/licenses.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <library id="com.squareup.retrofit2:retrofit:2.3.0" version="2.3.0">
+  <library id="com.squareup.retrofit2:retrofit" version="2.3.0">
     <name>
       Retrofit
     </name>
@@ -8,9 +8,9 @@
       
     </description>
     <licenses>
-      <license spdx-license-identifier="Apache-2.0" url="http://www.apache.org/licenses/LICENSE-2.0.txt">
+      <license spdx-license-identifier="Apache-2.0" url="https://spdx.org/licenses/Apache-2.0.html">
         <name>
-          Apache 2.0
+          Apache License 2.0
         </name>
       </license>
     </licenses>

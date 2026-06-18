@@ -2,6 +2,6 @@ Licenses
 ├─ com.google.firebase:firebase-core:10.0.1
 │  └─ License: Undefined
 └─ Retrofit:2.3.0
-   ├─ License: Apache 2.0
+   ├─ License: Apache License 2.0
    ├─ SPDX-License-Identifier: Apache-2.0
-   └─ URL: http://www.apache.org/licenses/LICENSE-2.0.txt
+   └─ URL: https://spdx.org/licenses/Apache-2.0.html

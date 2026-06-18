@@ -8,6 +8,7 @@ gradle-pluginPublish = "com.gradle.plugin-publish:2.1.1"
 kotlinx-kover = "org.jetbrains.kotlinx.kover:0.9.8"
 jetbrains-changelog = "org.jetbrains.changelog:2.5.0"
 buildconfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.10" }
+poko = { id = "dev.drewhamilton.poko", version = "0.23.1"}
 
 [versions]
 
@@ -21,7 +22,7 @@ jacoco = "0.8.14"
 
 android-gradle-plugin = "com.android.tools.build:gradle-api:9.2.1"
 kotlin-multiplatform-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0"
+kotlinx-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0"
 apache-commons-csv = "org.apache.commons:commons-csv:1.14.1"
 apache-commons-text = "org.apache.commons:commons-text:1.15.0"
 maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven" }
@@ -35,3 +36,4 @@ xmlunit-core = { module = "org.xmlunit:xmlunit-core", version.ref = "xmlunit" }
 xmlunit-matchers = { module = "org.xmlunit:xmlunit-matchers", version.ref = "xmlunit" }
 networknt-jsonschemavalidator = "com.networknt:json-schema-validator:3.0.3"
 java-diff-utils = "io.github.java-diff-utils:java-diff-utils:4.17"
+kotlinpoet = "com.squareup:kotlinpoet:2.3.0"

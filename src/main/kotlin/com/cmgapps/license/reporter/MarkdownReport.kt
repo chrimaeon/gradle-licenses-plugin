@@ -7,9 +7,8 @@
 package com.cmgapps.license.reporter
 
 import com.cmgapps.license.helper.logLicenseWarning
-import com.cmgapps.license.helper.text
 import com.cmgapps.license.helper.toLicensesMap
-import com.cmgapps.license.model.LicenseId
+import com.cmgapps.license.repository.SpdxIdRepository
 import org.gradle.api.Task
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.logging.Logger
@@ -22,7 +21,8 @@ abstract class MarkdownReport
         layout: ProjectLayout,
         task: Task,
         private val logger: Logger,
-    ) : LicensesSingleFileReport(layout, task, ReportType.MARKDOWN) {
+        spdxIdRepository: SpdxIdRepository,
+    ) : LicensesSingleFileReport(layout, task, ReportType.MARKDOWN, spdxIdRepository) {
         override fun writeLicenses(outputStream: OutputStream) {
             outputStream.bufferedWriter().use { writer ->
                 writer.write(
@@ -37,16 +37,15 @@ abstract class MarkdownReport
                             }
 
                             append("\n```\n")
-                            when (license.id) {
-                                LicenseId.UNKNOWN -> {
-                                    logger.logLicenseWarning(license, pairs)
-                                    append(license.name)
-                                    append("\n")
-                                    append(license.url)
-                                }
 
-                                else -> {
-                                    append(license.id.text)
+                            if (license.id == "UNKNOWN") {
+                                logger.logLicenseWarning(pairs)
+                                append(license.name)
+                                append("\n")
+                                append(license.url)
+                            } else {
+                                with(spdxIdRepository) {
+                                    append(license.licenseText())
                                 }
                             }
                             append("\n```\n")

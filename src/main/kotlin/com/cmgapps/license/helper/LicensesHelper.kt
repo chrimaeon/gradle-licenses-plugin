@@ -8,54 +8,49 @@
 
 package com.cmgapps.license.helper
 
-import com.cmgapps.license.model.Library
-import com.cmgapps.license.model.License
-import com.cmgapps.license.model.LicenseId
+import com.cmgapps.gradle.spdx.SpdxId
 import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.model.PomLibrary
 import org.gradle.api.logging.Logger
 
-internal val LicenseId.filename: String
-    get() =
-        when (this) {
-            LicenseId.APACHE -> "apache-2.0.txt"
-            LicenseId.BSD_2 -> "bsd-2-clause.txt"
-            LicenseId.BSD_3 -> "bsd-3-clause.txt"
-            LicenseId.CDDL -> "cddl.txt"
-            LicenseId.EPL_2 -> "epl-2.0.txt"
-            LicenseId.GPL_2 -> "gpl-2.0.txt"
-            LicenseId.GPL_3 -> "gpl-3.0.txt"
-            LicenseId.LGPL_2_1 -> "lgpl-2.1.txt"
-            LicenseId.LGPL_3 -> "lgpl-3.0.txt"
-            LicenseId.MIT -> "mit.txt"
-            LicenseId.MPL_2 -> "mpl-2.0.txt"
-            LicenseId.EPL_1 -> "epl-1.0.txt"
-            LicenseId.ISC -> "isc.txt"
-            else -> throw IllegalArgumentException("$this does not have a file associated")
-        }
+private fun unknown(
+    name: String,
+    url: String,
+) = SpdxId(id = "UNKNOWN", name = name, url = url, detailsUrl = "")
 
-internal val LicenseId.text: String
-    get() {
-        if (this == LicenseId.UNKNOWN) {
-            return ""
-        }
-
-        return this::class.java.getResource("/licenses/${this.filename}")!!.readText()
-    }
-
-internal fun Map<MavenCoordinates, Library>.toLicensesMap(): Map<License, List<Pair<MavenCoordinates, Library>>> =
+internal fun Map<MavenCoordinates, PomLibrary>.toLicensesMap(): Map<SpdxId, List<Pair<MavenCoordinates, PomLibrary>>> =
     this
         .asSequence()
-        .flatMap { (coordinates, library) -> library.licenses.map { license -> license to (coordinates to library) } }
-        .groupBy({ (license, _) -> license }, { (_, pair) -> pair })
+        .flatMap { (coordinates, library) ->
+            library.licenses.flatMap { license ->
+                val spdxIds =
+                    SpdxId.getSpdxIds(
+                        license.url,
+                        license.name,
+                    )
+                if (spdxIds.isEmpty()) {
+                    listOf(unknown(name = license.name ?: "", url = license.url ?: "") to (coordinates to library))
+                } else {
+                    spdxIds.map {
+                        it to (coordinates to library)
+                    }
+                }
+            }
+        }.groupBy({ (license, _) -> license }, { (_, pair) -> pair })
 
-fun Logger.logLicenseWarning(
-    license: License,
-    libraries: List<Pair<MavenCoordinates, Library>>,
-) = this.warn(
-    """
+internal fun Logger.logLicenseWarning(libraries: List<Pair<MavenCoordinates, PomLibrary>>) {
+    val license =
+        libraries
+            .firstOrNull()
+            ?.second
+            ?.licenses
+            ?.firstOrNull() ?: return
+    this.warn(
+        """
         |No mapping found for license: '${license.name}' with url '${license.url}'
         |used by ${libraries.map { it.first }.joinToString { "'$it'" }}
         |
         |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
-    """.trimMargin(),
-)
+        """.trimMargin(),
+    )
+}

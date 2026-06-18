@@ -8,4 +8,4 @@ package com.cmgapps.license.helper
 
 import java.util.Locale
 
-fun String.uppercaseFirstChar(): String = replaceFirstChar { it.uppercase(Locale.US) }
+internal fun String.uppercaseFirstChar(): String = replaceFirstChar { it.uppercase(Locale.US) }

@@ -7,6 +7,7 @@
 plugins {
     kotlin("jvm") version embeddedKotlinVersion
     id("java-gradle-plugin")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 group = "com.cmgapps.gradle.plugins"
@@ -18,4 +19,9 @@ gradlePlugin {
             implementationClass = "com.cmgapps.gradle.ktlint.KtlintPlugin"
         }
     }
+}
+
+dependencies {
+    implementation(libs.kotlinx.serialization)
+    implementation(libs.kotlinpoet)
 }

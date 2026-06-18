@@ -16,8 +16,8 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.model.License
 import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.repository.SpdxIdRepository
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -32,7 +32,8 @@ abstract class JsonReport
     constructor(
         layout: ProjectLayout,
         task: Task,
-    ) : LicensesSingleFileReport(layout, task, ReportType.JSON) {
+        spdxIdRepository: SpdxIdRepository,
+    ) : LicensesSingleFileReport(layout, task, ReportType.JSON, spdxIdRepository) {
         private val json =
             Json {
                 prettyPrint = true
@@ -42,11 +43,30 @@ abstract class JsonReport
         override fun writeLicenses(outputStream: OutputStream) {
             json.encodeToStream(
                 libraries.map { (coordinates, library) ->
+
+                    val licenses = mutableListOf<JsonLicense>()
+
+                    for (license in library.licenses) {
+                        spdxIdRepository
+                            .getSpdxIds(url = license.url, name = license.name)
+                            .mapTo(licenses) {
+                                JsonLicense(spdxLicenseIdentifier = it.id, name = it.name, url = it.url)
+                            }.ifEmpty {
+                                licenses.add(
+                                    JsonLicense(
+                                        spdxLicenseIdentifier = null,
+                                        name = license.name ?: "",
+                                        url = license.url ?: "",
+                                    ),
+                                )
+                            }
+                    }
+
                     JsonLibrary(
                         coordinates,
                         library.name,
                         library.description,
-                        library.licenses,
+                        licenses.toSet(),
                     )
                 },
                 outputStream,
@@ -55,9 +75,18 @@ abstract class JsonReport
     }
 
 @Serializable
-class JsonLibrary(
+private class JsonLibrary(
     val mavenCoordinates: MavenCoordinates,
     val name: String?,
     val description: String?,
-    val licenses: Set<License>,
+    val licenses: Set<
+        JsonLicense,
+    >,
+)
+
+@Serializable
+private class JsonLicense(
+    val spdxLicenseIdentifier: String?,
+    val name: String,
+    val url: String,
 )

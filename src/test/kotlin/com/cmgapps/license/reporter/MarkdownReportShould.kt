@@ -6,14 +6,13 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.model.Library
-import com.cmgapps.license.model.License
-import com.cmgapps.license.model.LicenseId
 import com.cmgapps.license.model.MavenCoordinates
+import com.cmgapps.license.model.PomLibrary
+import com.cmgapps.license.model.PomLicense
 import com.cmgapps.license.util.OutputStreamExtension
+import com.cmgapps.license.util.TestSpdxIdRepository
 import com.cmgapps.license.util.TestStream
 import com.cmgapps.license.util.asString
-import com.cmgapps.license.util.getFileContent
 import com.cmgapps.license.util.testLibraries
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
@@ -29,7 +28,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import java.io.ByteArrayOutputStream
 
-@Suppress("HttpUrlsUsage")
 @ExtendWith(OutputStreamExtension::class)
 class MarkdownReportShould {
     @TestStream
@@ -42,19 +40,39 @@ class MarkdownReportShould {
             outputStream.asString(),
             `is`(
                 """
-                    |# Open source licenses
-                    |## Notice for packages
-                    |* Test lib 1
-                    |* Test lib 2
-                    |```
-                    |${getFileContent("apache-2.0.txt")}
-                    |```
-                    |
-                    |* Test lib 1
-                    |```
-                    |${getFileContent("mit.txt")}
-                    |```
-                    |
+                |# Open source licenses
+                |## Notice for packages
+                |* Apache and MIT lib
+                |* Apache lib
+                |```
+                |Apache-2.0 LICENSE
+                |```
+                |
+                |* Apache and MIT lib
+                |```
+                |MIT LICENSE
+                |```
+                |
+                |* LGPL lib
+                |```
+                |LGPL-2.0 LICENSE
+                |```
+                |
+                |* LGPL lib
+                |```
+                |LGPL-2.0+ LICENSE
+                |```
+                |
+                |* LGPL lib
+                |```
+                |LGPL-2.0-only LICENSE
+                |```
+                |
+                |* LGPL lib
+                |```
+                |LGPL-2.0-or-later LICENSE
+                |```
+                |
                 """.trimMargin(),
             ),
         )
@@ -65,30 +83,30 @@ class MarkdownReportShould {
         TestMarkdownReport(
             mapOf(
                 MavenCoordinates("test.group", "test.artifact", "1.0") to
-                    Library(
+                    PomLibrary(
                         name = "Lib with invalid license",
                         description = null,
                         licenses =
                             setOf(
-                                License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
+                                PomLicense(name = "foo", url = "https://www.license.foo"),
                             ),
                     ),
                 MavenCoordinates("test.group2", "test.artifact2", "1.0") to
-                    Library(
+                    PomLibrary(
                         name = "Lib with invalid license 2",
                         description = null,
                         licenses =
                             setOf(
-                                License(LicenseId.UNKNOWN, name = "foo2", url = "http://www.license2.foo"),
+                                PomLicense(name = "foo2", url = "https://www.license2.foo"),
                             ),
                     ),
                 MavenCoordinates("test.group3", "test.artifact3", "1.0") to
-                    Library(
+                    PomLibrary(
                         name = "Lib with invalid license 3",
                         description = null,
                         licenses =
                             setOf(
-                                License(LicenseId.UNKNOWN, name = "foo2", url = "http://www.license2.foo"),
+                                PomLicense(name = "foo2", url = "https://www.license2.foo"),
                             ),
                     ),
             ),
@@ -102,14 +120,14 @@ class MarkdownReportShould {
                     |* Lib with invalid license
                     |```
                     |foo
-                    |http://www.license.foo
+                    |https://www.license.foo
                     |```
                     |
                     |* Lib with invalid license 2
                     |* Lib with invalid license 3
                     |```
                     |foo2
-                    |http://www.license2.foo
+                    |https://www.license2.foo
                     |```
                     |
                 """.trimMargin(),
@@ -124,12 +142,12 @@ class MarkdownReportShould {
         TestMarkdownReport(
             mapOf(
                 MavenCoordinates("test.group", "test.artifact", "1.0") to
-                    Library(
+                    PomLibrary(
                         name = "Lib with invalid license",
                         description = null,
                         licenses =
                             setOf(
-                                License(LicenseId.UNKNOWN, name = "foo", url = "http://www.license.foo"),
+                                PomLicense(name = "foo", url = "https://www.license.foo"),
                             ),
                     ),
             ),
@@ -138,7 +156,7 @@ class MarkdownReportShould {
 
         verify(logger).warn(
             """
-               |No mapping found for license: 'foo' with url 'http://www.license.foo'
+               |No mapping found for license: 'foo' with url 'https://www.license.foo'
                |used by 'test.group:test.artifact:1.0'
                |
                |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
@@ -148,10 +166,10 @@ class MarkdownReportShould {
 }
 
 private class TestMarkdownReport(
-    override var libraries: Map<MavenCoordinates, Library>,
+    override var libraries: Map<MavenCoordinates, PomLibrary>,
     logger: Logger = Logging.getLogger("TestMarkdownReport"),
     project: Project = ProjectBuilder.builder().build(),
-) : MarkdownReport(project.layout, project.tasks.register("licenseReport").get(), logger) {
+) : MarkdownReport(project.layout, project.tasks.register("licenseReport").get(), logger, TestSpdxIdRepository()) {
     override fun getRequired(): Property<Boolean> =
         ProjectBuilder
             .builder()

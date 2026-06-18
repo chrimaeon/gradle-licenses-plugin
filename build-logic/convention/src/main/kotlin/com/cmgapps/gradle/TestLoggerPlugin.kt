@@ -44,15 +44,20 @@ class TestLoggerPlugin : Plugin<Project> {
                         testTask.logger.logResults(testDescriptor, result)
                     }
 
-                    override fun beforeSuite(suite: TestDescriptor) {}
+                    override fun beforeSuite(suite: TestDescriptor) {
+                        // NO-OP
+                    }
 
                     override fun afterSuite(
                         suite: TestDescriptor,
                         result: TestResult,
                     ) {
+                        // NO-OP
                     }
 
-                    override fun beforeTest(testDescriptor: TestDescriptor) {}
+                    override fun beforeTest(testDescriptor: TestDescriptor) {
+                        // NO-OP
+                    }
                 },
             )
         }

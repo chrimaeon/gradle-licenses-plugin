@@ -6,7 +6,8 @@
 
 package com.cmgapps.license.reporter
 
-import com.cmgapps.license.model.License
+import com.cmgapps.license.model.PomLicense
+import com.cmgapps.license.repository.SpdxIdRepository
 import org.gradle.api.Task
 import org.gradle.api.file.ProjectLayout
 import java.io.OutputStream
@@ -17,7 +18,8 @@ abstract class TextReport
     constructor(
         layout: ProjectLayout,
         task: Task,
-    ) : LicensesSingleFileReport(layout, task, ReportType.TEXT) {
+        spdxIdRepository: SpdxIdRepository,
+    ) : LicensesSingleFileReport(layout, task, ReportType.TEXT, spdxIdRepository) {
         override fun writeLicenses(outputStream: OutputStream) {
             outputStream.bufferedWriter().use {
                 it.write(
@@ -57,57 +59,47 @@ abstract class TextReport
         private fun StringBuilder.appendLicenses(
             libIndex: Int,
             libLength: Int,
-            licenses: Collection<License>,
+            licenses: Collection<PomLicense>,
         ) {
-            val licensesLength = licenses.size
+            val linePrefix = if (libIndex < libLength - 1) LINE_PREFIX else LAST_LINE_PREFIX
 
             if (licenses.isEmpty()) {
-                if (libIndex < libLength - 1) {
-                    append(LINE_PREFIX)
-                } else {
-                    append(LAST_LINE_PREFIX)
-                }
-
+                append(linePrefix)
                 append(LAST_ITEM_PREFIX)
-
                 append(" License: Undefined")
                 return
             }
 
-            licenses.forEachIndexed { index, license ->
-                if (libIndex < libLength - 1) {
-                    append(LINE_PREFIX)
-                } else {
-                    append(LAST_LINE_PREFIX)
-                }
-
-                append("$ITEM_PREFIX License: ")
-                append(license.name)
-
-                license.id.spdxLicenseIdentifier?.let {
-                    if (libIndex < libLength - 1) {
-                        append(LINE_PREFIX)
+            val entries =
+                licenses.flatMap { license ->
+                    val spdxIds = spdxIdRepository.getSpdxIds(url = license.url, name = license.name)
+                    if (spdxIds.isEmpty()) {
+                        listOf(Triple(license.name, null, license.url))
                     } else {
-                        append(LAST_LINE_PREFIX)
+                        spdxIds.map { Triple(it.name, it.id, it.url) }
                     }
+                }
+            val total = entries.size
 
+            entries.forEachIndexed { index, (name, spdxId, url) ->
+                append(linePrefix)
+                append("$ITEM_PREFIX License: ")
+                append(name)
+
+                if (spdxId != null) {
+                    append(linePrefix)
                     append("$ITEM_PREFIX SPDX-License-Identifier: ")
-                    append(license.id.spdxLicenseIdentifier)
+                    append(spdxId)
                 }
 
-                if (libIndex < libLength - 1) {
-                    append(LINE_PREFIX)
-                } else {
-                    append(LAST_LINE_PREFIX)
-                }
-
-                if (index < licensesLength - 1) {
+                append(linePrefix)
+                if (index < total - 1) {
                     append(ITEM_PREFIX)
                 } else {
                     append(LAST_ITEM_PREFIX)
                 }
                 append(" URL: ")
-                append(license.url)
+                append(url)
             }
         }
 
