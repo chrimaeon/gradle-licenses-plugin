@@ -27,7 +27,6 @@ import org.gradle.api.resources.TextResourceFactory
 import java.io.File
 import javax.inject.Inject
 
-@Suppress("unused")
 abstract class LicensesExtension
 
 abstract class LicenseReportsExtension
@@ -123,14 +122,3 @@ class CustomReporter(
     outputFile: RegularFileProperty,
     val generator: Property<CustomReportGenerator>,
 ) : Reporter(enabled, outputFile)
-
-@Suppress("unused")
-enum class OutputType {
-    HTML,
-    XML,
-    JSON,
-    TEXT,
-    MD,
-    CSV,
-    CUSTOM,
-}

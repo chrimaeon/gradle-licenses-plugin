@@ -104,7 +104,7 @@ class LicensesPlugin : Plugin<Project> {
             if (findClass("com.android.build.api.variant.AndroidComponentsExtension") != null) {
                 configureAgp7Project(project, reportExtension)
             } else {
-                throw GradleException("Minimum Android Gradle Plugin Version is 7.0+")
+                throw GradleException("Minimum Android Gradle Plugin Version is 7.0")
             }
         }
 
@@ -113,12 +113,10 @@ class LicensesPlugin : Plugin<Project> {
             project: Project,
             reportExtension: LicenseReportsExtension,
         ) {
-            project.logger.info("Using AGP 7.0+ AndroidComponentsExtension")
             val androidComponentsExtension =
                 project.extensions.getByType(com.android.build.api.variant.AndroidComponentsExtension::class.java)
             androidComponentsExtension
                 .onVariants { variant ->
-
                     project.tasks.register(
                         "license${variant.name.uppercaseFirstChar()}Report",
                         LicensesTask::class.java,
@@ -247,7 +245,7 @@ class LicensesPlugin : Plugin<Project> {
     }
 }
 
-fun findClass(fqName: String) =
+private fun findClass(fqName: String) =
     try {
         Class.forName(fqName)
     } catch (_: ClassNotFoundException) {

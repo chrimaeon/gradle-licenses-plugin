@@ -313,7 +313,8 @@ class HtmlReportShould {
                |No mapping found for license: 'foo' with url 'https://www.license.foo'
                |used by 'test.group:test.artifact:1.0'
                |
-               |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
+               |If it is a valid Open Source License, please report to
+               |https://github.com/chrimaeon/gradle-licenses-plugin/issues/new?labels=missing+license&title=Missing+foo&body=Missing+license%0A%0A%60foo%60+with+url+%60https%3A%2F%2Fwww.license.foo%60
             """.trimMargin(),
         )
 
@@ -322,7 +323,8 @@ class HtmlReportShould {
                |No mapping found for license: 'foo2' with url 'https://www.license2.foo'
                |used by 'test.group2:test.artifact2:1.0', 'test.group3:test.artifact3:1.0'
                |
-               |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
+               |If it is a valid Open Source License, please report to
+               |https://github.com/chrimaeon/gradle-licenses-plugin/issues/new?labels=missing+license&title=Missing+foo2&body=Missing+license%0A%0A%60foo2%60+with+url+%60https%3A%2F%2Fwww.license2.foo%60
             """.trimMargin(),
         )
     }

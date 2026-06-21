@@ -68,10 +68,6 @@ public final class com/cmgapps/license/LicensesPlugin : org/gradle/api/Plugin {
 public final class com/cmgapps/license/LicensesPlugin$Companion {
 }
 
-public final class com/cmgapps/license/LicensesPluginKt {
-	public static final fun findClass (Ljava/lang/String;)Ljava/lang/Class;
-}
-
 public abstract class com/cmgapps/license/LicensesTask : org/gradle/api/DefaultTask, org/gradle/api/reporting/Reporting {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun configurationToCheck (Lorg/gradle/api/artifacts/Configuration;)V
@@ -86,19 +82,6 @@ public abstract class com/cmgapps/license/LicensesTask : org/gradle/api/DefaultT
 	public synthetic fun reports (Lorg/gradle/api/Action;)Lorg/gradle/api/reporting/ReportContainer;
 }
 
-public final class com/cmgapps/license/OutputType : java/lang/Enum {
-	public static final field CSV Lcom/cmgapps/license/OutputType;
-	public static final field CUSTOM Lcom/cmgapps/license/OutputType;
-	public static final field HTML Lcom/cmgapps/license/OutputType;
-	public static final field JSON Lcom/cmgapps/license/OutputType;
-	public static final field MD Lcom/cmgapps/license/OutputType;
-	public static final field TEXT Lcom/cmgapps/license/OutputType;
-	public static final field XML Lcom/cmgapps/license/OutputType;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/cmgapps/license/OutputType;
-	public static fun values ()[Lcom/cmgapps/license/OutputType;
-}
-
 public class com/cmgapps/license/Reporter {
 	public fun <init> (Lorg/gradle/api/provider/Property;Lorg/gradle/api/file/RegularFileProperty;)V
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
@@ -108,7 +91,6 @@ public class com/cmgapps/license/Reporter {
 public final class com/cmgapps/license/model/MavenCoordinates : java/io/Serializable, java/lang/Comparable {
 	public static final field Companion Lcom/cmgapps/license/model/MavenCoordinates$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public static final fun NameComparator ()Ljava/util/Comparator;
 	public fun compareTo (Lcom/cmgapps/license/model/MavenCoordinates;)I
 	public synthetic fun compareTo (Ljava/lang/Object;)I
 	public final fun component1 ()Ljava/lang/String;
@@ -137,7 +119,6 @@ public final synthetic class com/cmgapps/license/model/MavenCoordinates$$seriali
 }
 
 public final class com/cmgapps/license/model/MavenCoordinates$Companion {
-	public final fun NameComparator ()Ljava/util/Comparator;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 

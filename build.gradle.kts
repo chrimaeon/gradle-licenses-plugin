@@ -86,7 +86,7 @@ testing {
             register<JvmTestSuite>("functionalTest") {
                 dependencies {
                     implementation(project())
-                    implementation(libs.jUnit) {
+                    implementation(libs.junit.jupiter) {
                         exclude(group = "org.hamcrest")
                     }
                     implementation(libs.hamcrest)
@@ -280,7 +280,7 @@ dependencies {
     implementation(libs.apache.commons.csv)
     implementation(libs.apache.commons.text)
 
-    testImplementation(libs.jUnit) {
+    testImplementation(libs.junit.jupiter) {
         exclude(group = "org.hamcrest")
     }
     testImplementation(libs.hamcrest)

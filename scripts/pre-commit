@@ -10,6 +10,7 @@ FILES=$(git diff --cached --name-only --diff-filter=d | grep -i -E "\.kts?" || t
 
 if [ -n "$FILES" ]
 then
+    echo "Checking ktlint for $FILES"
     ktlint -F $FILES
     git add $FILES
 else

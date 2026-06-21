@@ -12,6 +12,8 @@ import com.cmgapps.gradle.spdx.SpdxId
 import com.cmgapps.license.model.MavenCoordinates
 import com.cmgapps.license.model.PomLibrary
 import org.gradle.api.logging.Logger
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 private fun unknown(
     name: String,
@@ -45,12 +47,29 @@ internal fun Logger.logLicenseWarning(libraries: List<Pair<MavenCoordinates, Pom
             ?.second
             ?.licenses
             ?.firstOrNull() ?: return
+
+    val issuesTrackerUrl =
+        buildString {
+            append("https://github.com/chrimaeon/gradle-licenses-plugin/issues/new?labels=")
+            append(URLEncoder.encode("missing license", StandardCharsets.UTF_8))
+            append("&title=Missing+")
+            append(URLEncoder.encode(license.name ?: license.url ?: "", StandardCharsets.UTF_8))
+            append("&body=")
+            append(
+                URLEncoder.encode(
+                    "Missing license\n\n`${license.name}` with url `${license.url}`",
+                    StandardCharsets.UTF_8,
+                ),
+            )
+        }
+
     this.warn(
         """
         |No mapping found for license: '${license.name}' with url '${license.url}'
         |used by ${libraries.map { it.first }.joinToString { "'$it'" }}
         |
-        |If it is a valid Open Source License, please report to https://github.com/chrimaeon/gradle-licenses-plugin/issues 
+        |If it is a valid Open Source License, please report to
+        |$issuesTrackerUrl
         """.trimMargin(),
     )
 }

@@ -28,12 +28,12 @@ apache-commons-text = "org.apache.commons:commons-text:1.15.0"
 maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven" }
 maven-model-builder = { module = "org.apache.maven:maven-model-builder", version.ref = "maven" }
 maven-artifact = { module = "org.apache.maven:maven-artifact", version.ref = "maven" }
-jUnit = "org.junit.jupiter:junit-jupiter:6.1.0"
+junit-jupiter = "org.junit.jupiter:junit-jupiter:6.1.0"
 hamcrest = "org.hamcrest:hamcrest:3.0"
 ktlint-cli = "com.pinterest.ktlint:ktlint-cli:1.8.0"
 mockito-kotlin = "org.mockito.kotlin:mockito-kotlin:6.3.0"
 xmlunit-core = { module = "org.xmlunit:xmlunit-core", version.ref = "xmlunit" }
 xmlunit-matchers = { module = "org.xmlunit:xmlunit-matchers", version.ref = "xmlunit" }
-networknt-jsonschemavalidator = "com.networknt:json-schema-validator:3.0.3"
+networknt-jsonschemavalidator = "com.networknt:json-schema-validator:3.0.4"
 java-diff-utils = "io.github.java-diff-utils:java-diff-utils:4.17"
 kotlinpoet = "com.squareup:kotlinpoet:2.3.0"
