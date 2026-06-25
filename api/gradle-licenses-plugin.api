@@ -54,8 +54,7 @@ public abstract class com/cmgapps/license/LicenseReportsExtension {
 	public final fun xml (Lorg/gradle/api/Action;)V
 }
 
-public abstract class com/cmgapps/license/LicensesExtension {
-	public fun <init> ()V
+public abstract interface class com/cmgapps/license/LicensesExtension {
 }
 
 public final class com/cmgapps/license/LicensesPlugin : org/gradle/api/Plugin {

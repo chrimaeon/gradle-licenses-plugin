@@ -27,7 +27,7 @@ import org.gradle.api.resources.TextResourceFactory
 import java.io.File
 import javax.inject.Inject
 
-abstract class LicensesExtension
+interface LicensesExtension
 
 abstract class LicenseReportsExtension
     @Inject
