@@ -129,25 +129,25 @@ internal abstract class LicenseReportContainerImpl
         }
 
         override val plainText: TextReport
-            get() = getByName(ReportType.TEXT.name) as TextReport
+            get() = withType(TextReport::class.java).getByName(ReportType.TEXT.name)
 
         override val json: JsonReport
-            get() = getByName(ReportType.JSON.name) as JsonReport
+            get() = withType(JsonReport::class.java).getByName(ReportType.JSON.name)
 
         override val html: HtmlReport
-            get() = getByName(ReportType.HTML.name) as HtmlReport
+            get() = withType(HtmlReport::class.java).getByName(ReportType.HTML.name)
 
         override val xml: XmlReport
-            get() = getByName(ReportType.XML.name) as XmlReport
+            get() = withType(XmlReport::class.java).getByName(ReportType.XML.name)
 
         override val csv: CsvReport
-            get() = getByName(ReportType.CSV.name) as CsvReport
+            get() = withType(CsvReport::class.java).getByName(ReportType.CSV.name)
 
         override val markdown: MarkdownReport
-            get() = getByName(ReportType.MARKDOWN.name) as MarkdownReport
+            get() = withType(MarkdownReport::class.java).getByName(ReportType.MARKDOWN.name)
 
         override val custom: CustomReport
-            get() = getByName(ReportType.CUSTOM.name) as CustomReport
+            get() = withType(CustomReport::class.java).getByName(ReportType.CUSTOM.name)
 
         @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
         override fun <T> toArray(generator: IntFunction<Array<out T?>?>): Array<out T?>? = super<LicenseReportContainer>.toArray(generator)
