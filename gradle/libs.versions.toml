@@ -28,7 +28,7 @@ apache-commons-text = "org.apache.commons:commons-text:1.15.0"
 maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven" }
 maven-model-builder = { module = "org.apache.maven:maven-model-builder", version.ref = "maven" }
 maven-artifact = { module = "org.apache.maven:maven-artifact", version.ref = "maven" }
-jUnit = "org.junit.jupiter:junit-jupiter:6.1.0"
+jUnit = "org.junit.jupiter:junit-jupiter:6.1.1"
 hamcrest = "org.hamcrest:hamcrest:3.0"
 ktlint-cli = "com.pinterest.ktlint:ktlint-cli:1.8.0"
 mockito-kotlin = "org.mockito.kotlin:mockito-kotlin:6.3.0"
