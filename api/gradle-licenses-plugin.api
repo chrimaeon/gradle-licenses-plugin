@@ -58,13 +58,9 @@ public abstract interface class com/cmgapps/license/LicensesExtension {
 }
 
 public final class com/cmgapps/license/LicensesPlugin : org/gradle/api/Plugin {
-	public static final field Companion Lcom/cmgapps/license/LicensesPlugin$Companion;
 	public fun <init> ()V
 	public synthetic fun apply (Ljava/lang/Object;)V
 	public fun apply (Lorg/gradle/api/Project;)V
-}
-
-public final class com/cmgapps/license/LicensesPlugin$Companion {
 }
 
 public abstract class com/cmgapps/license/LicensesTask : org/gradle/api/DefaultTask, org/gradle/api/reporting/Reporting {

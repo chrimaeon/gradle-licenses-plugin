@@ -35,6 +35,16 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
 
 private const val MIN_KOTLIN_VERSION = "2.0.0"
+private const val TASK_DESC = "Collect licenses from project"
+private const val TASK_GROUP = "Reporting"
+
+private val ANDROID_IDS =
+    listOf(
+        "com.android.application",
+        "com.android.library",
+        "com.android.feature",
+        "com.android.dynamic-feature",
+    )
 
 class LicensesPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -67,187 +77,150 @@ class LicensesPlugin : Plugin<Project> {
             }
         }
     }
+}
 
-    companion object {
-        private const val TASK_DESC = "Collect licenses from project"
-        private const val TASK_GROUP = "Reporting"
+private fun configureJavaProject(
+    project: Project,
+    licenseReportExtension: LicenseReportsExtension,
+) {
+    project.tasks.register(
+        "licenseReport",
+        LicensesTask::class.java,
+    ) { task ->
+        task.addBasicConfiguration(licenseReportExtension)
+        val configuration = project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME)
+        task.configurationToCheck(configuration)
+    }
+}
 
-        private val ANDROID_IDS =
-            listOf(
-                "com.android.application",
-                "com.android.library",
-                "com.android.feature",
-                "com.android.dynamic-feature",
-            )
+private fun configureAndroidProject(
+    project: Project,
+    reportExtension: LicenseReportsExtension,
+) {
+    val androidComponentsExtension =
+        project.extensions.findByType(com.android.build.api.variant.AndroidComponentsExtension::class.java)
+            ?: throw GradleException("Minimum Android Gradle Plugin Version is 7.0")
 
-        @JvmStatic
-        private fun configureJavaProject(
-            project: Project,
-            licenseReportExtension: LicenseReportsExtension,
-        ) {
+    androidComponentsExtension.onVariants { variant ->
+        project.tasks.register(
+            "license${variant.name.uppercaseFirstChar()}Report",
+            LicensesTask::class.java,
+        ) { task ->
+            task.addBasicConfiguration(reportExtension)
+            task.configurationToCheck(variant.runtimeConfiguration)
+        }
+    }
+}
+
+private fun configureMultiplatformProject(
+    project: Project,
+    reportExtension: LicenseReportsExtension,
+) {
+    val kotlinVersion = ComparableVersion(project.getKotlinPluginVersion())
+
+    if (kotlinVersion < ComparableVersion(MIN_KOTLIN_VERSION)) {
+        throw GradleException("Using Multiplatform Gradle Plugin v$kotlinVersion not supported")
+    }
+
+    val kotlinMultiplatformExtension = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
+
+    val targetRuntimeConfiguration = mutableListOf<Provider<Configuration>>()
+
+    val rootTask = project.tasks.register("licenseMultiplatformReport")
+
+    kotlinMultiplatformExtension.targets.configureEach { target ->
+        val targetName = target.name
+        if (target.platformType == KotlinPlatformType.common) {
+            // All common dependencies end up in platform targets.
+            return@configureEach
+        }
+
+        val task =
             project.tasks.register(
-                "licenseReport",
+                "licenseMultiplatform${targetName.uppercaseFirstChar()}Report",
                 LicensesTask::class.java,
             ) { task ->
-                task.addBasicConfiguration(licenseReportExtension)
-                val configuration = project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME)
-                task.configurationToCheck(configuration)
-            }
-        }
+                task.addBasicConfiguration(reportExtension)
+                val compilation = target.compilations.getByName(KotlinCompilation.MAIN_COMPILATION_NAME)
+                // Fallback to compile dependencies when runtime isn't supported, e.g. Kotlin/Native.
+                val runtimeConfigurationName =
+                    compilation.runtimeDependencyConfigurationName
+                        ?: compilation.compileDependencyConfigurationName
 
-        @JvmStatic
-        private fun configureAndroidProject(
-            project: Project,
-            reportExtension: LicenseReportsExtension,
-        ) {
-            // check for AGP 7.0+ 'androidComponent' extension
-            if (findClass("com.android.build.api.variant.AndroidComponentsExtension") != null) {
-                configureAgp7Project(project, reportExtension)
-            } else {
-                throw GradleException("Minimum Android Gradle Plugin Version is 7.0")
-            }
-        }
-
-        @JvmStatic
-        private fun configureAgp7Project(
-            project: Project,
-            reportExtension: LicenseReportsExtension,
-        ) {
-            val androidComponentsExtension =
-                project.extensions.getByType(com.android.build.api.variant.AndroidComponentsExtension::class.java)
-            androidComponentsExtension
-                .onVariants { variant ->
-                    project.tasks.register(
-                        "license${variant.name.uppercaseFirstChar()}Report",
-                        LicensesTask::class.java,
-                    ) { task ->
-                        task.addBasicConfiguration(reportExtension)
-                        task.configurationToCheck(variant.runtimeConfiguration)
-                    }
-                }
-        }
-
-        @JvmStatic
-        private fun configureMultiplatformProject(
-            project: Project,
-            reportExtension: LicenseReportsExtension,
-        ) {
-            val kotlinVersion = ComparableVersion(project.getKotlinPluginVersion())
-
-            if (kotlinVersion < ComparableVersion(MIN_KOTLIN_VERSION)) {
-                throw GradleException("Using Multiplatform Gradle Plugin v$kotlinVersion not supported")
+                val runtimeConfiguration = project.configurations.named(runtimeConfigurationName)
+                targetRuntimeConfiguration.add(runtimeConfiguration)
+                task.configurationToCheck(runtimeConfiguration)
             }
 
-            val kotlinMultiplatformExtension = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
+        rootTask.configure { it.dependsOn(task) }
+    }
+}
 
-            val targetRuntimeConfiguration = mutableListOf<Provider<Configuration>>()
+private fun LicensesTask.addBasicConfiguration(reportExtension: LicenseReportsExtension) {
+    description = TASK_DESC
+    group = TASK_GROUP
 
-            val rootTask = project.tasks.register("licenseMultiplatformReport")
-
-            kotlinMultiplatformExtension.targets.configureEach { target ->
-                val targetName = target.name
-                if (target.platformType == KotlinPlatformType.common) {
-                    // All common dependencies end up in platform targets.
-                    return@configureEach
-                }
-
-                val task =
-                    project.tasks.register(
-                        "licenseMultiplatform${targetName.uppercaseFirstChar()}Report",
-                        LicensesTask::class.java,
-                    ) { task ->
-                        task.addBasicConfiguration(reportExtension)
-                        val compilation = target.compilations.getByName(KotlinCompilation.MAIN_COMPILATION_NAME)
-                        // Fallback to compile dependencies when runtime isn't supported, e.g. Kotlin/Native.
-                        val runtimeConfigurationName =
-                            compilation.runtimeDependencyConfigurationName
-                                ?: compilation.compileDependencyConfigurationName
-
-                        val runtimeConfiguration = project.configurations.named(runtimeConfigurationName)
-                        targetRuntimeConfiguration.add(runtimeConfiguration)
-                        task.configurationToCheck(runtimeConfiguration)
-                    }
-
-                rootTask.configure { it.dependsOn(task) }
+    reports.configureEach { report ->
+        when (report.name) {
+            ReportType.HTML.name -> {
+                report as HtmlReport
+                val reporter =
+                    reportExtension.html
+                report.configureReport(reporter)
+                report.css.set(reporter.css)
+                report.useDarkMode.set(reporter.useDarkMode)
             }
-        }
 
-        @JvmStatic
-        private fun LicensesTask.addBasicConfiguration(reportExtension: LicenseReportsExtension) {
-            description = TASK_DESC
-            group = TASK_GROUP
-
-            reports.configureEach { report ->
-                when (report.name) {
-                    ReportType.HTML.name -> {
-                        report as HtmlReport
-                        val reporter =
-                            reportExtension.html
-                        report.configureReport(reporter)
-                        report.css.set(reporter.css)
-                        report.useDarkMode.set(reporter.useDarkMode)
-                    }
-
-                    ReportType.CSV.name -> {
-                        val reporter =
-                            reportExtension.csv
-                        report.configureReport(reporter)
-                    }
-
-                    ReportType.JSON.name -> {
-                        val reporter =
-                            reportExtension.json
-                        report.configureReport(reporter)
-                    }
-
-                    ReportType.MARKDOWN.name -> {
-                        val reporter =
-                            reportExtension.markdown
-                        report.configureReport(reporter)
-                    }
-
-                    ReportType.TEXT.name -> {
-                        val reporter =
-                            reportExtension.plainText
-                        report.configureReport(reporter)
-                    }
-
-                    ReportType.XML.name -> {
-                        val reporter =
-                            reportExtension.xml
-                        report.configureReport(reporter)
-                    }
-
-                    ReportType.CUSTOM.name -> {
-                        report as CustomReport
-                        val reporter =
-                            reportExtension.custom
-
-                        report.generator.set(reporter.generator)
-
-                        report.configureReport(reporter)
-                    }
-
-                    else -> {
-                        throw GradleException("Unknown report $name")
-                    }
-                }
+            ReportType.CSV.name -> {
+                val reporter =
+                    reportExtension.csv
+                report.configureReport(reporter)
             }
-        }
 
-        @JvmStatic
-        private fun SingleFileReport.configureReport(reporter: Reporter) {
-            required.set(reporter.enabled)
-            if (reporter.outputFile.isPresent) {
-                outputLocation.set(reporter.outputFile)
+            ReportType.JSON.name -> {
+                val reporter =
+                    reportExtension.json
+                report.configureReport(reporter)
+            }
+
+            ReportType.MARKDOWN.name -> {
+                val reporter =
+                    reportExtension.markdown
+                report.configureReport(reporter)
+            }
+
+            ReportType.TEXT.name -> {
+                val reporter =
+                    reportExtension.plainText
+                report.configureReport(reporter)
+            }
+
+            ReportType.XML.name -> {
+                val reporter =
+                    reportExtension.xml
+                report.configureReport(reporter)
+            }
+
+            ReportType.CUSTOM.name -> {
+                report as CustomReport
+                val reporter =
+                    reportExtension.custom
+
+                report.generator.set(reporter.generator)
+
+                report.configureReport(reporter)
+            }
+
+            else -> {
+                throw GradleException("Unknown report $name")
             }
         }
     }
 }
 
-private fun findClass(fqName: String) =
-    try {
-        Class.forName(fqName)
-    } catch (_: ClassNotFoundException) {
-        null
+private fun SingleFileReport.configureReport(reporter: Reporter) {
+    required.set(reporter.enabled)
+    if (reporter.outputFile.isPresent) {
+        outputLocation.set(reporter.outputFile)
     }
+}
