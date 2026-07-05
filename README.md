@@ -14,7 +14,7 @@ This Gradle plugin provides tasks to generate a file with the licenses used from
 
 ```kotlin
 plugins {
-    id("com.cmgapps.licenses") version "6.0.0"
+    id("com.cmgapps.licenses") version "7.0.0"
 }
 ```
 ### Tasks

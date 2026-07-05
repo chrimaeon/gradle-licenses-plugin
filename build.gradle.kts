@@ -219,27 +219,28 @@ tasks {
         gradleVersion = libs.versions.gradle.get()
     }
 
-    val updateReadme by registering {
-        description = "Updates the version in the README.md"
-        val readmeFile = rootDir.resolve("README.md")
-        val version: String by project
+    val updateReadme =
+        register("updateReadme") {
+            description = "Updates the version in the README.md"
+            val readmeFile = rootDir.resolve("README.md")
+            val version: String = project.version as String
 
-        inputs.property("libVersion", version)
-        outputs.file(readmeFile)
+            inputs.property("libVersion", version)
+            outputs.file(readmeFile)
 
-        doLast {
-            val content = readmeFile.readText()
-            val oldVersion =
-                """id\("com.cmgapps.licenses"\) version "(.*)"""".toRegex(RegexOption.MULTILINE).find(content)?.let {
-                    it.groupValues[1]
-                } ?: error("Cannot find oldVersion")
+            doLast {
+                val content = readmeFile.readText()
+                val oldVersion =
+                    """id\("com.cmgapps.licenses"\) version "(.*)"""".toRegex(RegexOption.MULTILINE).find(content)?.let {
+                        it.groupValues[1]
+                    } ?: error("Cannot find oldVersion")
 
-            logger.info("Updating README.md version $oldVersion to $version")
+                logger.info("Updating README.md version $oldVersion to $version")
 
-            val newContent = content.replace(oldVersion, version)
-            readmeFile.writeText(newContent)
+                val newContent = content.replace(oldVersion, version)
+                readmeFile.writeText(newContent)
+            }
         }
-    }
 
     patchChangelog {
         dependsOn(updateReadme)
@@ -258,8 +259,8 @@ tasks {
         into(jsonFolder)
     }
 
-    val generateSpdxIds by
-        registering(GenerateSpdxIdsTask::class) {
+    val generateSpdxIds =
+        register("generateSpdxIds", GenerateSpdxIdsTask::class) {
             description = "Generates SPDX IDs from a JSON file"
             inputJson = jsonFile
         }
