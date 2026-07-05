@@ -4,6 +4,20 @@
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [7.0.0]
+
+### Added
+
 - using the [SPDX license index](https://spdx.org/licenses/) for valid Open Source licenses
 
 ### Changed
@@ -16,8 +30,6 @@
 - Updated README and removed Groovy examples
 - `licenseMultiplatformReport` now runs the report tasks for all targets instead of collecting licenses from all targets
 
-### Deprecated
-
 ### Removed
 
 - Removes `additionalProjects` extension property; projects that are refereced as a dependency will be auto collected
@@ -27,8 +39,6 @@
 
 - Escape HTML in HTML report
 - Fixed license issue link
-
-### Security
 
 ## [6.0.0]
 
@@ -183,7 +193,8 @@ Use Gradle's Reports API to generate reports
 - All public properties are now provided Properties
 - Use Kotlin Serialization instead of Moshi
 
-[Unreleased]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/6.0.0...HEAD
+[Unreleased]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/7.0.0...HEAD
+[7.0.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/6.0.0...7.0.0
 [6.0.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/5.1.0...6.0.0
 [5.1.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/5.0.0...5.1.0
 [5.0.0]: https://github.com/chrimaeon/gradle-licenses-plugin/compare/4.8.0...5.0.0
