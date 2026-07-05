@@ -4,6 +4,8 @@
 
 ### Added
 
+- using the [SPDX license index](https://spdx.org/licenses/) for valid Open Source licenses
+
 ### Changed
 
 - Plugin is now configuration-cache compatible

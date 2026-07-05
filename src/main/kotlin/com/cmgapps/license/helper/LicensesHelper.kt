@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("HttpUrlsUsage")
-
 package com.cmgapps.license.helper
 
 import com.cmgapps.gradle.spdx.SpdxId

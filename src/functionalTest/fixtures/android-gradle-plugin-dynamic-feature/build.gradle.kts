@@ -5,7 +5,7 @@
  */
 
 plugins {
-    id("com.android.dynamic-feature") version "8.13.2"
+    id("com.android.dynamic-feature") version "9.2.0"
     id("com.cmgapps.licenses")
 }
 

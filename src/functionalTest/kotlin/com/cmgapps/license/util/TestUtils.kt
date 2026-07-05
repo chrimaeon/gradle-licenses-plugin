@@ -28,7 +28,6 @@ import org.hamcrest.TypeSafeDiagnosingMatcher
 import org.hamcrest.io.FileMatchers.anExistingDirectory
 import org.hamcrest.io.FileMatchers.anExistingFile
 import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.Arguments.arguments
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
@@ -38,13 +37,12 @@ operator fun File.plus(text: String) = appendText(text)
 
 val fixturesDir = File("src/functionalTest/fixtures")
 
-fun <S, T> List<S>.cartesianProduct(other: List<T>): Stream<Arguments> =
-    this
-        .flatMap { s1 ->
-            other.map { s2 ->
-                arguments(s1, s2)
-            }
-        }.stream()
+fun Stream<Arguments>.cartesianProduct(other: List<String>): Stream<Arguments> =
+    this.flatMap { s1 ->
+        other.stream().map { s2 ->
+            Arguments.of(*s1.get(), s2)
+        }
+    }
 
 fun createBuildRunner(
     fixtureDir: File,

@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("HttpUrlsUsage")
-
 package com.cmgapps.license
 
 import com.cmgapps.license.util.assertExpectedFiles
@@ -15,6 +13,7 @@ import com.cmgapps.license.util.fixturesDir
 import org.junit.jupiter.params.ParameterizedInvocationConstants
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
@@ -31,6 +30,17 @@ class LicensePluginAndroidShould {
 
         createBuildRunner(fixtureDir, "clean", taskName).build()
 
+        assertExpectedFiles(fixtureDir, taskName)
+    }
+
+    @ParameterizedTest(name = "${ParameterizedInvocationConstants.DISPLAY_NAME_PLACEHOLDER} {0}")
+    @MethodSource("androidTasks")
+    fun `generate licenses report for AGP 8 task `(taskName: String) {
+        val fixtureDir = File(fixturesDir, "android-gradle-plugin-8")
+        createBuildRunner(fixtureDir, "clean", taskName)
+            .apply {
+                withGradleVersion("9.5.0")
+            }.build()
         assertExpectedFiles(fixtureDir, taskName)
     }
 
@@ -57,13 +67,15 @@ class LicensePluginAndroidShould {
     companion object {
         @JvmStatic
         fun taskNamesAndFixtures(): Stream<Arguments> =
-            listOf("licenseDebugReport", "licenseReleaseReport").cartesianProduct(
+            androidTasks().cartesianProduct(
                 listOf(
-                    "android-gradle-plugin-8",
                     "android-gradle-plugin-9",
                     "android-gradle-plugin-library",
                     "android-gradle-plugin-dynamic-feature",
                 ),
             )
+
+        @JvmStatic
+        fun androidTasks(): Stream<Arguments> = listOf("licenseDebugReport", "licenseReleaseReport").stream().map(::arguments)
     }
 }

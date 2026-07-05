@@ -5,7 +5,7 @@
  */
 
 plugins {
-    id("com.android.application") version "8.13.2"
+    id("com.android.application") version "9.2.0"
     id("com.cmgapps.licenses")
 }
 
@@ -16,7 +16,7 @@ android {
         applicationId = "com.example"
     }
 
-    flavorDimensions("version", "store")
+    flavorDimensions += listOf("version", "store")
     productFlavors {
         register("demo") {
             dimension = "version"

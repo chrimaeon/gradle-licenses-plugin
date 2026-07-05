@@ -81,6 +81,7 @@ class LicensePluginJavaShould {
                     add("9.2.0")
                     add("9.3.0")
                     add("9.4.0")
+                    add("9.5.0")
                 }
             }.stream().map { arguments(it) }
     }

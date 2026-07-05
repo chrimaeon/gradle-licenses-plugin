@@ -5,7 +5,7 @@
  */
 
 plugins {
-    id("com.android.application") version "9.0.0"
+    id("com.android.application") version "9.2.0"
     id("com.cmgapps.licenses")
 }
 
