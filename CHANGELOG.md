@@ -12,14 +12,21 @@
 - Improved plugin setup and task execution architecture
 - Updated dependencies to the latest versions
 - Updated Gradle wrapper
+- `LicensesExtension` is now an interface
+- Updated README and removed Groovy examples
+- `licenseMultiplatformReport` now runs the report tasks for all targets instead of collecting licenses from all targets
 
 ### Deprecated
 
 ### Removed
 
 - Removes `additionalProjects` extension property; projects that are refereced as a dependency will be auto collected
+- Removed Groovy example from GH action
 
 ### Fixed
+
+- Escape HTML in HTML report
+- Fixed license issue link
 
 ### Security
 
