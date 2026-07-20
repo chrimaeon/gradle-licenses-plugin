@@ -5,7 +5,7 @@
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 gradle-pluginPublish = "com.gradle.plugin-publish:2.1.1"
-kotlinx-kover = "org.jetbrains.kotlinx.kover:0.9.8"
+kotlinx-kover = "org.jetbrains.kotlinx.kover:0.9.9"
 jetbrains-changelog = "org.jetbrains.changelog:2.5.0"
 buildconfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.10" }
 poko = { id = "dev.drewhamilton.poko", version = "0.23.1"}
