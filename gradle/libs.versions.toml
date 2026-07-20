@@ -12,7 +12,7 @@ poko = { id = "dev.drewhamilton.poko", version = "0.23.1"}
 
 [versions]
 
-kotlin = "2.4.0"
+kotlin = "2.4.10"
 xmlunit = "2.12.0"
 gradle = "9.6.1"
 maven = "3.9.16"
