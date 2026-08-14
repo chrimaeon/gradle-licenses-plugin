@@ -211,7 +211,11 @@ tasks {
 
     withType<Test>().configureEach {
         useJUnitPlatform()
-        jvmArgs("-Xmx2g", "-Xms512m")
+        jvmArgs(
+            "-Xmx2g",
+            "-Xms512m",
+            "-XX:ReservedCodeCacheSize=512m",
+        )
     }
 
     wrapper {
