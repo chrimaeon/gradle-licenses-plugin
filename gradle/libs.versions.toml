@@ -34,6 +34,6 @@ ktlint-cli = "com.pinterest.ktlint:ktlint-cli:1.8.0"
 mockito-kotlin = "org.mockito.kotlin:mockito-kotlin:6.3.0"
 xmlunit-core = { module = "org.xmlunit:xmlunit-core", version.ref = "xmlunit" }
 xmlunit-matchers = { module = "org.xmlunit:xmlunit-matchers", version.ref = "xmlunit" }
-networknt-jsonschemavalidator = "com.networknt:json-schema-validator:3.0.5"
+networknt-jsonschemavalidator = "com.networknt:json-schema-validator:3.0.6"
 java-diff-utils = "io.github.java-diff-utils:java-diff-utils:4.17"
 kotlinpoet = "com.squareup:kotlinpoet:2.3.0"
