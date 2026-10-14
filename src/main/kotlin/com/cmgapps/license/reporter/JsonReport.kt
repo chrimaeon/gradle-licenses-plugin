@@ -23,6 +23,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToStream
 import org.gradle.api.Task
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import java.io.OutputStream
 import javax.inject.Inject
@@ -30,10 +31,10 @@ import javax.inject.Inject
 abstract class JsonReport
     @Inject
     constructor(
-        layout: ProjectLayout,
+        reportDirectory: DirectoryProperty,
         task: Task,
         spdxIdRepository: SpdxIdRepository,
-    ) : LicensesSingleFileReport(layout, task, ReportType.JSON, spdxIdRepository) {
+    ) : LicensesSingleFileReport(reportDirectory, task, ReportType.JSON, spdxIdRepository) {
         private val json =
             Json {
                 prettyPrint = true

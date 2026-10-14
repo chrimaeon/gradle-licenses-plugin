@@ -6,10 +6,9 @@
 
 package com.cmgapps.gradle.ktlint
 
-import groovy.lang.Closure
+import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.attributes.Bundling
 import org.gradle.api.tasks.JavaExec
@@ -29,7 +28,7 @@ class KtlintPlugin : Plugin<Project> {
 
             tasks.register("ktlintFormat", JavaExec::class.java) { task ->
                 task.inputs.files(inputFiles)
-                task.inputs.dir(outputDir)
+                task.outputs.dir(outputDir)
 
                 task.group = "Formatting"
                 task.description = "Fix Kotlin code style deviations."
@@ -68,24 +67,19 @@ class KtlintPlugin : Plugin<Project> {
 
             val libs = extensions.getByType(VersionCatalogsExtension::class.java).named("libs")
 
-            val closure =
-                object : Closure<Unit>(this) {
-                    fun doCall(dependency: ModuleDependency) {
-                        dependency.attributes {
-                            it.attribute(
-                                Bundling.BUNDLING_ATTRIBUTE,
-                                objects.named(Bundling::class.java, Bundling.EXTERNAL),
-                            )
-                        }
-                    }
-                }
-
-            dependencies.add(
+            dependencies.addProvider(
                 ktlintConfiguration.name,
                 libs
                     .findLibrary("ktlint-cli")
                     .orElseThrow { NoSuchElementException("ktlint-cli not found in version catalog") },
-                closure,
+                Action { dependency ->
+                    dependency.attributes {
+                        it.attribute(
+                            Bundling.BUNDLING_ATTRIBUTE,
+                            objects.named(Bundling::class.java, Bundling.EXTERNAL),
+                        )
+                    }
+                },
             )
         }
     }

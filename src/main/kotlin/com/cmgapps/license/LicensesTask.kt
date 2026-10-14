@@ -48,6 +48,7 @@ import org.gradle.api.attributes.Attribute
 import org.gradle.api.attributes.Category.CATEGORY_ATTRIBUTE
 import org.gradle.api.attributes.Category.ENFORCED_PLATFORM
 import org.gradle.api.attributes.Category.REGULAR_PLATFORM
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logger
@@ -94,18 +95,19 @@ internal abstract class LicenseReportContainerImpl
         private val objects: ObjectFactory,
         layout: ProjectLayout,
         task: Task,
+        private val reportDirectory: DirectoryProperty,
     ) : NamedDomainObjectSet<LicensesSingleFileReport> by objects.namedDomainObjectSet(LicensesSingleFileReport::class.java),
         LicenseReportContainer {
         private val spdxIdRepository: SpdxIdRepository = SpdxIdRepositoryImpl(layout)
 
         init {
-            addReporter(TextReport::class.java, layout, task, spdxIdRepository)
-            addReporter(JsonReport::class.java, layout, task, spdxIdRepository)
-            addReporter(HtmlReport::class.java, layout, task, task.logger, objects, spdxIdRepository)
-            addReporter(XmlReport::class.java, layout, task, spdxIdRepository)
-            addReporter(MarkdownReport::class.java, layout, task, task.logger, spdxIdRepository)
-            addReporter(CsvReport::class.java, layout, task, spdxIdRepository)
-            addReporter(CustomReport::class.java, layout, task, objects, spdxIdRepository)
+            addReporter(TextReport::class.java, reportDirectory, task, spdxIdRepository)
+            addReporter(JsonReport::class.java, reportDirectory, task, spdxIdRepository)
+            addReporter(HtmlReport::class.java, reportDirectory, task, task.logger, objects, spdxIdRepository)
+            addReporter(XmlReport::class.java, reportDirectory, task, spdxIdRepository)
+            addReporter(MarkdownReport::class.java, reportDirectory, task, task.logger, spdxIdRepository)
+            addReporter(CsvReport::class.java, reportDirectory, task, spdxIdRepository)
+            addReporter(CustomReport::class.java, reportDirectory, task, objects, spdxIdRepository)
         }
 
         override fun getEnabled(): NamedDomainObjectSet<LicensesSingleFileReport> = enabledReports
@@ -158,10 +160,11 @@ abstract class LicensesTask
     @Inject
     constructor(
         objects: ObjectFactory,
+        reportDirectory: DirectoryProperty,
     ) : DefaultTask(),
         Reporting<LicenseReportContainer> {
         private val reports: LicenseReportContainer =
-            objects.newInstance(LicenseReportContainerImpl::class.java, this)
+            objects.newInstance(LicenseReportContainerImpl::class.java, this, reportDirectory)
 
         @get:Input
         internal abstract val coordinatesWithPomLibrary: MapProperty<MavenCoordinates, PomLibrary>

@@ -13,6 +13,7 @@ import com.cmgapps.license.util.asString
 import com.cmgapps.license.util.testLibraries
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.reporting.ReportingExtension
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -29,7 +30,9 @@ class CustomReportShould {
     fun `generate report`() {
         val project = ProjectBuilder.builder().build()
         object : CustomReport(
-            project.layout,
+            project.objects
+                .directoryProperty()
+                .convention(project.layout.buildDirectory.dir(ReportingExtension.DEFAULT_REPORTS_DIR_NAME)),
             project.tasks.register("licenseReport").get(),
             project.objects,
             TestSpdxIdRepository(),

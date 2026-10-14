@@ -16,6 +16,7 @@ import com.cmgapps.license.util.testLibraries
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.reporting.ReportingExtension
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -114,7 +115,13 @@ class JsonReportShould {
 private class TestJsonReport(
     override var libraries: Map<MavenCoordinates, PomLibrary>,
     project: Project = ProjectBuilder.builder().build(),
-) : JsonReport(project.layout, project.tasks.register("licenseReport").get(), TestSpdxIdRepository()) {
+) : JsonReport(
+        project.objects.directoryProperty().convention(
+            project.layout.buildDirectory.dir(ReportingExtension.DEFAULT_REPORTS_DIR_NAME),
+        ),
+        project.tasks.register("licenseReport").get(),
+        TestSpdxIdRepository(),
+    ) {
     override fun getRequired(): Property<Boolean> =
         ProjectBuilder
             .builder()

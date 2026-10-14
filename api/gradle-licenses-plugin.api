@@ -64,7 +64,7 @@ public final class com/cmgapps/license/LicensesPlugin : org/gradle/api/Plugin {
 }
 
 public abstract class com/cmgapps/license/LicensesTask : org/gradle/api/DefaultTask, org/gradle/api/reporting/Reporting {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/file/DirectoryProperty;)V
 	public final fun configurationToCheck (Lorg/gradle/api/artifacts/Configuration;)V
 	public final fun configurationToCheck (Lorg/gradle/api/provider/Provider;)V
 	public final fun getOutputFiles ()Ljava/util/Map;
@@ -147,7 +147,7 @@ public final class com/cmgapps/license/model/PomLicense : java/io/Serializable {
 
 public abstract class com/cmgapps/license/reporter/CsvReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
 	public static final field Companion Lcom/cmgapps/license/reporter/CsvReport$Companion;
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
+	public fun <init> (Lorg/gradle/api/file/DirectoryProperty;Lorg/gradle/api/Task;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
 
@@ -155,7 +155,7 @@ public final class com/cmgapps/license/reporter/CsvReport$Companion {
 }
 
 public abstract class com/cmgapps/license/reporter/CustomReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lorg/gradle/api/model/ObjectFactory;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
+	public fun <init> (Lorg/gradle/api/file/DirectoryProperty;Lorg/gradle/api/Task;Lorg/gradle/api/model/ObjectFactory;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public final fun getGenerator ()Lorg/gradle/api/provider/Property;
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
@@ -185,14 +185,14 @@ public final class com/cmgapps/license/reporter/CustomReportGenerator$License {
 }
 
 public abstract class com/cmgapps/license/reporter/HtmlReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lorg/gradle/api/logging/Logger;Lorg/gradle/api/model/ObjectFactory;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
+	public fun <init> (Lorg/gradle/api/file/DirectoryProperty;Lorg/gradle/api/Task;Lorg/gradle/api/logging/Logger;Lorg/gradle/api/model/ObjectFactory;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public final fun getCss ()Lorg/gradle/api/provider/Property;
 	public final fun getUseDarkMode ()Lorg/gradle/api/provider/Property;
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
 
 public abstract class com/cmgapps/license/reporter/JsonReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
+	public fun <init> (Lorg/gradle/api/file/DirectoryProperty;Lorg/gradle/api/Task;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
 
@@ -202,7 +202,7 @@ public abstract interface class com/cmgapps/license/reporter/LicenseReport {
 }
 
 public abstract class com/cmgapps/license/reporter/LicensesSingleFileReport : com/cmgapps/license/reporter/LicenseReport, org/gradle/api/reporting/SingleFileReport {
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lcom/cmgapps/license/reporter/ReportType;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
+	public fun <init> (Lorg/gradle/api/file/DirectoryProperty;Lorg/gradle/api/Task;Lcom/cmgapps/license/reporter/ReportType;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public synthetic fun configure (Lgroovy/lang/Closure;)Ljava/lang/Object;
 	public fun configure (Lgroovy/lang/Closure;)Lorg/gradle/api/reporting/Report;
 	public fun getDisplayName ()Ljava/lang/String;
@@ -213,7 +213,7 @@ public abstract class com/cmgapps/license/reporter/LicensesSingleFileReport : co
 }
 
 public abstract class com/cmgapps/license/reporter/MarkdownReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lorg/gradle/api/logging/Logger;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
+	public fun <init> (Lorg/gradle/api/file/DirectoryProperty;Lorg/gradle/api/Task;Lorg/gradle/api/logging/Logger;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
 
@@ -232,12 +232,12 @@ public final class com/cmgapps/license/reporter/ReportType : java/lang/Enum {
 }
 
 public abstract class com/cmgapps/license/reporter/TextReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
+	public fun <init> (Lorg/gradle/api/file/DirectoryProperty;Lorg/gradle/api/Task;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
 
 public abstract class com/cmgapps/license/reporter/XmlReport : com/cmgapps/license/reporter/LicensesSingleFileReport {
-	public fun <init> (Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/Task;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
+	public fun <init> (Lorg/gradle/api/file/DirectoryProperty;Lorg/gradle/api/Task;Lcom/cmgapps/license/repository/SpdxIdRepository;)V
 	public fun writeLicenses (Ljava/io/OutputStream;)V
 }
 

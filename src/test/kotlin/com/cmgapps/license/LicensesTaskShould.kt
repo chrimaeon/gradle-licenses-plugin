@@ -9,7 +9,9 @@ package com.cmgapps.license
 import com.cmgapps.license.reporter.CustomReport
 import com.cmgapps.license.reporter.ReportType
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME
+import org.gradle.api.reporting.ReportingExtension
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
@@ -26,15 +28,29 @@ class LicensesTaskShould {
 
     private lateinit var reportFolder: String
     private lateinit var project: Project
+    private lateinit var reportsDirectory: DirectoryProperty
 
     @BeforeEach
     fun setUp() {
-        reportFolder = "$testProjectDir/build/reports/licenses/licensesReport"
         project =
             ProjectBuilder
                 .builder()
                 .withProjectDir(testProjectDir.toFile())
                 .build()
+
+        reportsDirectory =
+            project.objects.directoryProperty().convention(
+                project.layout.buildDirectory.dir(
+                    ReportingExtension.DEFAULT_REPORTS_DIR_NAME,
+                ),
+            )
+
+        reportFolder =
+            reportsDirectory
+                .dir("licenses/licensesReport")
+                .get()
+                .asFile.absolutePath
+
         val mavenRepoUrl = javaClass.getResource("/maven")!!.toURI().toString()
         project.repositories.add(
             project.repositories.maven { it.setUrl(mavenRepoUrl) },
@@ -49,13 +65,13 @@ class LicensesTaskShould {
 
         val task =
             project.tasks
-                .register("licensesReport", LicensesTask::class.java) { task ->
-                    task.reports { container ->
-                        container.html.required.set(true)
-                        container.html.useDarkMode.set(false)
-                    }
-                }.get()
+                .register("licensesReport", LicensesTask::class.java, reportsDirectory)
+                .get()
 
+        task.reports { container ->
+            container.html.required.set(true)
+            container.html.useDarkMode.set(false)
+        }
         task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
@@ -86,19 +102,19 @@ class LicensesTaskShould {
     }
 
     @Test
-    fun `generate HTML Report wih custom CSS`() {
+    fun `generate HTML Report with custom CSS`() {
         val outputFile = File(reportFolder, "licenses.html")
 
         val task =
             project.tasks
-                .register("licensesReport", LicensesTask::class.java) {
-                    it.reports { container ->
-                        container.html.required.set(true)
-                        container.html.css.set(project.resources.text.fromString("body{}"))
-                        container.html.useDarkMode.set(false)
-                    }
-                }.get()
+                .register("licensesReport", LicensesTask::class.java, reportsDirectory)
+                .get()
 
+        task.reports { container ->
+            container.html.required.set(true)
+            container.html.css.set(project.resources.text.fromString("body{}"))
+            container.html.useDarkMode.set(false)
+        }
         task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
@@ -131,12 +147,12 @@ class LicensesTaskShould {
 
         val task =
             project.tasks
-                .register("licensesReport", LicensesTask::class.java) {
-                    it.reports { container ->
-                        container.json.required.set(true)
-                    }
-                }.get()
+                .register("licensesReport", LicensesTask::class.java, reportsDirectory)
+                .get()
 
+        task.reports { container ->
+            container.json.required.set(true)
+        }
         task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
@@ -173,11 +189,12 @@ class LicensesTaskShould {
 
         val task =
             project.tasks
-                .register("licensesReport", LicensesTask::class.java) {
-                    it.reports { container ->
-                        container.xml.required.set(true)
-                    }
-                }.get()
+                .register("licensesReport", LicensesTask::class.java, reportsDirectory)
+                .get()
+
+        task.reports { container ->
+            container.xml.required.set(true)
+        }
 
         task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
 
@@ -216,10 +233,12 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.md")
         val task =
             project.tasks
-                .register("licensesReport", LicensesTask::class.java) {
-                    it.reports.markdown.required
-                        .set(true)
-                }.get()
+                .register("licensesReport", LicensesTask::class.java, reportsDirectory)
+                .get()
+
+        task.reports { container ->
+            container.markdown.required.set(true)
+        }
 
         task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
@@ -246,10 +265,12 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.txt")
         val task =
             project.tasks
-                .register("licensesReport", LicensesTask::class.java) {
-                    it.reports.plainText.required
-                        .set(true)
-                }.get()
+                .register("licensesReport", LicensesTask::class.java, reportsDirectory)
+                .get()
+
+        task.reports { container ->
+            container.plainText.required.set(true)
+        }
 
         task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
@@ -270,13 +291,13 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses.csv")
         val task =
             project.tasks
-                .register("licensesReport", LicensesTask::class.java) {
-                    it.reports { container ->
-                        container.csv.required.set(true)
-                        container.csv.outputLocation.set(outputFile)
-                    }
-                }.get()
+                .register("licensesReport", LicensesTask::class.java, reportsDirectory)
+                .get()
 
+        task.reports { container ->
+            container.csv.required.set(true)
+            container.csv.outputLocation.set(outputFile)
+        }
         task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
@@ -294,19 +315,19 @@ class LicensesTaskShould {
         val outputFile = File(reportFolder, "licenses")
         val task =
             project.tasks
-                .register("licensesReport", LicensesTask::class.java) {
-                    it.reports { container ->
-                        container.custom.required.set(true)
-                        container.custom.outputLocation.set(outputFile)
-                        container.custom.generator.set { libraries ->
-                            libraries
-                                .map { (coordinates, lib) ->
-                                    lib.name ?: coordinates.identifierWithoutVersion
-                                }.joinToString()
-                        }
-                    }
-                }.get()
+                .register("licensesReport", LicensesTask::class.java, reportsDirectory)
+                .get()
 
+        task.reports { container ->
+            container.custom.required.set(true)
+            container.custom.outputLocation.set(outputFile)
+            container.custom.generator.set { libraries ->
+                libraries
+                    .map { (coordinates, lib) ->
+                        lib.name ?: coordinates.identifierWithoutVersion
+                    }.joinToString()
+            }
+        }
         task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
@@ -316,7 +337,7 @@ class LicensesTaskShould {
     @Test
     fun `generate HTML by default`() {
         val outputFile = File(reportFolder, "licenses.html")
-        val task = project.tasks.register("licensesReport", LicensesTask::class.java).get()
+        val task = project.tasks.register("licensesReport", LicensesTask::class.java, reportsDirectory).get()
 
         task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
@@ -353,26 +374,26 @@ class LicensesTaskShould {
     fun `generate all reports`() {
         val task =
             project.tasks
-                .register("licensesReport", LicensesTask::class.java) {
-                    it.reports { container ->
-                        container.csv.required.set(true)
+                .register("licensesReport", LicensesTask::class.java, reportsDirectory)
+                .get()
 
-                        container.custom.required.set(true)
-                        container.custom.generator.set { libraries ->
-                            libraries
-                                .map { (coordinates, lib) ->
-                                    lib.name ?: coordinates.identifierWithoutVersion
-                                }.joinToString()
-                        }
+        task.reports { container ->
+            container.csv.required.set(true)
 
-                        container.html.required.set(true)
-                        container.json.required.set(true)
-                        container.markdown.required.set(true)
-                        container.plainText.required.set(true)
-                        container.xml.required.set(true)
-                    }
-                }.get()
+            container.custom.required.set(true)
+            container.custom.generator.set { libraries ->
+                libraries
+                    .map { (coordinates, lib) ->
+                        lib.name ?: coordinates.identifierWithoutVersion
+                    }.joinToString()
+            }
 
+            container.html.required.set(true)
+            container.json.required.set(true)
+            container.markdown.required.set(true)
+            container.plainText.required.set(true)
+            container.xml.required.set(true)
+        }
         task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
@@ -387,14 +408,14 @@ class LicensesTaskShould {
         project.dependencies.add("implementation", "group:other:1.0.0")
         val task =
             project.tasks
-                .register("licensesReport", LicensesTask::class.java) {
-                    it.reports { container ->
-                        container.html.required.set(false)
-                        container.plainText.required.set(true)
-                        container.plainText.outputLocation.set(outputFile)
-                    }
-                }.get()
+                .register("licensesReport", LicensesTask::class.java, reportsDirectory)
+                .get()
 
+        task.reports { container ->
+            container.html.required.set(false)
+            container.plainText.required.set(true)
+            container.plainText.outputLocation.set(outputFile)
+        }
         task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
@@ -426,15 +447,15 @@ class LicensesTaskShould {
 
         val task =
             project.tasks
-                .register("licensesReport", LicensesTask::class.java) {
-                    it.reports { container ->
-                        container.html.required.set(false)
+                .register("licensesReport", LicensesTask::class.java, reportsDirectory)
+                .get()
 
-                        container.csv.required.set(true)
-                        container.csv.outputLocation.set(outputFile)
-                    }
-                }.get()
+        task.reports { container ->
+            container.html.required.set(false)
 
+            container.csv.required.set(true)
+            container.csv.outputLocation.set(outputFile)
+        }
         task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 
@@ -452,22 +473,22 @@ class LicensesTaskShould {
     fun `have outputFiles`() {
         val task =
             project.tasks
-                .register("licensesReport", LicensesTask::class.java) {
-                    it.reports { container ->
-                        container.forEach { report ->
-                            report.required.set(true)
-                            if (report is CustomReport) {
-                                report.generator.set { libraries ->
-                                    libraries
-                                        .map { (coordinates, lib) ->
-                                            lib.name ?: coordinates.identifierWithoutVersion
-                                        }.joinToString()
-                                }
-                            }
-                        }
-                    }
-                }.get()
+                .register("licensesReport", LicensesTask::class.java, reportsDirectory)
+                .get()
 
+        task.reports { container ->
+            container.forEach { report ->
+                report.required.set(true)
+                if (report is CustomReport) {
+                    report.generator.set { libraries ->
+                        libraries
+                            .map { (coordinates, lib) ->
+                                lib.name ?: coordinates.identifierWithoutVersion
+                            }.joinToString()
+                    }
+                }
+            }
+        }
         task.configurationToCheck(project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME))
         task.licensesReport()
 

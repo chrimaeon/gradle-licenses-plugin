@@ -25,9 +25,12 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME
+import org.gradle.api.plugins.ReportingBasePlugin
 import org.gradle.api.provider.Provider
+import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.reporting.SingleFileReport
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
@@ -49,6 +52,7 @@ private val ANDROID_IDS =
 class LicensesPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
+            pluginManager.apply(ReportingBasePlugin::class.java)
             val licenseExtension = extensions.create("licenses", LicensesExtension::class.java)
 
             val licenseReportExtension =
@@ -57,22 +61,24 @@ class LicensesPlugin : Plugin<Project> {
                     LicenseReportsExtension::class.java,
                 )
 
+            val reportingExtension = extensions.getByType(ReportingExtension::class.java)
+
             pluginManager.withPlugin("org.gradle.java") {
                 // Special case: KMP with JVM withJava():
                 // withKotlinMultiPlatformPlugin did already run, so the jvm target is already set, ignore
                 // another setup.
                 if (!project.pluginManager.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
-                    configureJavaProject(project, licenseReportExtension)
+                    configureJavaProject(project, licenseReportExtension, reportingExtension.baseDirectory)
                 }
             }
 
             pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
-                configureMultiplatformProject(project, licenseReportExtension)
+                configureMultiplatformProject(project, licenseReportExtension, reportingExtension.baseDirectory)
             }
 
             ANDROID_IDS.forEach { id ->
                 pluginManager.withPlugin(id) {
-                    configureAndroidProject(project, licenseReportExtension)
+                    configureAndroidProject(project, licenseReportExtension, reportingExtension.baseDirectory)
                 }
             }
         }
@@ -82,39 +88,46 @@ class LicensesPlugin : Plugin<Project> {
 private fun configureJavaProject(
     project: Project,
     licenseReportExtension: LicenseReportsExtension,
+    reportDirectory: DirectoryProperty,
 ) {
-    project.tasks.register(
-        "licenseReport",
-        LicensesTask::class.java,
-    ) { task ->
-        task.addBasicConfiguration(licenseReportExtension)
-        val configuration = project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME)
-        task.configurationToCheck(configuration)
-    }
+    project.tasks
+        .register(
+            "licenseReport",
+            LicensesTask::class.java,
+            reportDirectory,
+        ).configure { task ->
+            task.addBasicConfiguration(licenseReportExtension)
+            val configuration = project.configurations.named(RUNTIME_CLASSPATH_CONFIGURATION_NAME)
+            task.configurationToCheck(configuration)
+        }
 }
 
 private fun configureAndroidProject(
     project: Project,
     reportExtension: LicenseReportsExtension,
+    reportDirectory: DirectoryProperty,
 ) {
     val androidComponentsExtension =
         project.extensions.findByType(com.android.build.api.variant.AndroidComponentsExtension::class.java)
             ?: throw GradleException("Minimum Android Gradle Plugin Version is 7.0")
 
     androidComponentsExtension.onVariants { variant ->
-        project.tasks.register(
-            "license${variant.name.uppercaseFirstChar()}Report",
-            LicensesTask::class.java,
-        ) { task ->
-            task.addBasicConfiguration(reportExtension)
-            task.configurationToCheck(variant.runtimeConfiguration)
-        }
+        project.tasks
+            .register(
+                "license${variant.name.uppercaseFirstChar()}Report",
+                LicensesTask::class.java,
+                reportDirectory,
+            ).configure { task ->
+                task.addBasicConfiguration(reportExtension)
+                task.configurationToCheck(variant.runtimeConfiguration)
+            }
     }
 }
 
 private fun configureMultiplatformProject(
     project: Project,
     reportExtension: LicenseReportsExtension,
+    reportDirectory: DirectoryProperty,
 ) {
     val kotlinVersion = ComparableVersion(project.getKotlinPluginVersion())
 
@@ -136,21 +149,25 @@ private fun configureMultiplatformProject(
         }
 
         val task =
-            project.tasks.register(
-                "licenseMultiplatform${targetName.uppercaseFirstChar()}Report",
-                LicensesTask::class.java,
-            ) { task ->
-                task.addBasicConfiguration(reportExtension)
-                val compilation = target.compilations.getByName(KotlinCompilation.MAIN_COMPILATION_NAME)
-                // Fallback to compile dependencies when runtime isn't supported, e.g. Kotlin/Native.
-                val runtimeConfigurationName =
-                    compilation.runtimeDependencyConfigurationName
-                        ?: compilation.compileDependencyConfigurationName
+            project.tasks
+                .register(
+                    "licenseMultiplatform${targetName.uppercaseFirstChar()}Report",
+                    LicensesTask::class.java,
+                    reportDirectory,
+                )
 
-                val runtimeConfiguration = project.configurations.named(runtimeConfigurationName)
-                targetRuntimeConfiguration.add(runtimeConfiguration)
-                task.configurationToCheck(runtimeConfiguration)
-            }
+        task.configure { task ->
+            task.addBasicConfiguration(reportExtension)
+            val compilation = target.compilations.getByName(KotlinCompilation.MAIN_COMPILATION_NAME)
+            // Fallback to compile dependencies when runtime isn't supported, e.g. Kotlin/Native.
+            val runtimeConfigurationName =
+                compilation.runtimeDependencyConfigurationName
+                    ?: compilation.compileDependencyConfigurationName
+
+            val runtimeConfiguration = project.configurations.named(runtimeConfigurationName)
+            targetRuntimeConfiguration.add(runtimeConfiguration)
+            task.configurationToCheck(runtimeConfiguration)
+        }
 
         rootTask.configure { it.dependsOn(task) }
     }

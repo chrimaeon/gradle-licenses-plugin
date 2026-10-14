@@ -9,17 +9,17 @@ package com.cmgapps.license.reporter
 import com.cmgapps.license.model.PomLicense
 import com.cmgapps.license.repository.SpdxIdRepository
 import org.gradle.api.Task
-import org.gradle.api.file.ProjectLayout
+import org.gradle.api.file.DirectoryProperty
 import java.io.OutputStream
 import javax.inject.Inject
 
 abstract class XmlReport
     @Inject
     constructor(
-        layout: ProjectLayout,
+        reportDirectory: DirectoryProperty,
         task: Task,
         spdxIdRepository: SpdxIdRepository,
-    ) : LicensesSingleFileReport(layout, task, ReportType.XML, spdxIdRepository) {
+    ) : LicensesSingleFileReport(reportDirectory, task, ReportType.XML, spdxIdRepository) {
         override fun writeLicenses(outputStream: OutputStream) {
             outputStream.bufferedWriter().use {
                 it.write(

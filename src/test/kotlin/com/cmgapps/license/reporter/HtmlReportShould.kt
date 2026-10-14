@@ -20,6 +20,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
+import org.gradle.api.reporting.ReportingExtension
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -353,7 +354,10 @@ private class TestHtmlReport(
         objects =
             project
                 .objects,
-        layout = project.layout,
+        reportDirectory =
+            project.objects
+                .directoryProperty()
+                .convention(project.layout.buildDirectory.dir(ReportingExtension.DEFAULT_REPORTS_DIR_NAME)),
         task = project.tasks.register("licenseReport").get(),
         spdxIdRepository = TestHtmlSpdxIdRepository(),
     ) {

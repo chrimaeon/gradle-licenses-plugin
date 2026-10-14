@@ -17,6 +17,7 @@ import com.cmgapps.license.util.testLibraries
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.reporting.ReportingExtension
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -137,7 +138,9 @@ private class TestCsvReport(
     override var libraries: Map<MavenCoordinates, PomLibrary>,
     project: Project = ProjectBuilder.builder().build().project,
 ) : CsvReport(
-        project.layout,
+        project.objects
+            .directoryProperty()
+            .convention(project.layout.buildDirectory.dir(ReportingExtension.DEFAULT_REPORTS_DIR_NAME)),
         project.tasks.register("licensesTask").get(),
         TestSpdxIdRepository(),
     ) {

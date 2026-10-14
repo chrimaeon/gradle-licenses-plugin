@@ -11,6 +11,7 @@ import com.cmgapps.license.helper.toLicensesMap
 import com.cmgapps.license.repository.SpdxIdRepository
 import org.apache.commons.text.StringEscapeUtils
 import org.gradle.api.Task
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.logging.Logger
 import org.gradle.api.model.ObjectFactory
@@ -22,12 +23,12 @@ import javax.inject.Inject
 abstract class HtmlReport
     @Inject
     constructor(
-        layout: ProjectLayout,
+        reportDirectory: DirectoryProperty,
         task: Task,
         private val logger: Logger,
         objects: ObjectFactory,
         spdxIdRepository: SpdxIdRepository,
-    ) : LicensesSingleFileReport(layout, task, ReportType.HTML, spdxIdRepository) {
+    ) : LicensesSingleFileReport(reportDirectory, task, ReportType.HTML, spdxIdRepository) {
         init {
             required.set(true)
         }

@@ -10,7 +10,7 @@ import com.cmgapps.license.helper.logLicenseWarning
 import com.cmgapps.license.helper.toLicensesMap
 import com.cmgapps.license.repository.SpdxIdRepository
 import org.gradle.api.Task
-import org.gradle.api.file.ProjectLayout
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logger
 import java.io.OutputStream
 import javax.inject.Inject
@@ -18,11 +18,11 @@ import javax.inject.Inject
 abstract class MarkdownReport
     @Inject
     constructor(
-        layout: ProjectLayout,
+        reportDirectory: DirectoryProperty,
         task: Task,
         private val logger: Logger,
         spdxIdRepository: SpdxIdRepository,
-    ) : LicensesSingleFileReport(layout, task, ReportType.MARKDOWN, spdxIdRepository) {
+    ) : LicensesSingleFileReport(reportDirectory, task, ReportType.MARKDOWN, spdxIdRepository) {
         override fun writeLicenses(outputStream: OutputStream) {
             outputStream.bufferedWriter().use { writer ->
                 writer.write(

@@ -18,6 +18,7 @@ package com.cmgapps.license.reporter
 
 import com.cmgapps.license.repository.SpdxIdRepository
 import org.gradle.api.Task
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -27,11 +28,11 @@ import javax.inject.Inject
 abstract class CustomReport
     @Inject
     constructor(
-        layout: ProjectLayout,
+        reportDirectory: DirectoryProperty,
         task: Task,
         objects: ObjectFactory,
         spdxIdRepository: SpdxIdRepository,
-    ) : LicensesSingleFileReport(layout, task, ReportType.CUSTOM, spdxIdRepository) {
+    ) : LicensesSingleFileReport(reportDirectory, task, ReportType.CUSTOM, spdxIdRepository) {
         val generator: Property<CustomReportGenerator> = objects.property(CustomReportGenerator::class.java)
 
         override fun writeLicenses(outputStream: OutputStream) {

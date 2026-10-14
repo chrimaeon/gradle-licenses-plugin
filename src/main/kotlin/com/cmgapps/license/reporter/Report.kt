@@ -21,7 +21,7 @@ import com.cmgapps.license.model.PomLibrary
 import com.cmgapps.license.repository.SpdxIdRepository
 import groovy.lang.Closure
 import org.gradle.api.Task
-import org.gradle.api.file.ProjectLayout
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.reporting.Report
 import org.gradle.api.reporting.SingleFileReport
 import java.io.OutputStream
@@ -31,7 +31,7 @@ interface LicenseReport {
 }
 
 abstract class LicensesSingleFileReport(
-    layout: ProjectLayout,
+    reportDirectory: DirectoryProperty,
     task: Task,
     private val type: ReportType,
     protected val spdxIdRepository: SpdxIdRepository,
@@ -41,7 +41,7 @@ abstract class LicensesSingleFileReport(
         required.convention(false)
         val path =
             buildString {
-                append("reports/licenses/")
+                append("licenses/")
                 append(task.name)
                 append("/licenses")
                 if (type.extension.isNotBlank()) {
@@ -49,7 +49,7 @@ abstract class LicensesSingleFileReport(
                 }
             }
 
-        outputLocation.convention(layout.buildDirectory.file(path))
+        outputLocation.convention(reportDirectory.file(path))
     }
 
     abstract fun writeLicenses(outputStream: OutputStream)
