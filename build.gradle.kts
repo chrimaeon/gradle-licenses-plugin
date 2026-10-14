@@ -10,6 +10,7 @@ import com.cmgapps.gradle.spdx.GenerateSpdxIdsTask
 import kotlinx.kover.gradle.plugin.dsl.AggregationType
 import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
 import kotlinx.kover.gradle.plugin.dsl.GroupingEntityType
+import org.gradle.plugin.compatibility.compatibility
 import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
@@ -78,9 +79,10 @@ tasks.withType<KotlinCompile>().configureEach {
 
 testing {
     suites {
-        val test: JvmTestSuite by getting(JvmTestSuite::class) {
-            useJUnitJupiter()
-        }
+        val test =
+            named("test", JvmTestSuite::class) {
+                useJUnitJupiter()
+            }
 
         val functionalTestSuite =
             register<JvmTestSuite>("functionalTest") {
@@ -125,6 +127,11 @@ gradlePlugin {
             displayName = pomName
             description = pomDescription
             tags = listOf("license-management", "android", "java", "java-library", "licenses")
+            compatibility {
+                features {
+                    configurationCache = true
+                }
+            }
         }
     }
 
