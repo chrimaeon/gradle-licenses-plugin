@@ -22,7 +22,7 @@ jacoco = "0.8.14"
 
 android-gradle-plugin = "com.android.tools.build:gradle-api:9.3.0"
 kotlin-multiplatform-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlinx-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0"
+kotlinx-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0"
 apache-commons-csv = "org.apache.commons:commons-csv:1.14.1"
 apache-commons-text = "org.apache.commons:commons-text:1.15.0"
 maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven" }
